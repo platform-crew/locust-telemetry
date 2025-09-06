@@ -89,7 +89,7 @@ def setup_logging(environment: Environment, **kwargs: Any) -> None:
     """
     configure_logging()
     logger.info(
-        "[%s] Logging configured successfully.", type(environment.runner).__name__
+        "[%s] Logging configured successfully.", environment.runner.__class__.__name__
     )
 
 

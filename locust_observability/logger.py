@@ -8,14 +8,14 @@ import logging
 import os
 from datetime import datetime, timezone
 
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger.json import JsonFormatter
 
 # -------------------------------
 # Custom RFC3339 JSON Formatter
 # -------------------------------
 
 
-class RFC3339JsonFormatter(jsonlogger.JsonFormatter):
+class RFC3339JsonFormatter(JsonFormatter):
     """
     Custom JSON formatter that outputs timestamps in RFC3339 format with
     millisecond precision.

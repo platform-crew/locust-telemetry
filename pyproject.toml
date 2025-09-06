@@ -8,7 +8,8 @@ version = "0.1.0"
 description = "A Locust plugin to log load test metrics to observability tools (DB-free)."
 readme = "README.md"
 requires-python = ">=3.9"
-license = {text = "MIT"}
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 authors = [
     {name = "Swaroop Shubhakrishna Bhat", email = "swaroopbhatk@gmail.com"}
 ]
@@ -21,7 +22,6 @@ keywords = [
     "load-testing",
     "metrics-recorder"
 ]
-
 dependencies = [
     "locust>=2.37.14",
     "python-json-logger>=3.3.0",
@@ -32,6 +32,9 @@ Homepage = "https://github.com/platform-crew/locust-observability"
 Documentation = "https://github.com/platform-crew/locust-observability#readme"
 Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
 
+# --------------------------
+# Code formatting tools
+# --------------------------
 [tool.black]
 line-length = 88
 target-version = ["py38", "py39", "py310", "py311"]
@@ -40,9 +43,15 @@ skip-string-normalization = false
 [tool.isort]
 profile = "black"
 line_length = 88
-known_first_party = ["locust_observability"]  # adjust this if you want your own libs sorted first
+known_first_party = ["locust_observability"]
 combine_as_imports = true
 include_trailing_comma = true
 multi_line_output = 3
 force_grid_wrap = 0
 use_parentheses = true
+
+# --------------------------
+# Packages to include
+# --------------------------
+[tool.setuptools.packages]
+find = { include = ["locust_observability*"] }

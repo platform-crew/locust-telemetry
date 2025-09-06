@@ -1,0 +1,10 @@
+include README.md
+include LICENSE
+include pyproject.toml
+
+# Only include Python files inside your package
+recursive-include locust_observability *.py
+
+# Exclude caches & build junk
+exclude *.pyc
+exclude __pycache__/*
