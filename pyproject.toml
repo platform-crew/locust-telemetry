@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=80.9.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "locust-observability"
+version = "0.1.0"
+description = "A Locust plugin to log load test metrics to observability tools (DB-free)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Swaroop Shubhakrishna Bhat", email = "swaroopbhatk@gmail.com"}
+]
+keywords = [
+    "locust",
+    "locust-plugin",
+    "json-logging",
+    "observability",
+    "locust-stats",
+    "load-testing",
+    "metrics-recorder"
+]
+
+dependencies = [
+    "locust>=2.37.14",
+    "python-json-logger>=3.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/platform-crew/locust-observability"
+Documentation = "https://github.com/platform-crew/locust-observability#readme"
+Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
+
+[tool.black]
+line-length = 88
+target-version = ["py38", "py39", "py310", "py311"]
+skip-string-normalization = false
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["locust_observability"]  # adjust this if you want your own libs sorted first
+combine_as_imports = true
+include_trailing_comma = true
+multi_line_output = 3
+force_grid_wrap = 0
+use_parentheses = true
