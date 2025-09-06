@@ -27,7 +27,8 @@ class BaseRecorder:
     - Standardized method to log structured metrics with environment context.
 
     Attributes:
-        name (ClassVar[str]): Identifier for the recorder. Should be overridden by subclasses.
+        name (ClassVar[str]): Identifier for the recorder. Should be overridden
+        by subclasses.
         env (Environment): The Locust environment instance.
     """
 

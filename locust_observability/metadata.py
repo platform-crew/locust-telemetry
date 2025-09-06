@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from typing import Dict
 
 from locust.env import Environment
+
 from locust_observability import config
 
 logger = logging.getLogger(__name__)

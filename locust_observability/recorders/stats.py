@@ -23,8 +23,8 @@ from typing import Any, ClassVar, Dict, Optional
 import gevent
 from locust.env import Environment
 
+from locust_observability.metrics import EventsEnum, MetricsEnum
 from locust_observability.recorders.base import BaseRecorder
-from locust_observability.metrics import MetricsEnum, EventsEnum
 
 logger = logging.getLogger(__name__)
 
@@ -82,9 +82,8 @@ class MasterNodeStatsRecorder(BaseRecorder):
 
     def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
         """
-        Handler called when a test stops.
-
-        Stops background logging, logs final stats and errors, and emits the test stop event.
+        Handler called when a test stops. Stops background logging, logs final stats
+        and errors, and emits the test stop event.
 
         Args:
             *args: Positional arguments passed by Locust.

@@ -15,12 +15,8 @@ class EventsEnum(Enum):
 
 
 class MetricsEnum(Enum):
-    REQUEST_CURRENT_STATS_METRIC = MetricData(
-        "metric", "metric.request.current.stats"
-    )
-    REQUEST_FINAL_STATS_METRIC = MetricData(
-        "metric", "metric.request.final.stats"
-    )
+    REQUEST_CURRENT_STATS_METRIC = MetricData("metric", "metric.request.current.stats")
+    REQUEST_FINAL_STATS_METRIC = MetricData("metric", "metric.request.final.stats")
     REQUEST_ENDPOINT_STATS_METRIC = MetricData(
         "metric", "metric.request.endpoint.stats"
     )

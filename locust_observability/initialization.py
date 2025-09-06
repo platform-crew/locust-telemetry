@@ -13,14 +13,16 @@ import logging
 from typing import Any
 
 from locust import events
-from locust.env import Environment
 from locust.argument_parser import LocustArgumentParser
+from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
 
 from locust_observability import config
 from locust_observability.logger import configure_logging
 from locust_observability.metadata import (
-    get_test_metadata, set_test_metadata, handle_worker_metadata
+    get_test_metadata,
+    handle_worker_metadata,
+    set_test_metadata,
 )
 
 logger = logging.getLogger(__name__)
@@ -48,7 +50,7 @@ def add_arguments(parser: LocustArgumentParser) -> None:
         type=str,
         help="Unique identifier for the tests or service name under test.",
         env_var="LOCUST_TESTPLAN_NAME",
-        required=True
+        required=True,
     )
 
     group.add_argument(
@@ -75,6 +77,7 @@ def add_arguments(parser: LocustArgumentParser) -> None:
 # Logging Setup
 # -------------------------------
 
+
 @events.init.add_listener
 def setup_logging(environment: Environment, **kwargs: Any) -> None:
     """
@@ -86,14 +89,14 @@ def setup_logging(environment: Environment, **kwargs: Any) -> None:
     """
     configure_logging()
     logger.info(
-        "[%s] Logging configured successfully.",
-        type(environment.runner).__name__
+        "[%s] Logging configured successfully.", type(environment.runner).__name__
     )
 
 
 # -------------------------------
 # Master Initialization
 # -------------------------------
+
 
 @events.test_start.add_listener
 def setup_master_test(environment: Environment, **kwargs: Any) -> None:
@@ -125,6 +128,7 @@ def setup_master_test(environment: Environment, **kwargs: Any) -> None:
 # -------------------------------
 # Worker Initialization
 # -------------------------------
+
 
 @events.init.add_listener
 def init_worker(environment: Environment, **kwargs: Any) -> None:

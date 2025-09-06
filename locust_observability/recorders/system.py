@@ -18,8 +18,8 @@ from typing import Any, ClassVar, Optional
 
 from locust.env import Environment
 
-from locust_observability.recorders.base import BaseRecorder
 from locust_observability.metrics import EventsEnum
+from locust_observability.recorders.base import BaseRecorder
 
 logger = logging.getLogger(__name__)
 

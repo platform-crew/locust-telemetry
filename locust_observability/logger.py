@@ -3,9 +3,11 @@ Logging configuration for locust-observability.
 
 Outputs structured JSON logs with RFC3339 timestamps.
 """
+
 import logging
 import os
 from datetime import datetime, timezone
+
 from pythonjsonlogger import jsonlogger
 
 # -------------------------------
