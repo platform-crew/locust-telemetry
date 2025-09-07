@@ -67,3 +67,15 @@ use_parentheses = true
 # --------------------------
 [tool.setuptools.packages]
 find = { include = ["locust_telemetry*"] }
+
+# --------------------------
+# Coverage report
+# --------------------------
+
+[tool.coverage.run]
+source = ["locust_telemetry"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
