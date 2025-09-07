@@ -24,7 +24,7 @@ keywords = [
     "metrics-recorder"
 ]
 dependencies = [
-    "locust>=2.37.14",
+    "locust>=2.37.0",
     "python-json-logger>=3.3.0",
 ]
 
