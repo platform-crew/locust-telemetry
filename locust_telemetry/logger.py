@@ -5,7 +5,6 @@ Outputs structured JSON logs with RFC3339 timestamps.
 """
 
 import logging
-import os
 from datetime import datetime, timezone
 
 from pythonjsonlogger.json import JsonFormatter
@@ -31,7 +30,9 @@ class RFC3339JsonFormatter(JsonFormatter):
 # Logging Configuration
 # -------------------------------
 
-LOG_LEVEL = os.getenv("LOCUST_TELEMETRY_LOG_LEVEL", "INFO").upper()
+# TODO: Change it to env variable
+# TODO: Also, telemetry logging should always set to info
+LOG_LEVEL = "INFO"
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -62,7 +63,7 @@ LOGGING_CONFIG = {
     "loggers": {
         "locust_telemetry": {  # Only this plugin namespace
             "handlers": ["console"],
-            "level": LOG_LEVEL,
+            "level": "INFO",
             "propagate": False,  # prevent double logging to root
         },
     },
