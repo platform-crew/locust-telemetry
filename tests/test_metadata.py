@@ -1,96 +1,71 @@
-"""
-Tests for locust_observability.metadata module.
+from unittest.mock import patch
 
-Verifies:
-- Generating test metadata
-- Setting metadata on the environment
-- Handling metadata in worker nodes
-"""
+import pytest
 
-from unittest.mock import MagicMock
-
-from locust_observability import config, metadata
+from locust_telemetry import metadata
 
 
-def test_get_test_metadata_returns_dict_with_run_id():
+def test_set_test_metadata_sets_attributes(mock_env):
+    """Ensure set_test_metadata sets all attributes from config generators."""
+    fake_generators = {
+        "run_id": lambda: "test-run",
+        "env": lambda: "dev",
+    }
+
+    with patch.dict(
+        metadata.config.__dict__, {"ENVIRONMENT_METADATA": fake_generators}
+    ):
+        metadata.set_test_metadata(mock_env)
+        for key, gen in fake_generators.items():
+            assert getattr(mock_env, key) == gen()
+
+
+def test_get_test_metadata_returns_all_keys(mock_env):
+    """Ensure get_test_metadata returns correct key/value pairs."""
+    fake_generators = {
+        "run_id": lambda: "test-run",
+        "env": lambda: "dev",
+    }
+    with patch.dict(
+        metadata.config.__dict__, {"ENVIRONMENT_METADATA": fake_generators}
+    ):
+        metadata.set_test_metadata(mock_env)
+        md = metadata.get_test_metadata(mock_env)
+        assert md["run_id"] == "test-run"
+        assert md["env"] == "dev"
+
+
+def test_get_test_metadata_raises_if_missing_key(mock_env):
+    """Ensure get_test_metadata raises AttributeError if metadata key is missing."""
+    fake_generators = {"run_id": lambda: "test-run", "env": lambda: "dev"}
+    with patch.dict(
+        metadata.config.__dict__, {"ENVIRONMENT_METADATA": fake_generators}
+    ):
+        # Remove one attribute intentionally
+        setattr(mock_env, "run_id", "1234")
+        if hasattr(mock_env, "env"):
+            delattr(mock_env, "env")
+
+        with pytest.raises(AttributeError) as exc_info:
+            metadata.get_test_metadata(mock_env)
+        assert "env" in str(exc_info.value)
+
+
+def test_apply_worker_metadata_sets_attributes(mock_env, sample_metadata):
     """
-    Ensure get_test_metadata returns a dictionary containing a 'run_id' key
-    with a valid ISO-formatted UTC timestamp.
+    Ensure apply_worker_metadata sets attributes correctly on the worker environment.
     """
-    result = metadata.get_test_metadata()
-    assert isinstance(result, dict)
-    assert "run_id" in result
-    # Ensure it's a string in ISO format
-    assert "T" in result["run_id"] and result["run_id"].endswith("Z") is False
+    metadata.apply_worker_metadata(mock_env, sample_metadata)
+    for key, value in sample_metadata.items():
+        assert getattr(mock_env, key) == value
 
 
-def test_set_test_metadata_adds_attributes_to_environment(mock_env):
-    """
-    Ensure set_test_metadata sets each key/value pair from metadata as attributes
-    on the environment.
-    """
-    env = mock_env
-    data = {"run_id": "123", "custom_key": "value"}
-
-    metadata.set_test_metadata(env, data)
-
-    assert env.run_id == "123"
-    assert env.custom_key == "value"
-
-
-def test_handle_worker_metadata_calls_set_and_worker_recorders(monkeypatch, mock_env):
-    """
-    Ensure handle_worker_metadata:
-    - Calls set_test_metadata
-    - Calls all worker node recorders with env
-    - Logs the applied metadata
-    """
-    env = mock_env
-    env.parsed_options.testplan = "my-testplan"
-    env.run_id = "123"
-
-    # Patch WORKER_NODE_RECORDERS with a mock recorder
-    recorder_mock = MagicMock()
-    monkeypatch.setattr(config, "WORKER_NODE_RECORDERS", [recorder_mock])
-
-    # Patch set_test_metadata to track call
-    set_test_mock = MagicMock()
-    monkeypatch.setattr(metadata, "set_test_metadata", set_test_mock)
-
-    # Patch logger to capture logging
-    log_mock = MagicMock()
-    monkeypatch.setattr(metadata.logger, "info", log_mock)
-
-    # Call the function
-    metadata.handle_worker_metadata(env, {"run_id": "123"})
-
-    set_test_mock.assert_called_once_with(env, {"run_id": "123"})
-    recorder_mock.assert_called_once_with(env=env)
-    log_mock.assert_called_once_with(
-        "[Worker] Metadata applied: run_id=%s, testplan=%s", "123", "my-testplan"
-    )
-
-
-def test_handle_worker_metadata_handles_missing_testplan(monkeypatch, mock_env):
-    """
-    Verify that handle_worker_metadata works even if environment.parsed_options
-    has no 'testplan' attribute.
-    """
-    env = mock_env
-    env.run_id = "123"
-    env.parsed_options = MagicMock()
-    del env.parsed_options.testplan  # simulate missing attribute
-
-    recorder_mock = MagicMock()
-    monkeypatch.setattr(config, "WORKER_NODE_RECORDERS", [recorder_mock])
-    monkeypatch.setattr(metadata, "set_test_metadata", MagicMock())
-    log_mock = MagicMock()
-    monkeypatch.setattr(metadata.logger, "info", log_mock)
-
-    metadata.handle_worker_metadata(env, {"run_id": "123"})
-
-    recorder_mock.assert_called_once_with(env=env)
-    # testplan is None
-    log_mock.assert_called_once_with(
-        "[Worker] Metadata applied: run_id=%s, testplan=%s", "123", None
-    )
+def test_apply_worker_metadata_logs_info(mock_env, sample_metadata):
+    """Ensure apply_worker_metadata logs an info message after applying metadata."""
+    with patch("locust_telemetry.metadata.logger.info") as mock_info:
+        metadata.apply_worker_metadata(mock_env, sample_metadata)
+        mock_info.assert_called_once()
+        args, kwargs = mock_info.call_args
+        assert "Metadata applied" in args[0]
+        assert getattr(mock_env, "run_id") in args
+        assert getattr(mock_env.parsed_options, "testplan") in args

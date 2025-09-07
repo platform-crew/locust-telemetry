@@ -5,7 +5,6 @@ Outputs structured JSON logs with RFC3339 timestamps.
 """
 
 import logging
-import os
 from datetime import datetime, timezone
 
 from pythonjsonlogger.json import JsonFormatter
@@ -31,7 +30,9 @@ class RFC3339JsonFormatter(JsonFormatter):
 # Logging Configuration
 # -------------------------------
 
-LOG_LEVEL = os.getenv("LOCUST_OB_LOG_LEVEL", "INFO").upper()
+# TODO: Change it to env variable
+# TODO: Also, telemetry logging should always set to info
+LOG_LEVEL = "INFO"
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -41,7 +42,7 @@ LOGGING_CONFIG = {
             "()": RFC3339JsonFormatter,
             "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
             "rename_fields": {"asctime": "time", "levelname": "level"},
-            "json_indent": None,  # single-line JSON for observability tools
+            "json_indent": None,  # single-line JSON
         }
     },
     "handlers": {
@@ -56,13 +57,15 @@ LOGGING_CONFIG = {
         },
     },
     "root": {
-        "handlers": ["console"],
-        "level": LOG_LEVEL,
+        "handlers": ["null"],  # Disable root logger output
+        "level": "WARNING",  # keep root quiet
     },
     "loggers": {
-        # Optional: configure third-party libraries to reduce noise
-        "urllib3": {"level": "WARNING"},
-        "requests": {"level": "WARNING"},
+        "locust_telemetry": {  # Only this plugin namespace
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,  # prevent double logging to root
+        },
     },
 }
 

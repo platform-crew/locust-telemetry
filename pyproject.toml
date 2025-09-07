@@ -3,7 +3,7 @@ requires = ["setuptools>=80.9.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "locust-observability"
+name = "locust-telemetry"
 version = "0.1.0"
 description = "A Locust plugin to log load test metrics to observability tools (DB-free)."
 readme = "README.md"
@@ -18,6 +18,7 @@ keywords = [
     "locust-plugin",
     "json-logging",
     "observability",
+    "locust-telemetry",
     "locust-stats",
     "load-testing",
     "metrics-recorder"
@@ -32,6 +33,10 @@ Homepage = "https://github.com/platform-crew/locust-observability"
 Documentation = "https://github.com/platform-crew/locust-observability#readme"
 Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
 
+[project.entry-points."locust_plugins"]
+telemetry_locust = "locust_telemetry.core_telemetry.plugin:core_plugin_load"
+telemetry_k8 = "locust_telemetry.k8_telemetry.plugin:k8_plugin_load"
+
 # --------------------------
 # Code formatting tools
 # --------------------------
@@ -43,7 +48,7 @@ skip-string-normalization = false
 [tool.isort]
 profile = "black"
 line_length = 88
-known_first_party = ["locust_observability"]
+known_first_party = ["locust_telemetry"]
 combine_as_imports = true
 include_trailing_comma = true
 multi_line_output = 3
@@ -54,4 +59,4 @@ use_parentheses = true
 # Packages to include
 # --------------------------
 [tool.setuptools.packages]
-find = { include = ["locust_observability*"] }
+find = { include = ["locust_telemetry*"] }

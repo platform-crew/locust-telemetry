@@ -1,14 +1,14 @@
 """
-Worker Node Stats Recorder
+Worker Node Locust Telemetry Recorder
 
-This module provides the `WorkerNodeStatsRecorder` class, which runs on
-Locust worker nodes. It captures worker-specific metrics such as CPU warnings and
-logs them for observability tools.
+This module provides the `WorkerLocustTelemetryRecorder` class, which runs on
+Locust worker nodes. It captures worker-specific telemetry such as CPU warnings
+and logs them in a format suitable for observability tools.
 
 The recorder listens to:
 - cpu_warning
 
-It can be extended to capture additional worker-level metrics.
+It can be extended to capture additional worker-level telemetry in the future.
 """
 
 import logging
@@ -18,29 +18,29 @@ from typing import Any, ClassVar, Optional
 
 from locust.env import Environment
 
-from locust_observability.metrics import EventsEnum
-from locust_observability.recorders.base import BaseRecorder
+from locust_telemetry.core.telemetry import BaseTelemetryRecorder
+from locust_telemetry.core_telemetry.constants import LocustTestEvent
 
 logger = logging.getLogger(__name__)
 
 
-class WorkerNodeStatsRecorder(BaseRecorder):
+class WorkerLocustTelemetryRecorder(BaseTelemetryRecorder):
     """
-    Recorder for Locust worker nodes.
+    Telemetry recorder for Locust worker nodes.
 
-    This recorder captures:
-    - Worker-specific metrics, such as CPU warnings.
-    - Additional metrics can be added in the future.
+    Responsibilities:
+    - Handle worker-specific telemetry, such as CPU warnings.
+    - Provide extension points for additional worker-level telemetry.
 
     Attributes:
         name (ClassVar[str]): Identifier for the recorder.
     """
 
-    name: ClassVar[str] = "worker_recorder"
+    name: ClassVar[str] = "worker_locust_telemetry_recorder"
 
     def __init__(self, env: Environment) -> None:
         """
-        Initialize the worker node stats recorder.
+        Initialize the worker telemetry recorder.
 
         Args:
             env (Environment): The Locust environment instance.
@@ -63,7 +63,7 @@ class WorkerNodeStatsRecorder(BaseRecorder):
         **kwargs: Any,
     ) -> None:
         """
-        Handler called when high CPU usage is detected.
+        Handle the cpu_warning event.
 
         Args:
             environment (Environment): The Locust environment instance.
@@ -72,12 +72,12 @@ class WorkerNodeStatsRecorder(BaseRecorder):
             timestamp (Optional[float]): Unix timestamp of the warning.
             **kwargs: Additional keyword arguments from Locust events.
         """
-        self.log_metrics(
-            metric=EventsEnum.CPU_WARNING_EVENT.value,
+        self.log_telemetry(
+            telemetry=LocustTestEvent.CPU_WARNING.value,
             cpu_usage=cpu_usage,
             message=message,
             text=(
-                f"{self.env.parsed_options.testplan} High CPU usage "
+                f"{self.env.parsed_options.testplan} high CPU usage "
                 f"({cpu_usage:.2f}%)"
             ),
         )
