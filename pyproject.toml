@@ -7,7 +7,7 @@ name = "locust-telemetry"
 version = "0.1.0"
 description = "A Locust plugin to log load test metrics to observability tools (DB-free)."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
