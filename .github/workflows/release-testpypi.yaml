@@ -1,0 +1,43 @@
+name: Python Package Pre-Release Test & Upload
+
+on:
+  release:
+    types: [prereleased]  # Only triggers for pre-releases
+
+jobs:
+  pre-release-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      # 3. Install build and development dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+          pip install ".[dev]"  # installs pytest, coverage, etc.
+
+      # 4. Run tests with coverage
+      - name: Run tests with coverage
+        run: |
+          pytest tests --maxfail=1 --cov=locust_telemetry --cov-report=xml --cov-report=term
+
+      # 5. Build source and wheel distributions
+      - name: Build distributions
+        run: python -m build
+
+      # 6. Upload to TestPyPI
+      - name: Upload to TestPyPI
+        env:
+          TWINE_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}
+        run: python -m twine upload --repository testpypi dist/*

@@ -32,6 +32,10 @@ Homepage = "https://github.com/platform-crew/locust-observability"
 Documentation = "https://github.com/platform-crew/locust-observability#readme"
 Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
 
+[project.entry-points."locust_plugins"]
+telemetry.locust = "locust_telemetry.core_telemetry.plugin:core_plugin_load"
+telemetry.k8 = "locust_telemetry.k8_telemetry.plugin:k8_plugin_load"
+
 # --------------------------
 # Code formatting tools
 # --------------------------
@@ -43,7 +47,7 @@ skip-string-normalization = false
 [tool.isort]
 profile = "black"
 line_length = 88
-known_first_party = ["locust_observability"]
+known_first_party = ["locust_telemetry"]
 combine_as_imports = true
 include_trailing_comma = true
 multi_line_output = 3
@@ -54,4 +58,4 @@ use_parentheses = true
 # Packages to include
 # --------------------------
 [tool.setuptools.packages]
-find = { include = ["locust_observability*"] }
+find = { include = ["locust_telemetry*"] }
