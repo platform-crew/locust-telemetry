@@ -13,6 +13,7 @@ env:
 
 jobs:
   test:
+    name: Tests
     runs-on: ubuntu-latest
 
     strategy:
@@ -37,7 +38,6 @@ jobs:
       - name: Run tests
         run: pytest --cov=locust_telemetry --cov-report=term
 
-      # Collect coverage only once (Python 3.12)
       - name: Run tests with coverage (XML report)
         if: ${{ matrix.python-version == env.COVERAGE_PYTHON_VERSION }}
         run: pytest --cov=locust_telemetry --cov-report=xml --cov-report=term
@@ -49,11 +49,10 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
-      # Optional: Send coverage to Codecov (only once)
       - name: Upload coverage to Codecov
         if: ${{ matrix.python-version == env.COVERAGE_PYTHON_VERSION }}
         uses: codecov/codecov-action@v5
         with:
-          file: coverage.xml
+          files: coverage.xml
           flags: unittests
           name: codecov-coverage
