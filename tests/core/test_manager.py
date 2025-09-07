@@ -47,15 +47,6 @@ def test_on_init_calls_configure_logging(mock_env: Environment) -> None:
         mock_log.assert_called_once()
 
 
-def test_on_init_master_sets_metadata(mock_env: Environment) -> None:
-    """Ensure master initialization sets test metadata."""
-    manager = TelemetryPluginManager()
-    mock_env.runner.__class__ = MasterRunner
-    with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
-        manager._on_init_master(mock_env)
-        mock_set.assert_called_once_with(mock_env)
-
-
 def test_on_init_worker_registers_message_handler(mock_env: Environment) -> None:
     """Ensure worker initialization registers metadata message handler."""
     manager = TelemetryPluginManager()
@@ -67,6 +58,15 @@ def test_on_init_worker_registers_message_handler(mock_env: Environment) -> None
     msg_type, func = args
     assert msg_type == "set_metadata"
     assert callable(func)
+
+
+def test_on_test_start_master_sets_metadata(mock_env: Environment) -> None:
+    """Ensure master initialization sets test metadata."""
+    manager = TelemetryPluginManager()
+    mock_env.runner.__class__ = MasterRunner
+    with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
+        manager._on_test_start(mock_env)
+        mock_set.assert_called_once_with(mock_env)
 
 
 def test_on_test_start_loads_plugins_on_master(

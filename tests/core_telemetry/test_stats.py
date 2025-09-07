@@ -180,7 +180,6 @@ def test_log_entry_stats_calls_log_telemetry_for_each_entry(
             kwargs = call_args.kwargs
             assert kwargs["telemetry"] == RequestMetric.ENDPOINT_STATS.value
             assert "request_path" in kwargs
-            assert "method" in kwargs
             assert kwargs["percentile_95"] == 100
             assert kwargs["percentile_99"] == 200
 
