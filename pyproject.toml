@@ -28,6 +28,13 @@ dependencies = [
     "python-json-logger>=3.3.0",
 ]
 
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.0",
+    "pytest-cov>=6.3.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/platform-crew/locust-observability"
 Documentation = "https://github.com/platform-crew/locust-observability#readme"
