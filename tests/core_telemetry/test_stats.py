@@ -8,7 +8,7 @@ These tests verify:
 - Helper methods for stats formatting and logging
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import gevent
 import pytest
@@ -77,6 +77,7 @@ def test_on_test_stop_stops_logger_and_logs_final_stats(
         mock_error.assert_called_once()
         mock_log.assert_called_once_with(
             telemetry=LocustTestEvent.STOP.value,
+            endtime=ANY,
             text=f"{recorder.env.parsed_options.testplan} "
             f"finished. Stopping the tests.",
         )

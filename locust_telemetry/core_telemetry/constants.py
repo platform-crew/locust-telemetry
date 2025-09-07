@@ -59,3 +59,6 @@ class RequestMetric(BaseTelemetryEnum):
     FINAL_STATS = TelemetryData("metric", "metric.request.final.stats")
     ENDPOINT_STATS = TelemetryData("metric", "metric.request.endpoint.stats")
     ENDPOINT_ERRORS = TelemetryData("metric", "metric.request.endpoint.errors")
+
+
+TEST_STOP_BUFFER_FOR_GRAPHS = 2  # 2 seconds

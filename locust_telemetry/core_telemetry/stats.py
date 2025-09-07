@@ -17,13 +17,18 @@ Responsibilities
 import logging
 import os
 import socket
+from datetime import datetime, timedelta, timezone
 from typing import Any, ClassVar, Dict, Optional
 
 import gevent
 from locust.env import Environment
 
 from locust_telemetry.core.telemetry import BaseTelemetryRecorder
-from locust_telemetry.core_telemetry.constants import LocustTestEvent, RequestMetric
+from locust_telemetry.core_telemetry.constants import (
+    TEST_STOP_BUFFER_FOR_GRAPHS,
+    LocustTestEvent,
+    RequestMetric,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -96,8 +101,19 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         self._log_total_stats(final=True)
         self._log_entry_stats()
         self._log_error_stats()
+
+        # Hack: For graphs to create autolink
+        # Compute current UTC time + 2 seconds
+        end_time = datetime.now(timezone.utc) + timedelta(
+            seconds=TEST_STOP_BUFFER_FOR_GRAPHS
+        )
+        end_time_str = end_time.isoformat(timespec="milliseconds").replace(
+            "+00:00", "Z"
+        )
+
         self.log_telemetry(
             telemetry=LocustTestEvent.STOP.value,
+            endtime=end_time_str,
             text=f"{self.env.parsed_options.testplan} finished. Stopping the tests.",
         )
 

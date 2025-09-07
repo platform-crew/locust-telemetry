@@ -141,7 +141,11 @@
                 "path": "telemetry.testplan"
               },
               {
-                "alias": "UTCTime",
+                "alias": "Endtime",
+                "path": "telemetry.endtime"
+              },
+              {
+                "alias": "Starttime",
                 "path": "time"
               }
             ],
@@ -176,6 +180,9 @@
           "id": "organize",
           "options": {
             "excludeByName": {
+              "Endtime 1": true,
+              "Endtime 2": false,
+              "Starttime 2": true,
               "Testplan 2": true,
               "Time 1": true,
               "Time 2": true,
@@ -196,7 +203,9 @@
             "renameByName": {
               "Duration": "Duration",
               "End Time": "End Time",
+              "Endtime 2": "End Time",
               "Run Id": "Run Id",
+              "Starttime 1": "Start Time",
               "Testplan 1": "Testplan",
               "Time 1": "",
               "Time 2": "",
@@ -223,5 +232,5 @@
   "timezone": "browser",
   "title": "Load Test Runs",
   "uid": "2a1a2a1b-5407-44dd-860f-1c9361750049",
-  "version": 2
+  "version": 6
 }
