@@ -18,10 +18,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -34,21 +34,21 @@ jobs:
       - name: Run tests
         run: pytest --cov=locust_telemetry --cov-report=term
 
-      # Collect coverage only once (Python 3.12)
+      # Collect coverage only once (Python 3.11)
       - name: Run tests with coverage (XML report)
-        if: matrix.python-version == '3.12'
+        if: matrix.python-version == '3.11'
         run: pytest --cov=locust_telemetry --cov-report=xml --cov-report=term
 
       - name: Upload coverage to GitHub
         if: matrix.python-version == '3.11'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage.xml
 
       # Optional: Send coverage to Codecov (only once)
       - name: Upload coverage to Codecov
-        if: matrix.python-version == '3.12'
+        if: matrix.python-version == '3.11'
         uses: codecov/codecov-action@v3
         with:
           file: coverage.xml
