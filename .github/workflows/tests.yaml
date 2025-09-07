@@ -36,11 +36,7 @@ jobs:
         run: pip install -e ".[dev]"
 
       - name: Run tests
-        run: pytest --cov=locust_telemetry --cov-report=term
-
-      - name: Run tests with coverage (XML report)
-        if: ${{ matrix.python-version == env.COVERAGE_PYTHON_VERSION }}
-        run: pytest --cov=locust_telemetry --cov-report=xml --cov-report=term
+        run: pytest --cov=locust_telemetry --cov-report=term --cov-report=xml
 
       - name: Upload coverage to GitHub
         if: ${{ matrix.python-version == env.COVERAGE_PYTHON_VERSION }}
@@ -53,6 +49,9 @@ jobs:
         if: ${{ matrix.python-version == env.COVERAGE_PYTHON_VERSION }}
         uses: codecov/codecov-action@v5
         with:
+          comment: always
           files: coverage.xml
           flags: unittests
           name: codecov-coverage
+          slug: platform-crew/locust-telemetry
+          token: ${{ secrets.CODECOV_TOKEN }}
