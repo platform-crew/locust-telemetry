@@ -43,7 +43,7 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         name (ClassVar[str]): Identifier for the recorder.
     """
 
-    name: ClassVar[str] = "master_telemetry_recorder"
+    name: ClassVar[str] = "master_locust_telemetry_recorder"
 
     def __init__(self, env: Environment) -> None:
         """

@@ -31,7 +31,7 @@ class RFC3339JsonFormatter(JsonFormatter):
 # Logging Configuration
 # -------------------------------
 
-LOG_LEVEL = os.getenv("LOCUST_OB_LOG_LEVEL", "INFO").upper()
+LOG_LEVEL = os.getenv("LOCUST_TELEMETRY_LOG_LEVEL", "INFO").upper()
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -41,7 +41,7 @@ LOGGING_CONFIG = {
             "()": RFC3339JsonFormatter,
             "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
             "rename_fields": {"asctime": "time", "levelname": "level"},
-            "json_indent": None,  # single-line JSON for observability tools
+            "json_indent": None,  # single-line JSON
         }
     },
     "handlers": {
@@ -56,13 +56,15 @@ LOGGING_CONFIG = {
         },
     },
     "root": {
-        "handlers": ["console"],
-        "level": LOG_LEVEL,
+        "handlers": ["null"],  # Disable root logger output
+        "level": "WARNING",  # keep root quiet
     },
     "loggers": {
-        # Optional: configure third-party libraries to reduce noise
-        "urllib3": {"level": "WARNING"},
-        "requests": {"level": "WARNING"},
+        "locust_telemetry": {  # Only this plugin namespace
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,  # prevent double logging to root
+        },
     },
 }
 

@@ -3,7 +3,7 @@ requires = ["setuptools>=80.9.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "locust-observability"
+name = "locust-telemetry"
 version = "0.1.0"
 description = "A Locust plugin to log load test metrics to observability tools (DB-free)."
 readme = "README.md"
@@ -18,6 +18,7 @@ keywords = [
     "locust-plugin",
     "json-logging",
     "observability",
+    "locust-telemetry",
     "locust-stats",
     "load-testing",
     "metrics-recorder"
@@ -33,8 +34,8 @@ Documentation = "https://github.com/platform-crew/locust-observability#readme"
 Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
 
 [project.entry-points."locust_plugins"]
-telemetry.locust = "locust_telemetry.core_telemetry.plugin:core_plugin_load"
-telemetry.k8 = "locust_telemetry.k8_telemetry.plugin:k8_plugin_load"
+telemetry_locust = "locust_telemetry.core_telemetry.plugin:core_plugin_load"
+telemetry_k8 = "locust_telemetry.k8_telemetry.plugin:k8_plugin_load"
 
 # --------------------------
 # Code formatting tools

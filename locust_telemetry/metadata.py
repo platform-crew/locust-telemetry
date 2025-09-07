@@ -32,8 +32,7 @@ def set_test_metadata(environment: Environment) -> None:
         environment (Environment): The Locust environment instance.
     """
     for key, generator in config.ENVIRONMENT_METADATA.items():
-        if not hasattr(environment, key):
-            setattr(environment, key, generator())
+        setattr(environment, key, generator())
 
 
 def get_test_metadata(environment: Environment) -> Dict[str, str]:

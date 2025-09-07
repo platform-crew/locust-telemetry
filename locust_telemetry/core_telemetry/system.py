@@ -36,7 +36,7 @@ class WorkerLocustTelemetryRecorder(BaseTelemetryRecorder):
         name (ClassVar[str]): Identifier for the recorder.
     """
 
-    name: ClassVar[str] = "worker_telemetry_recorder"
+    name: ClassVar[str] = "worker_locust_telemetry_recorder"
 
     def __init__(self, env: Environment) -> None:
         """
