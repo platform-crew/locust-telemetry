@@ -1,13 +1,17 @@
 """
 Base Telemetry Recorder for Locust Telemetry
+============================================
 
 This module provides the `BaseTelemetryRecorder` class, which serves as the foundation
 for all telemetry recorders (metrics or events) in a Locust environment.
 
+Usage
+-----
 Custom recorders should inherit from this class to ensure:
-- A consistent logging structure
-- Access to the Locust environment context
-- Standardized telemetry recording across master and worker nodes
+
+- A consistent logging structure.
+- Access to the Locust environment context.
+- Standardized telemetry recording across master and worker nodes.
 """
 
 import logging
@@ -59,8 +63,8 @@ class BaseTelemetryRecorder:
             extra={
                 "telemetry": {
                     "run_id": getattr(self.env, "run_id", None),
-                    "type": telemetry.type,
-                    "name": telemetry.name,
+                    "telemetry_type": telemetry.type,
+                    "telemetry_name": telemetry.name,
                     "recorder": self.name,
                     "testplan": getattr(self.env.parsed_options, "testplan", None),
                     **kwargs,

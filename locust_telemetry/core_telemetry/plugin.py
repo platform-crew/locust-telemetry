@@ -1,14 +1,16 @@
 """
 Locust Telemetry Plugin
+=======================
 
 This module defines the `LocustTelemetryPlugin`, which integrates
 telemetry recording into Locust runs. It initializes master and
 worker telemetry recorders to capture lifecycle events, request
 statistics, and worker system metrics.
 
-The plugin:
-- Adds CLI arguments for telemetry configuration
-- Registers master and worker telemetry recorders
+Responsibilities
+----------------
+- Add CLI arguments for telemetry configuration.
+- Register master and worker telemetry recorders.
 """
 
 import logging
@@ -30,17 +32,20 @@ class LocustTelemetryPlugin(BaseTelemetryPlugin):
     """
     Plugin for enabling telemetry in Locust.
 
-    Responsibilities:
-    - Add CLI arguments for telemetry configuration
-    - Register master and worker telemetry recorders
+    Responsibilities
+    ----------------
+    - Add CLI arguments for telemetry configuration.
+    - Register master and worker telemetry recorders.
     """
 
     def add_arguments(self, parser: LocustArgumentParser) -> None:
         """
         Register CLI arguments for telemetry configuration.
 
-        Args:
-            parser (LocustArgumentParser): The Locust argument parser.
+        Args
+        ----
+        parser : LocustArgumentParser
+            The Locust argument parser instance.
         """
         group = parser.add_argument_group(
             "telemetry.locust - Locust Telemetry",
@@ -60,8 +65,10 @@ class LocustTelemetryPlugin(BaseTelemetryPlugin):
         """
         Register the telemetry recorder for the master node.
 
-        Args:
-            environment (Environment): The Locust environment instance.
+        Args
+        ----
+        environment : Environment
+            The Locust environment instance.
         """
         MasterLocustTelemetryRecorder(env=environment)
 
@@ -71,8 +78,10 @@ class LocustTelemetryPlugin(BaseTelemetryPlugin):
         """
         Register the telemetry recorder for worker nodes.
 
-        Args:
-            environment (Environment): The Locust environment instance.
+        Args
+        ----
+        environment : Environment
+            The Locust environment instance.
         """
         WorkerLocustTelemetryRecorder(env=environment)
 
@@ -84,6 +93,5 @@ def core_plugin_load(*args, **kwargs):
     This function can be called at the start of your test script
     to ensure the plugin is loaded and lifecycle hooks are registered.
     """
-
     manager = TelemetryPluginManager()
     manager.register_plugin(plugin=LocustTelemetryPlugin())

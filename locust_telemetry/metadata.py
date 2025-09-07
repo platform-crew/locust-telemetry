@@ -1,14 +1,27 @@
 """
 Locust Telemetry Metadata Utilities
+===================================
 
 This module provides helper functions for managing test metadata
 in a Locust Telemetry setup. Metadata is generated on the master node,
 propagated to worker nodes, and attached to the Locust environment.
 
-Responsibilities:
+Responsibilities
+----------------
 - Generate and attach metadata to the master environment
 - Retrieve metadata from any environment
 - Apply master-sent metadata on worker environments
+
+Functions
+---------
+set_test_metadata(environment)
+    Generate and attach test metadata to the Locust environment.
+
+get_test_metadata(environment)
+    Retrieve metadata from the environment as a dictionary.
+
+apply_worker_metadata(environment, metadata)
+    Apply metadata received from the master node to a worker environment.
 """
 
 import logging

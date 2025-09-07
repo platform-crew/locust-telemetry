@@ -33,6 +33,9 @@ dependencies = [
 dev = [
     "pytest>=8.4.0",
     "pytest-cov>=6.3.0",
+    "sphinx>=8.2.3",
+    "sphinx-rtd-theme>=3.0.2",
+    "sphinx-autobuild>=2025.08.25",
 ]
 
 [project.urls]

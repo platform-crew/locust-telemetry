@@ -1,23 +1,28 @@
 """
 locust-telemetry Configuration
+===============================
 
-This module defines:
-- Default interval settings for stats recording and test stop buffering
-- Master and worker recorder class references
+This module defines default settings and references for Locust telemetry recorders.
 
-Constants:
-- DEFAULT_OB_RECORDER_INTERVAL: default interval (seconds) for recording stats
-- DEFAULT_OB_WAIT_AFTER_TEST_STOP: buffer time after test stop (seconds)
-  for log visualization
+Modules
+-------
+- Default interval settings for stats recording.
 
+Constants
+---------
+DEFAULT_RECORDER_INTERVAL : int
+    Default interval in seconds for recording stats.
+
+ENVIRONMENT_METADATA : Dict[str, Callable]
+    Dictionary of environment metadata functions. For example, 'run_id' returns
+    the current UTC timestamp in ISO format.
 """
 
 from datetime import datetime, timezone
 from typing import Callable, Dict
 
-# Default intervals
-DEFAULT_RECORDER_INTERVAL = 2  # seconds
-
+# Default interval for telemetry recording
+DEFAULT_RECORDER_INTERVAL: int = 2  # seconds
 
 ENVIRONMENT_METADATA: Dict[str, Callable] = {
     "run_id": lambda: datetime.now(timezone.utc).isoformat()

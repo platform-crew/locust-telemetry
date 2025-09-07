@@ -1,0 +1,227 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Load Test Runs",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 2,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "All Test Runs",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Run Id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Locust Dashboard",
+                    "url": "/d/4a54c6e2-1519-4332-9bb5-fa79c0989ec8/locust-requests-dashboard?var-run_id=${__data.fields[\"Run Id\"]:percentencode}&var-testplan=${__data.fields[\"Testplan\"]}&from=${__data.fields[\"Start Time\"]}&to=${__data.fields[\"End Time\"]}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 21,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"event.test.start\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"event.test.stop\"}\n| json",
+          "hide": false,
+          "queryType": "range",
+          "refId": "B"
+        }
+      ],
+      "title": "All Test Runs",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Run Id",
+                "path": "telemetry.run_id"
+              },
+              {
+                "alias": "Testplan",
+                "path": "telemetry.testplan"
+              },
+              {
+                "alias": "UTCTime",
+                "path": "time"
+              }
+            ],
+            "keepTime": true,
+            "replace": true,
+            "source": "Line"
+          }
+        },
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Run Id",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Duration",
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "Time 1",
+                "Time 2"
+              ],
+              "reducer": "diff"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Testplan 2": true,
+              "Time 1": true,
+              "Time 2": true,
+              "UTCTime 2": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Duration": 8,
+              "End Time": 3,
+              "Run Id": 0,
+              "Testplan 1": 1,
+              "Testplan 2": 7,
+              "Time 1": 5,
+              "Time 2": 6,
+              "UTCTime 1": 2,
+              "UTCTime 2": 4
+            },
+            "renameByName": {
+              "Duration": "Duration",
+              "End Time": "End Time",
+              "Run Id": "Run Id",
+              "Testplan 1": "Testplan",
+              "Time 1": "",
+              "Time 2": "",
+              "UTCTime 1": "Start Time",
+              "UTCTime 2": "End Time"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Load Test Runs",
+  "uid": "2a1a2a1b-5407-44dd-860f-1c9361750049",
+  "version": 2
+}

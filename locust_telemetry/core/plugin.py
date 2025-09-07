@@ -1,13 +1,14 @@
 """
 Locust Telemetry - Plugin Architecture
+======================================
 
 This module defines the base plugin interface for Locust Telemetry extensions.
 
-Responsibilities:
+Responsibilities
+----------------
 - Provide a consistent lifecycle for plugins across master and worker nodes.
 - Allow plugins to define their own CLI arguments and environment variables.
-- Ensure master and worker recorders are registered automatically
-  depending on runner type.
+- Automatically register master and worker recorders depending on runner type.
 - Support multiple telemetry plugins within a single Locust session.
 """
 
