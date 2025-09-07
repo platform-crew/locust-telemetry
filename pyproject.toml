@@ -7,7 +7,7 @@ name = "locust-telemetry"
 version = "0.1.0"
 description = "A Locust plugin to log load test metrics to observability tools (DB-free)."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
@@ -24,8 +24,15 @@ keywords = [
     "metrics-recorder"
 ]
 dependencies = [
-    "locust>=2.37.14",
+    "locust>=2.37.0",
     "python-json-logger>=3.3.0",
+]
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.0",
+    "pytest-cov>=6.3.0",
 ]
 
 [project.urls]
@@ -60,3 +67,15 @@ use_parentheses = true
 # --------------------------
 [tool.setuptools.packages]
 find = { include = ["locust_telemetry*"] }
+
+# --------------------------
+# Coverage report
+# --------------------------
+
+[tool.coverage.run]
+source = ["locust_telemetry"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
