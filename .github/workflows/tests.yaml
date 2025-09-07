@@ -31,18 +31,24 @@ jobs:
       - name: Install dependencies
         run: pip install ".[dev]"
 
-      - name: Run tests with coverage
-        run: |
-          pytest --cov=locust_telemetry --cov-report=xml --cov-report=term
+      - name: Run tests
+        run: pytest --cov=locust_telemetry --cov-report=term
+
+      # Collect coverage only once (Python 3.12)
+      - name: Run tests with coverage (XML report)
+        if: matrix.python-version == '3.12'
+        run: pytest --cov=locust_telemetry --cov-report=xml --cov-report=term
 
       - name: Upload coverage to GitHub
+        if: matrix.python-version == '3.11'
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
           path: coverage.xml
 
-      # Optional: Send coverage to Codecov
+      # Optional: Send coverage to Codecov (only once)
       - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.12'
         uses: codecov/codecov-action@v3
         with:
           file: coverage.xml
