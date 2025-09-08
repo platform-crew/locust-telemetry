@@ -1,7 +1,4 @@
 """
-Worker Node Locust Telemetry Recorder
-=====================================
-
 This module provides the `WorkerLocustTelemetryRecorder` class, which runs on
 Locust worker nodes. It captures worker-specific telemetry such as CPU warnings
 and logs them in a format suitable for observability tools.

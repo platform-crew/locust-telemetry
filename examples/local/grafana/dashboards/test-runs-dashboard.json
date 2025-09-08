@@ -27,7 +27,7 @@
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
       },
-      "description": "All Test Runs",
+      "description": "All Load Test Runs",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -39,7 +39,7 @@
               "type": "auto"
             },
             "filterable": true,
-            "inspect": false
+            "inspect": true
           },
           "mappings": [],
           "thresholds": {
@@ -47,10 +47,6 @@
             "steps": [
               {
                 "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -78,7 +74,7 @@
         ]
       },
       "gridPos": {
-        "h": 21,
+        "h": 12,
         "w": 24,
         "x": 0,
         "y": 0
@@ -124,7 +120,7 @@
           "refId": "B"
         }
       ],
-      "title": "All Test Runs",
+      "title": "All Load Test Runs",
       "transformations": [
         {
           "id": "extractFields",
@@ -190,15 +186,16 @@
             },
             "includeByName": {},
             "indexByName": {
-              "Duration": 8,
-              "End Time": 3,
+              "Duration": 7,
+              "Endtime 1": 8,
+              "Endtime 2": 6,
               "Run Id": 0,
+              "Starttime 1": 5,
+              "Starttime 2": 9,
               "Testplan 1": 1,
-              "Testplan 2": 7,
-              "Time 1": 5,
-              "Time 2": 6,
-              "UTCTime 1": 2,
-              "UTCTime 2": 4
+              "Testplan 2": 4,
+              "Time 1": 2,
+              "Time 2": 3
             },
             "renameByName": {
               "Duration": "Duration",
@@ -215,6 +212,7 @@
           }
         }
       ],
+      "transparent": true,
       "type": "table"
     }
   ],
@@ -232,5 +230,5 @@
   "timezone": "browser",
   "title": "Load Test Runs",
   "uid": "2a1a2a1b-5407-44dd-860f-1c9361750049",
-  "version": 6
+  "version": 9
 }

@@ -1,7 +1,4 @@
 """
-Locust Telemetry Constants
-==========================
-
 This module defines constants for telemetry events and metrics
 used within Locust Telemetry plugins and recorders.
 

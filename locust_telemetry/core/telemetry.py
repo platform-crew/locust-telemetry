@@ -1,6 +1,4 @@
 """
-Base Telemetry Recorder for Locust Telemetry
-============================================
 
 This module provides the `BaseTelemetryRecorder` class, which serves as the foundation
 for all telemetry recorders (metrics or events) in a Locust environment.

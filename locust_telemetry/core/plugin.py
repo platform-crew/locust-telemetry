@@ -1,7 +1,4 @@
 """
-Locust Telemetry - Plugin Architecture
-======================================
-
 This module defines the base plugin interface for Locust Telemetry extensions.
 
 Responsibilities

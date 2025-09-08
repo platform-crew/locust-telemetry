@@ -1,11 +1,11 @@
 """
-Tests for LocustTelemetryPlugin and core_plugin_load.
+Tests for LocustTelemetryPlugin and load_plugin.
 
 These tests verify:
 - CLI argument registration
 - Master and worker recorder registration
 - Proper dispatching via the plugin load method
-- Plugin registration via core_plugin_load
+- Plugin registration via load_plugin
 """
 
 from unittest.mock import patch
@@ -18,7 +18,7 @@ from locust.runners import MasterRunner, WorkerRunner
 from locust_telemetry.core.manager import TelemetryPluginManager
 from locust_telemetry.core_telemetry.plugin import (
     LocustTelemetryPlugin,
-    core_plugin_load,
+    load_plugin,
 )
 
 
@@ -97,10 +97,10 @@ def test_load_dispatches_to_worker_recorder_when_worker(mock_env: Environment) -
         mock_worker.assert_called_once_with(mock_env)
 
 
-def test_core_plugin_load_registers_plugin_in_manager() -> None:
-    """Ensure core_plugin_load registers the LocustTelemetryPlugin in the manager."""
+def test_load_plugin_registers_plugin_in_manager() -> None:
+    """Ensure load_plugin registers the LocustTelemetryPlugin in the manager."""
     manager = TelemetryPluginManager()
     manager._plugins.clear()  # ensure clean state
 
-    core_plugin_load()
+    load_plugin()
     assert any(isinstance(p, LocustTelemetryPlugin) for p in manager._plugins)

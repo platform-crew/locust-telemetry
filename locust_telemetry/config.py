@@ -1,29 +1,23 @@
 """
-locust-telemetry Configuration
-===============================
-
 This module defines default settings and references for Locust telemetry recorders.
-
-Modules
--------
-- Default interval settings for stats recording.
 
 Constants
 ---------
 DEFAULT_RECORDER_INTERVAL : int
-    Default interval in seconds for recording stats.
+    Default interval in seconds for recording stats is 2 seconds. But can be set through
+    environment variable LOCUST_TELEMETRY_RECORDER_INTERVAL
 
 ENVIRONMENT_METADATA : Dict[str, Callable]
     Dictionary of environment metadata functions. For example, 'run_id' returns
-    the current UTC timestamp in ISO format.
+    the current UTC timestamp in ISO format. This is for internal use only.
 """
 
-from datetime import datetime, timezone
+import uuid
 from typing import Callable, Dict
 
 # Default interval for telemetry recording
 DEFAULT_RECORDER_INTERVAL: int = 2  # seconds
 
 ENVIRONMENT_METADATA: Dict[str, Callable] = {
-    "run_id": lambda: datetime.now(timezone.utc).isoformat()
+    "run_id": lambda: str(uuid.uuid4())[:8]  # first 8 characters of UUID
 }

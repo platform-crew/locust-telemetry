@@ -1,7 +1,4 @@
 """
-Locust Telemetry Plugin
-=======================
-
 This module defines the `LocustTelemetryPlugin`, which integrates
 telemetry recording into Locust runs. It initializes master and
 worker telemetry recorders to capture lifecycle events, request
@@ -86,7 +83,7 @@ class LocustTelemetryPlugin(BaseTelemetryPlugin):
         WorkerLocustTelemetryRecorder(env=environment)
 
 
-def core_plugin_load(*args, **kwargs):
+def load_plugin(*args, **kwargs):
     """
     Initialize and register the core telemetry plugin with Locust.
 

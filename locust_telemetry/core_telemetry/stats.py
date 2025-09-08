@@ -1,7 +1,4 @@
 """
-Master Node Locust Telemetry Recorder
-=====================================
-
 This module provides the `MasterLocustTelemetryRecorder` class, which runs on
 the Locust master node. It captures lifecycle events and request statistics,
 logging them in a format suitable for observability tools.

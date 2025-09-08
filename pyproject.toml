@@ -41,8 +41,7 @@ Documentation = "https://github.com/platform-crew/locust-observability#readme"
 Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
 
 [project.entry-points."locust_plugins"]
-telemetry_locust = "locust_telemetry.core_telemetry.plugin:core_plugin_load"
-telemetry_k8 = "locust_telemetry.k8_telemetry.plugin:k8_plugin_load"
+telemetry_locust = "locust_telemetry.core_telemetry.plugin:load_plugin"
 
 # --------------------------
 # Code formatting tools

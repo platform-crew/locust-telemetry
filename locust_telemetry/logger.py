@@ -1,7 +1,4 @@
 """
-Logging configuration for locust-observability
-==============================================
-
 This module provides structured JSON logging for Locust Telemetry.
 
 Features

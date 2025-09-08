@@ -1,9 +1,9 @@
 from locust import HttpUser, between, task
 
-from locust_telemetry.core_telemetry.plugin import core_plugin_load
+from locust_telemetry.core_telemetry.plugin import load_plugin
 
 # Load core telemetry
-core_plugin_load()
+load_plugin()
 
 
 class HttpBinUser(HttpUser):

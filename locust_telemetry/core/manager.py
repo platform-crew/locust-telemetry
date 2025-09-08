@@ -1,8 +1,5 @@
 """
-Locust Telemetry Plugin Manager
-===============================
-
-Centralized manager for Locust Telemetry setup and lifecycle.
+Centralized manager for Telemetry setup and lifecycle.
 
 Responsibilities
 ----------------

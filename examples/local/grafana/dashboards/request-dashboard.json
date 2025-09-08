@@ -75,6 +75,483 @@
         "x": 0,
         "y": 0
       },
+      "id": 16,
+      "panels": [],
+      "title": "Numbers At Glance",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Total Requests",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "blue"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Requests",
+      "transformations": [
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": "/^(?:A)$/"
+          },
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Max Hits",
+                "path": "telemetry.num_requests"
+              }
+            ],
+            "source": "Line"
+          }
+        }
+      ],
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Total Failures",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 1
+      },
+      "id": 5,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Failures",
+      "transformations": [
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": "/^(?:A)$/"
+          },
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Max Failures",
+                "path": "telemetry.num_failures"
+              }
+            ],
+            "source": "Line"
+          }
+        }
+      ],
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Minimum Response Time",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "fieldMinMax": true,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "semi-dark-green"
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Minimum Response Time",
+      "transformations": [
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": "/^(?:A)$/"
+          },
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Max Hits",
+                "path": "telemetry.min_response_time"
+              }
+            ],
+            "source": "Line"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Total Requests Per Second",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "blue"
+              }
+            ]
+          },
+          "unit": "r/s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "id": 18,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Requests Per Second",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Max Hits",
+                "path": "telemetry.total_rps"
+              }
+            ],
+            "source": "Line"
+          }
+        }
+      ],
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Failure Per Second",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "f/s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "id": 17,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Failure Per Second",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "FPS",
+                "path": "telemetry.total_fail_per_sec"
+              }
+            ],
+            "source": "Line"
+          }
+        }
+      ],
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Maximum Response Time",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange"
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Maximum Response Time",
+      "transformations": [
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": "/^(?:A)$/"
+          },
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Max Hits",
+                "path": "telemetry.max_response_time"
+              }
+            ],
+            "keepTime": true,
+            "replace": true,
+            "source": "Line"
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
       "id": 11,
       "panels": [],
       "title": "Application Performance",
@@ -162,9 +639,9 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 10,
+        "w": 12,
         "x": 0,
-        "y": 1
+        "y": 12
       },
       "id": 2,
       "options": {
@@ -218,89 +695,6 @@
         }
       ],
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
-      },
-      "description": "Total Requests",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "orange",
-                "value": 70
-              },
-              {
-                "color": "red",
-                "value": 85
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 10,
-        "y": 1
-      },
-      "id": 4,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "direction": "backward",
-          "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Total Requests",
-      "transformations": [
-        {
-          "filter": {
-            "id": "byRefId",
-            "options": "/^(?:A)$/"
-          },
-          "id": "extractFields",
-          "options": {
-            "delimiter": ",",
-            "format": "json",
-            "jsonPaths": [
-              {
-                "alias": "Max Hits",
-                "path": "telemetry.num_requests"
-              }
-            ],
-            "source": "Line"
-          }
-        }
-      ],
-      "type": "gauge"
     },
     {
       "datasource": {
@@ -396,9 +790,9 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 11,
-        "x": 13,
-        "y": 1
+        "w": 12,
+        "x": 12,
+        "y": 12
       },
       "id": 3,
       "options": {
@@ -452,85 +846,6 @@
         }
       ],
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
-      },
-      "description": "Total Failures",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 0
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 10,
-        "y": 6
-      },
-      "id": 5,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "direction": "backward",
-          "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Total Failures",
-      "transformations": [
-        {
-          "filter": {
-            "id": "byRefId",
-            "options": "/^(?:A)$/"
-          },
-          "id": "extractFields",
-          "options": {
-            "delimiter": ",",
-            "format": "json",
-            "jsonPaths": [
-              {
-                "alias": "Max Failures",
-                "path": "telemetry.num_failures"
-              }
-            ],
-            "source": "Line"
-          }
-        }
-      ],
-      "type": "gauge"
     },
     {
       "datasource": {
@@ -643,9 +958,9 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 10,
+        "w": 12,
         "x": 0,
-        "y": 11
+        "y": 22
       },
       "id": 6,
       "options": {
@@ -703,88 +1018,6 @@
         }
       ],
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
-      },
-      "description": "Min Response Time",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "fieldMinMax": true,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "semi-dark-green"
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 10,
-        "y": 11
-      },
-      "id": 9,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "direction": "backward",
-          "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Response time (min)",
-      "transformations": [
-        {
-          "filter": {
-            "id": "byRefId",
-            "options": "/^(?:A)$/"
-          },
-          "id": "extractFields",
-          "options": {
-            "delimiter": ",",
-            "format": "json",
-            "jsonPaths": [
-              {
-                "alias": "Max Hits",
-                "path": "telemetry.min_response_time"
-              }
-            ],
-            "source": "Line"
-          }
-        }
-      ],
-      "type": "stat"
     },
     {
       "datasource": {
@@ -849,9 +1082,9 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 11,
-        "x": 13,
-        "y": 11
+        "w": 12,
+        "x": 12,
+        "y": 22
       },
       "id": 7,
       "options": {
@@ -901,15 +1134,22 @@
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
       },
-      "description": "Max Response Time",
+      "description": "Average Endpoint's Response Time",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "orange"
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
               }
             ]
           },
@@ -918,63 +1158,201 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 3,
-        "x": 10,
-        "y": 16
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
       },
-      "id": 8,
+      "id": 14,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "displayMode": "basic",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
         },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
       },
       "pluginVersion": "12.0.0",
       "targets": [
         {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.endpoint.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Response time (max)",
+      "title": "Average Endpoint's Response Time",
       "transformations": [
         {
-          "filter": {
-            "id": "byRefId",
-            "options": "/^(?:A)$/"
-          },
           "id": "extractFields",
           "options": {
             "delimiter": ",",
             "format": "json",
             "jsonPaths": [
               {
-                "alias": "Max Hits",
-                "path": "telemetry.max_response_time"
+                "alias": "Path",
+                "path": "telemetry.request_path"
+              },
+              {
+                "alias": "RT",
+                "path": "telemetry.avg_response_time"
               }
             ],
-            "keepTime": true,
+            "keepTime": false,
             "replace": true,
             "source": "Line"
           }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Path": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "RT": {
+                "aggregations": [
+                  "mean"
+                ],
+                "operation": "aggregate"
+              }
+            }
+          }
         }
       ],
-      "type": "stat"
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Average Endpoints Failures Per Sec",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 32
+      },
+      "id": 15,
+      "options": {
+        "displayMode": "basic",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.endpoint.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Average Endpoints Failures Per Sec",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Path",
+                "path": "telemetry.request_path"
+              },
+              {
+                "alias": "RT",
+                "path": "telemetry.total_fail_per_sec"
+              }
+            ],
+            "keepTime": false,
+            "replace": true,
+            "source": "Line"
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Path": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "RT": {
+                "aggregations": [
+                  "mean"
+                ],
+                "operation": "aggregate"
+              }
+            }
+          }
+        }
+      ],
+      "type": "bargauge"
     },
     {
       "collapsed": false,
@@ -982,7 +1360,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 40
       },
       "id": 12,
       "panels": [],
@@ -1043,7 +1421,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 41
       },
       "id": 1,
       "options": {
@@ -1157,7 +1535,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 50
       },
       "id": 13,
       "options": {
@@ -1299,5 +1677,5 @@
   "timezone": "browser",
   "title": "Locust Requests Dashboard",
   "uid": "4a54c6e2-1519-4332-9bb5-fa79c0989ec8",
-  "version": 6
+  "version": 16
 }
