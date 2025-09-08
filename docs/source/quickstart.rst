@@ -1,18 +1,38 @@
 Quick Start
 ===========
 
-Load the core telemetry plugin in your Locust test script:
+This extension builds on Locust, and all existing usage and configuration
+options remain unchanged. For details on how Locust works, please refer
+to the official Locust `documentation <https://docs.locust.io/en/stable/index.html>`_.
+
+Once Locust is set up, the following steps demonstrate how to load and use the telemetry plugin.
+
+Load the core telemetry plugin in your Locust test script (e.g., locustfile.py):
 
 .. code-block:: python
 
-    from locust_telemetry.core_telemetry.plugin import core_plugin_load
-    core_plugin_load()
+    from locust_telemetry.core_telemetry.plugin import load_plugin
+    load_plugin()
 
-For Kubernetes-specific telemetry:
 
-.. code-block:: python
 
-    from locust_telemetry.k8_telemetry.plugin import k8_plugin_load
-    k8_plugin_load()
+.. note::
+   - Telemetry plugins are implemented as singletons, so loading a plugin multiple times will not generate duplicate events.
+   - Locust currently does not support plugin arguments (``--plugin`` or ``-p``). Therefore, plugins must be loaded manually in ``locustfile.py``.
+   - The Locust team is planning to add support for CLI and environment variables in the future, which will allow plugins to be specified directly in the run script. You can track the progress of this feature in issue `#3212 <https://github.com/locustio/locust/issues/3212>`_.
 
-Your Locust load test is now instrumented with structured telemetry logging.
+
+
+Here’s an example of a Grafana dashboard built using telemetry from this plugin.
+It shows how Locust metrics can be transformed into meaningful insights with just a few steps.
+
+For a full walkthrough on setting up dashboards locally, see the :ref:`examples-section`.
+
+.. image:: _static/quick-start-dashboard.png
+   :alt: Quickstart Dashboard Overview
+   :width: 100%
+   :align: center
+
+.. raw:: html
+
+   <br><br>

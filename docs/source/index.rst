@@ -1,9 +1,6 @@
-=========================
-Locust Telemetry Plugin
-=========================
-
-High-level observability plugin for Locust load testing.
-Provides structured telemetry logging, master and worker recorders, and support for custom telemetry plugins.
+=======================================
+Locust Telemetry Documentation
+=======================================
 
 Getting Started
 ---------------
@@ -11,32 +8,43 @@ Getting Started
 .. toctree::
    :maxdepth: 2
 
-   overview
+   getting_started
    installation
    quickstart
 
-Features
---------
+=======================================
+Configuration
+=======================================
 
 .. toctree::
    :maxdepth: 2
 
-   features
+   configuration
 
+=======================================
+Examples
+=======================================
+
+.. toctree::
+   :maxdepth: 2
+
+   examples
+
+=======================================
 API Reference
--------------
+=======================================
 
 The API reference is automatically generated from docstrings.
-Use ``sphinx-apidoc`` to regenerate it when new modules are added.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
-   api_reference
+   api/index
 
 
+=======================================
 Notes
------
+=======================================
 
 .. toctree::
    :maxdepth: 1

@@ -79,4 +79,4 @@ extlinks = {
 
 # -- TODO settings -----------------------------------------------------------
 
-todo_include_todos = True
+todo_include_todos = False
