@@ -96,23 +96,23 @@ Below are sample dashboards showing how Locust Telemetry metrics can be explored
 
 *Overview of all load test runs*
 
-![All Load Test Runs](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/source/_static/load-test-runs.png)
+![All Load Test Runs](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/load-test-runs.png)
 
 *Request metrics and performance overview*
 
-![Request Dashboard 1](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/source/_static/request-dashboard-1.png)
+![Request Dashboard 1](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/request-dashboard-1.png)
 
 *Endpoint-specific statistics*
 
-![Request Dashboard 2](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/source/_static/request-dashboard-2.png)
+![Request Dashboard 2](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/request-dashboard-2.png)
 
 *Errors and failures visualized*
 
-![Request Dashboard 3](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/source/_static/request-dashboard-3.png)
+![Request Dashboard 3](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/request-dashboard-3.png)
 
 *System metrics and CPU warnings*
 
-![Request Dashboard 4](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/source/_static/request-dashboard-4.png)
+![Request Dashboard 4](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/request-dashboard-4.png)
 
 
 ### 🚀 Full Setup Instructions
