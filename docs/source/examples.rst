@@ -110,3 +110,54 @@ master and worker nodes, along with additional telemetry insights.
 .. raw:: html
 
    <br><br>
+
+
+Log Parsing
+-----------
+
+To make dashboards load quickly and filters work seamlessly, Locust Telemetry
+logs should be parsed into structured fields and indexed efficiently.
+
+At a minimum, the following fields are recommended as indexes/facets:
+
+- **run_id** → identifies a specific test run
+- **testplan** → test plan name
+- **recorder** → recorder instance (e.g., master/worker)
+- **telemetry_type** → type of telemetry (event or metric)
+- **telemetry_name** → specific event/metric name
+
+Promtail Example
+~~~~~~~~~~~~~~~~
+
+The snippet below shows how to configure a Promtail log parser.
+The same approach can be adapted for other observability tools such as
+Datadog, ELK, or OpenTelemetry by extracting the same fields.
+
+.. code-block:: yaml
+
+   pipeline_stages:
+     - json:
+         expressions:
+           run_id: telemetry.run_id
+           recorder: telemetry.recorder
+           testplan: telemetry.testplan
+           telemetry_type: telemetry.telemetry_type
+           telemetry_name: telemetry.telemetry_name
+           level: telemetry.level
+           message: telemetry.message
+           ts: telemetry.time
+
+     - labels:
+         run_id: run_id
+         testplan: testplan
+         recorder: recorder
+         telemetry_type: telemetry_type
+         telemetry_name: telemetry_name
+
+     - match:
+         selector: '{run_id=""}'
+         action: drop
+
+     - timestamp:
+         source: ts
+         format: RFC3339
