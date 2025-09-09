@@ -47,7 +47,7 @@ class BaseTelemetryPlugin(ABC):
         pass
 
     @abstractmethod
-    def register_master_telemetry_recorder(
+    def load_master_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
@@ -58,7 +58,7 @@ class BaseTelemetryPlugin(ABC):
         pass
 
     @abstractmethod
-    def register_worker_telemetry_recorder(
+    def load_worker_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
@@ -77,6 +77,6 @@ class BaseTelemetryPlugin(ABC):
         on the current runner type.
         """
         if isinstance(environment.runner, MasterRunner):
-            self.register_master_telemetry_recorder(environment, **kwargs)
+            self.load_master_telemetry_recorders(environment, **kwargs)
         elif isinstance(environment.runner, WorkerRunner):
-            self.register_worker_telemetry_recorder(environment, **kwargs)
+            self.load_worker_telemetry_recorders(environment, **kwargs)

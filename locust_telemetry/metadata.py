@@ -35,6 +35,23 @@ def set_test_metadata(environment: Environment) -> None:
         setattr(environment, key, generator())
 
 
+def unset_test_metadata(environment: Environment) -> None:
+    """
+    Remove all test metadata from the Locust environment.
+
+    All attributes corresponding to keys in `config.ENVIRONMENT_METADATA` will
+    be deleted from the environment if they exist.
+
+    Parameters
+    ----------
+    environment : Environment
+        The Locust environment instance from which metadata will be removed.
+    """
+    for key in config.ENVIRONMENT_METADATA:
+        if hasattr(environment, key):
+            delattr(environment, key)
+
+
 def get_test_metadata(environment: Environment) -> Dict[str, str]:
     """
     Collect all configured metadata from the Locust environment.

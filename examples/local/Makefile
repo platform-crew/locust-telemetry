@@ -25,7 +25,7 @@ logs-master: ## Follow locust master logs
 	docker-compose logs -f locust_master
 
 logs-worker: ## Follow locust worker logs
-	docker-compose logs -f locust_worker
+	docker compose logs -f $$(docker compose ps --services | grep locust_worker)
 
 locust-bash: ## Get inside locust master container
 	docker-compose exec locust_master bash

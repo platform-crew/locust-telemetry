@@ -3,97 +3,91 @@ from unittest.mock import MagicMock, patch
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
 
-from locust_telemetry.core.manager import TelemetryPluginManager
+from locust_telemetry.core.manager import PluginManager, TelemetryManager
 from locust_telemetry.core.plugin import BaseTelemetryPlugin
 
 
-def test_singleton(mock_env: Environment) -> None:
-    """Ensure TelemetryPluginManager implements a singleton pattern."""
-    manager1 = TelemetryPluginManager()
-    manager2 = TelemetryPluginManager()
+def test_singleton() -> None:
+    """Ensure TelemetryManager implements a singleton pattern."""
+    manager1 = TelemetryManager(plugin_manager=PluginManager())
+    manager2 = TelemetryManager(plugin_manager=PluginManager())
     assert manager1 is manager2
+    assert manager1.plugin_manager is manager2.plugin_manager
 
 
-def test_register_plugin(
-    mock_env: Environment, dummy_plugin: BaseTelemetryPlugin
-) -> None:
+def test_register_plugin(dummy_plugin) -> None:
     """Verify that plugins can be registered and are not duplicated."""
-    manager = TelemetryPluginManager()
-    manager.register_plugin(dummy_plugin)
-    assert dummy_plugin in manager._plugins
+    plugin_manager = PluginManager()
+
+    plugin_manager.register_plugin(dummy_plugin)
+    assert dummy_plugin in plugin_manager._plugins
 
     # Re-registering should not duplicate
-    manager.register_plugin(dummy_plugin)
-    assert manager._plugins.count(dummy_plugin) == 1
+    plugin_manager.register_plugin(dummy_plugin)
+    assert plugin_manager._plugins.count(dummy_plugin) == 1
 
 
-def test_on_init_command_line_parser_calls_plugin_add_arguments(
-    mock_env: Environment, dummy_plugin: BaseTelemetryPlugin
-) -> None:
-    """Ensure that plugin CLI argument hooks are called during init."""
-    manager = TelemetryPluginManager()
-    manager.register_plugin(dummy_plugin)
+def test_load_plugins_calls_plugin_load(mock_env) -> None:
+    """Ensure load_plugins calls each plugin's load method."""
+    plugin_manager = PluginManager()
+    dummy_plugin = MagicMock(spec=BaseTelemetryPlugin)
 
+    plugin_manager.register_plugin(dummy_plugin)
+    plugin_manager.load_plugins(mock_env)
+
+    dummy_plugin.load.assert_called_once_with(environment=mock_env)
+
+
+def test_add_arguments() -> None:
+    """Ensure TelemetryManager adds CLI arguments."""
+    manager = TelemetryManager(plugin_manager=PluginManager())
     parser = MagicMock()
-    manager._on_init_command_line_parser(parser)
-    assert dummy_plugin.added_args
+    manager._add_arguments(parser)
+    parser.add_argument_group.assert_called_once()
 
 
-def test_on_init_calls_configure_logging(mock_env: Environment) -> None:
-    """Ensure configure_logging is called during manager initialization."""
-    manager = TelemetryPluginManager()
+def test_setup_logging_calls_configure_logging(mock_env) -> None:
+    """Ensure configure_logging is called during _setup_logging."""
+    manager = TelemetryManager(plugin_manager=PluginManager())
+
     with patch("locust_telemetry.core.manager.configure_logging") as mock_log:
-        manager._on_init(mock_env)
+        manager._setup_logging(mock_env)
         mock_log.assert_called_once()
 
 
-def test_on_init_worker_registers_message_handler(mock_env: Environment) -> None:
-    """Ensure worker initialization registers metadata message handler."""
-    manager = TelemetryPluginManager()
+def test_register_metadata_handler_for_worker(mock_env) -> None:
+    """Ensure worker message handler is registered for WorkerRunner."""
+    manager = TelemetryManager(plugin_manager=PluginManager())
     mock_env.runner.__class__ = WorkerRunner
-    manager._on_init_worker(mock_env)
+    manager._register_metadata_handler(mock_env)
 
     mock_env.runner.register_message.assert_called_once()
-    args, _ = mock_env.runner.register_message.call_args
-    msg_type, func = args
+    msg_type, func = mock_env.runner.register_message.call_args[0]
     assert msg_type == "set_metadata"
     assert callable(func)
 
 
-def test_on_test_start_master_sets_metadata(mock_env: Environment) -> None:
-    """Ensure master initialization sets test metadata."""
-    manager = TelemetryPluginManager()
+def test_setup_metadata_for_master(mock_env) -> None:
+    """Ensure master runner sets and sends metadata."""
+    manager = TelemetryManager(plugin_manager=PluginManager())
     mock_env.runner.__class__ = MasterRunner
-    with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
-        manager._on_test_start(mock_env)
-        mock_set.assert_called_once_with(mock_env)
 
-
-def test_on_test_start_loads_plugins_on_master(
-    mock_env: Environment, dummy_plugin: BaseTelemetryPlugin
-) -> None:
-    """Ensure plugins are loaded on master runner during test start."""
-    manager = TelemetryPluginManager()
-    manager.register_plugin(dummy_plugin)
-
-    mock_env.runner.__class__ = MasterRunner
-    with patch(
+    with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set, patch(
         "locust_telemetry.core.manager.get_test_metadata",
         return_value={"run_id": "123"},
-    ):
-        manager._on_test_start(mock_env)
+    ) as _:
+        manager._setup_metadata(mock_env)
+        mock_set.assert_called_once_with(mock_env)
+        mock_env.runner.send_message.assert_called_once_with(
+            "set_metadata", {"run_id": "123"}
+        )
 
-    assert dummy_plugin.master_loaded
 
+def test_remove_metadata_calls_unset() -> None:
+    """Ensure _remove_metadata calls unset_test_metadata."""
+    manager = TelemetryManager(plugin_manager=PluginManager())
+    mock_env = MagicMock(spec=Environment)
 
-def test_on_test_start_loads_plugins_on_worker(
-    mock_env: Environment, dummy_plugin: BaseTelemetryPlugin
-) -> None:
-    """Ensure plugins are loaded on worker runner during test start."""
-    manager = TelemetryPluginManager()
-    manager.register_plugin(dummy_plugin)
-
-    mock_env.runner.__class__ = WorkerRunner
-    manager._on_test_start(mock_env)
-
-    assert dummy_plugin.worker_loaded
+    with patch("locust_telemetry.core.manager.unset_test_metadata") as mock_unset:
+        manager._remove_metadata(mock_env)
+        mock_unset.assert_called_once_with(mock_env)

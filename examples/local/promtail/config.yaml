@@ -15,13 +15,25 @@ scrape_configs:
         refresh_interval: 5s
 
     relabel_configs:
-      - source_labels: [__meta_docker_container_name]
-        regex: "/(locust-master|locust-worker)"
+      # Only keep locust master and worker containers
+      - source_labels: [ __meta_docker_container_name ]
+        regex: "/(locust-master|locust-worker.*)"
         action: keep
-      - source_labels: [__meta_docker_container_name]
-        regex: "/(.*)"
+
+      # Normalize worker names to "locust-worker"
+      - source_labels: [ __meta_docker_container_name ]
+        regex: "/locust-worker[0-9]+"
+        replacement: "locust-worker"
         target_label: container
-      - source_labels: [__meta_docker_image]
+
+      # Keep master as "locust-master"
+      - source_labels: [ __meta_docker_container_name ]
+        regex: "/locust-master"
+        replacement: "locust-master"
+        target_label: container
+
+      # Optional: add image label
+      - source_labels: [ __meta_docker_image ]
         target_label: image
 
     pipeline_stages:

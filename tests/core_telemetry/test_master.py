@@ -15,7 +15,7 @@ import pytest
 from locust.env import Environment
 
 from locust_telemetry.core_telemetry.constants import LocustTestEvent, RequestMetric
-from locust_telemetry.core_telemetry.stats import MasterLocustTelemetryRecorder
+from locust_telemetry.core_telemetry.master import MasterLocustTelemetryRecorder
 
 
 @pytest.fixture

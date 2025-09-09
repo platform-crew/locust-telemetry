@@ -13,6 +13,8 @@ Custom recorders should inherit from this class to ensure:
 """
 
 import logging
+import os
+import socket
 from typing import Any, ClassVar
 
 from locust.env import Environment
@@ -47,6 +49,9 @@ class BaseTelemetryRecorder:
             env (Environment): The Locust environment instance.
         """
         self.env = env
+        self._username: str = os.getenv("USER", "unknown")
+        self._hostname: str = socket.gethostname()
+        self._pid: int = os.getpid()
 
     def log_telemetry(self, telemetry: TelemetryData, **kwargs: Any) -> None:
         """
@@ -57,7 +62,7 @@ class BaseTelemetryRecorder:
             **kwargs: Additional attributes to include in the telemetry log
         """
         logger.info(
-            f"Recording telemetry: {telemetry.type}.{telemetry.name}",
+            f"Recording telemetry: {telemetry.name}",
             extra={
                 "telemetry": {
                     "run_id": getattr(self.env, "run_id", None),

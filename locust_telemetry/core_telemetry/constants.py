@@ -28,12 +28,15 @@ class LocustTestEvent(BaseTelemetryEnum):
         Emitted when user spawn is complete.
     CPU_WARNING : TelemetryData
         Emitted when CPU usage exceeds threshold.
+    USAGE: TelemetryData
+        Emitted periodically give systems usage details
     """
 
     START = TelemetryData("event", "event.test.start")
     STOP = TelemetryData("event", "event.test.stop")
     SPAWN_COMPLETE = TelemetryData("event", "event.spawn.complete")
     CPU_WARNING = TelemetryData("event", "event.cpu.warning")
+    USAGE = TelemetryData("event", "event.system.usage")
 
 
 class RequestMetric(BaseTelemetryEnum):

@@ -17,10 +17,10 @@ from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 
 from locust_telemetry import config
-from locust_telemetry.core.manager import TelemetryPluginManager
+from locust_telemetry.core.manager import PluginManager, TelemetryManager
 from locust_telemetry.core.plugin import BaseTelemetryPlugin
-from locust_telemetry.core_telemetry.stats import MasterLocustTelemetryRecorder
-from locust_telemetry.core_telemetry.system import WorkerLocustTelemetryRecorder
+from locust_telemetry.core_telemetry.master import MasterLocustTelemetryRecorder
+from locust_telemetry.core_telemetry.worker import WorkerLocustTelemetryRecorder
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class LocustTelemetryPlugin(BaseTelemetryPlugin):
             default=config.DEFAULT_RECORDER_INTERVAL,
         )
 
-    def register_master_telemetry_recorder(
+    def load_master_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
@@ -69,7 +69,7 @@ class LocustTelemetryPlugin(BaseTelemetryPlugin):
         """
         MasterLocustTelemetryRecorder(env=environment)
 
-    def register_worker_telemetry_recorder(
+    def load_worker_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
@@ -83,12 +83,30 @@ class LocustTelemetryPlugin(BaseTelemetryPlugin):
         WorkerLocustTelemetryRecorder(env=environment)
 
 
-def load_plugin(*args, **kwargs):
+def entry_point(*args, **kwargs):
     """
     Initialize and register the core telemetry plugin with Locust.
 
-    This function can be called at the start of your test script
-    to ensure the plugin is loaded and lifecycle hooks are registered.
+    This function sets up the telemetry system by:
+
+    1. Creating or retrieving the singleton `PluginManager`.
+    2. Registering the core `LocustTelemetryPlugin`.
+    3. Initializing the singleton `TelemetryManager` with the plugin manager,
+       which hooks into Locust lifecycle events (CLI arguments, logging,
+       metadata handling, plugin loading).
+
+    Usage:
+        Call this function at the start of your Locust test script to ensure
+        telemetry is initialized before any load tests begin.
+
+    Parameters
+    ----------
+    *args : tuple
+        Optional positional arguments, currently unused.
+    **kwargs : dict
+        Optional keyword arguments, currently unused.
     """
-    manager = TelemetryPluginManager()
-    manager.register_plugin(plugin=LocustTelemetryPlugin())
+    plugin_manager = PluginManager()
+    plugin_manager.register_plugin(plugin=LocustTelemetryPlugin())
+    telemetry_manager = TelemetryManager(plugin_manager=plugin_manager)
+    telemetry_manager.initialize()

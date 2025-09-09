@@ -1,11 +1,11 @@
 """
-Tests for LocustTelemetryPlugin and load_plugin.
+Tests for LocustTelemetryPlugin and entry_point.
 
 These tests verify:
 - CLI argument registration
 - Master and worker recorder registration
 - Proper dispatching via the plugin load method
-- Plugin registration via load_plugin
+- Plugin registration via entry_point
 """
 
 from unittest.mock import patch
@@ -15,10 +15,10 @@ from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
 
-from locust_telemetry.core.manager import TelemetryPluginManager
+from locust_telemetry.core.manager import PluginManager
 from locust_telemetry.core_telemetry.plugin import (
     LocustTelemetryPlugin,
-    load_plugin,
+    entry_point,
 )
 
 
@@ -59,7 +59,7 @@ def test_register_master_telemetry_recorder_calls_master_recorder(
     with patch(
         "locust_telemetry.core_telemetry.plugin.MasterLocustTelemetryRecorder"
     ) as mock_recorder:
-        plugin.register_master_telemetry_recorder(mock_env)
+        plugin.load_master_telemetry_recorders(mock_env)
         mock_recorder.assert_called_once_with(env=mock_env)
 
 
@@ -73,7 +73,7 @@ def test_register_worker_telemetry_recorder_calls_worker_recorder(
     with patch(
         "locust_telemetry.core_telemetry.plugin.WorkerLocustTelemetryRecorder"
     ) as mock_recorder:
-        plugin.register_worker_telemetry_recorder(mock_env)
+        plugin.load_worker_telemetry_recorders(mock_env)
         mock_recorder.assert_called_once_with(env=mock_env)
 
 
@@ -82,7 +82,7 @@ def test_load_dispatches_to_master_recorder_when_master(mock_env: Environment) -
     plugin = LocustTelemetryPlugin()
     mock_env.runner.__class__ = MasterRunner
 
-    with patch.object(plugin, "register_master_telemetry_recorder") as mock_master:
+    with patch.object(plugin, "load_master_telemetry_recorders") as mock_master:
         plugin.load(mock_env)
         mock_master.assert_called_once_with(mock_env)
 
@@ -92,15 +92,15 @@ def test_load_dispatches_to_worker_recorder_when_worker(mock_env: Environment) -
     plugin = LocustTelemetryPlugin()
     mock_env.runner.__class__ = WorkerRunner
 
-    with patch.object(plugin, "register_worker_telemetry_recorder") as mock_worker:
+    with patch.object(plugin, "load_worker_telemetry_recorders") as mock_worker:
         plugin.load(mock_env)
         mock_worker.assert_called_once_with(mock_env)
 
 
-def test_load_plugin_registers_plugin_in_manager() -> None:
-    """Ensure load_plugin registers the LocustTelemetryPlugin in the manager."""
-    manager = TelemetryPluginManager()
+def test_entry_point_registers_plugin_in_manager() -> None:
+    """Ensure entry_point registers the LocustTelemetryPlugin in the manager."""
+    manager = PluginManager()
     manager._plugins.clear()  # ensure clean state
 
-    load_plugin()
+    entry_point()
     assert any(isinstance(p, LocustTelemetryPlugin) for p in manager._plugins)

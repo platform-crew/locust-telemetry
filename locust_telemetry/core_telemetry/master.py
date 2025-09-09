@@ -12,25 +12,26 @@ Responsibilities
 """
 
 import logging
-import os
-import socket
 from datetime import datetime, timedelta, timezone
 from typing import Any, ClassVar, Dict, Optional
 
 import gevent
 from locust.env import Environment
 
-from locust_telemetry.core.telemetry import BaseTelemetryRecorder
+from locust_telemetry.core.recorder import BaseTelemetryRecorder
 from locust_telemetry.core_telemetry.constants import (
     TEST_STOP_BUFFER_FOR_GRAPHS,
     LocustTestEvent,
     RequestMetric,
 )
+from locust_telemetry.core_telemetry.mixins import LocustTelemetryCommonRecorderMixin
 
 logger = logging.getLogger(__name__)
 
 
-class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
+class MasterLocustTelemetryRecorder(
+    BaseTelemetryRecorder, LocustTelemetryCommonRecorderMixin
+):
     """
     Telemetry recorder for the Locust master node.
 
@@ -61,9 +62,6 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
             The Locust environment instance.
         """
         super().__init__(env)
-        self._username: str = os.getenv("USER", "unknown")
-        self._hostname: str = socket.gethostname()
-        self._pid: int = os.getpid()
         self._request_stats_logger: Optional[gevent.Greenlet] = None
 
         # Register master-only event listeners
@@ -71,14 +69,13 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         env.events.test_stop.add_listener(self.on_test_stop)
         env.events.spawning_complete.add_listener(self.on_spawning_complete)
 
-    # --- Event Handlers ---
-
     def on_test_start(self, *args: Any, **kwargs: Any) -> None:
         """
         Handle the test_start event.
 
         Starts the background stats logger and emits the test start telemetry.
         """
+        super().on_test_start(args, kwargs)
         self._request_stats_logger = gevent.spawn(self._log_request_stats)
         self.log_telemetry(
             telemetry=LocustTestEvent.START.value,
@@ -94,6 +91,7 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         Stops background logging, logs final stats and errors,
         and emits the test stop telemetry.
         """
+        super().on_test_stop(args, kwargs)
         self._stop_request_stats_logger()
         self._log_total_stats(final=True)
         self._log_entry_stats()
