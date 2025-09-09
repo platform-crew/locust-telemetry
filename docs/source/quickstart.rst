@@ -23,6 +23,8 @@ Locust test script (e.g., locustfile.py):
    - The Locust team is planning to add support for CLI and environment variables in the future, which will allow plugins to be specified directly in the run script. You can track the progress of this feature in issue `#3212 <https://github.com/locustio/locust/issues/3212>`_.
 
 
+Run your first test - please refer `Quick Start Guide <https://docs.locust.io/en/stable/quickstart.html>`_ from Locust.
+
 
 Here’s an example of a Grafana dashboard built using telemetry from this plugin.
 It shows how Locust metrics can be transformed into meaningful insights with just a few steps.

@@ -57,12 +57,17 @@ poetry add locust-telemetry
 poetry show locust-telemetry  # validate installation
 ```
 
-Load the core telemetry plugin in your locustfile.py:
+### Load the core telemetry plugin in your locustfile.py:
 
 ```python
 from locust_telemetry.core_telemetry.plugin import entry_point
 entry_point()
 ```
+
+### Run your first test:
+
+Please refer [Quick Start Guide](https://docs.locust.io/en/stable/quickstart.html) from Locust.
+
 
 #### Notes
 - Plugins are singletons; loading multiple times will not duplicate events.
