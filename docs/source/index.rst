@@ -20,6 +20,7 @@ Configuration
    :maxdepth: 2
 
    configuration
+   telemetry
 
 =======================================
 Examples
