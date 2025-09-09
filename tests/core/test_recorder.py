@@ -4,7 +4,7 @@ from unittest.mock import patch
 from locust.env import Environment
 
 from locust_telemetry.common.telemetry import TelemetryData
-from locust_telemetry.core.telemetry import BaseTelemetryRecorder
+from locust_telemetry.core.recorder import BaseTelemetryRecorder
 
 
 def test_recorder_initialization(
@@ -20,13 +20,13 @@ def test_log_telemetry_calls_logger_info(recorder: BaseTelemetryRecorder) -> Non
     telemetry = TelemetryData(type="event", name="dummy_event")
 
     with patch.object(
-        logging.getLogger("locust_telemetry.core.telemetry"), "info"
+        logging.getLogger("locust_telemetry.core.recorder"), "info"
     ) as mock_info:
         recorder.log_telemetry(telemetry, custom_key="custom_value")
         mock_info.assert_called_once()
         log_args, log_kwargs = mock_info.call_args
         # First arg is the message string
-        assert log_args[0] == f"Recording telemetry: {telemetry.type}.{telemetry.name}"
+        assert log_args[0] == f"Recording telemetry: {telemetry.name}"
         # Extra contains telemetry dictionary
         extra = log_kwargs.get("extra", {}).get("telemetry", {})
         assert extra.get("run_id") == recorder.env.run_id

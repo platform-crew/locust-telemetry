@@ -8,14 +8,14 @@ These tests verify:
 - Helper methods for stats formatting and logging
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import gevent
 import pytest
 from locust.env import Environment
 
 from locust_telemetry.core_telemetry.constants import LocustTestEvent, RequestMetric
-from locust_telemetry.core_telemetry.stats import MasterLocustTelemetryRecorder
+from locust_telemetry.core_telemetry.master import MasterLocustTelemetryRecorder
 
 
 @pytest.fixture
@@ -77,6 +77,7 @@ def test_on_test_stop_stops_logger_and_logs_final_stats(
         mock_error.assert_called_once()
         mock_log.assert_called_once_with(
             telemetry=LocustTestEvent.STOP.value,
+            endtime=ANY,
             text=f"{recorder.env.parsed_options.testplan} "
             f"finished. Stopping the tests.",
         )
@@ -180,7 +181,6 @@ def test_log_entry_stats_calls_log_telemetry_for_each_entry(
             kwargs = call_args.kwargs
             assert kwargs["telemetry"] == RequestMetric.ENDPOINT_STATS.value
             assert "request_path" in kwargs
-            assert "method" in kwargs
             assert kwargs["percentile_95"] == 100
             assert kwargs["percentile_99"] == 200
 

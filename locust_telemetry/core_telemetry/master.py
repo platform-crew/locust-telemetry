@@ -1,46 +1,51 @@
 """
-Master Node Locust Telemetry Recorder
-
 This module provides the `MasterLocustTelemetryRecorder` class, which runs on
 the Locust master node. It captures lifecycle events and request statistics,
 logging them in a format suitable for observability tools.
 
-The recorder listens to:
-- test_start
-- test_stop
-- spawning_complete
-
-It periodically logs request statistics during the test and
-outputs final aggregated stats at test end.
+Responsibilities
+----------------
+- Listen to test lifecycle events: `test_start`, `test_stop`, `spawning_complete`.
+- Periodically log request statistics during the test.
+- Output final aggregated stats at test end.
+- Support observability tools integration.
 """
 
 import logging
-import os
-import socket
-import time
+from datetime import datetime, timedelta, timezone
 from typing import Any, ClassVar, Dict, Optional
 
 import gevent
 from locust.env import Environment
 
-from locust_telemetry.core.telemetry import BaseTelemetryRecorder
-from locust_telemetry.core_telemetry.constants import LocustTestEvent, RequestMetric
+from locust_telemetry.core.recorder import BaseTelemetryRecorder
+from locust_telemetry.core_telemetry.constants import (
+    TEST_STOP_BUFFER_FOR_GRAPHS,
+    LocustTestEvent,
+    RequestMetric,
+)
+from locust_telemetry.core_telemetry.mixins import LocustTelemetryCommonRecorderMixin
 
 logger = logging.getLogger(__name__)
 
 
-class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
+class MasterLocustTelemetryRecorder(
+    LocustTelemetryCommonRecorderMixin, BaseTelemetryRecorder
+):
     """
     Telemetry recorder for the Locust master node.
 
-    Responsibilities:
+    Responsibilities
+    ----------------
     - Handle lifecycle events (test start/stop, spawning complete)
     - Collect aggregate and per-endpoint request statistics
     - Collect error statistics
     - Run a background greenlet to periodically log request stats
 
-    Attributes:
-        name (ClassVar[str]): Identifier for the recorder.
+    Attributes
+    ----------
+    name : ClassVar[str]
+        Identifier for the recorder.
     """
 
     name: ClassVar[str] = "master_locust_telemetry_recorder"
@@ -49,13 +54,14 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         """
         Initialize the master telemetry recorder.
 
-        Args:
-            env (Environment): The Locust environment instance.
+        Registers event listeners for test lifecycle events.
+
+        Parameters
+        ----------
+        env : Environment
+            The Locust environment instance.
         """
         super().__init__(env)
-        self._username: str = os.getenv("USER", "unknown")
-        self._hostname: str = socket.gethostname()
-        self._pid: int = os.getpid()
         self._request_stats_logger: Optional[gevent.Greenlet] = None
 
         # Register master-only event listeners
@@ -63,14 +69,13 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         env.events.test_stop.add_listener(self.on_test_stop)
         env.events.spawning_complete.add_listener(self.on_spawning_complete)
 
-    # --- Event Handlers ---
-
     def on_test_start(self, *args: Any, **kwargs: Any) -> None:
         """
         Handle the test_start event.
 
         Starts the background stats logger and emits the test start telemetry.
         """
+        super().on_test_start(*args, **kwargs)
         self._request_stats_logger = gevent.spawn(self._log_request_stats)
         self.log_telemetry(
             telemetry=LocustTestEvent.START.value,
@@ -86,13 +91,24 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         Stops background logging, logs final stats and errors,
         and emits the test stop telemetry.
         """
+        super().on_test_stop(*args, **kwargs)
         self._stop_request_stats_logger()
         self._log_total_stats(final=True)
         self._log_entry_stats()
         self._log_error_stats()
-        time.sleep(self.env.parsed_options.wait_after_test_stop)
+
+        # Hack: For graphs to create autolink
+        # Compute current UTC time + 2 seconds
+        end_time = datetime.now(timezone.utc) + timedelta(
+            seconds=TEST_STOP_BUFFER_FOR_GRAPHS
+        )
+        end_time_str = end_time.isoformat(timespec="milliseconds").replace(
+            "+00:00", "Z"
+        )
+
         self.log_telemetry(
             telemetry=LocustTestEvent.STOP.value,
+            endtime=end_time_str,
             text=f"{self.env.parsed_options.testplan} finished. Stopping the tests.",
         )
 
@@ -100,8 +116,10 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         """
         Handle the spawning_complete event.
 
-        Args:
-            user_count (int): Number of users spawned.
+        Parameters
+        ----------
+        user_count : int
+            Number of users spawned.
         """
         self.log_telemetry(
             telemetry=LocustTestEvent.SPAWN_COMPLETE.value,
@@ -118,11 +136,15 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         """
         Convert a Locust stats object to a dictionary for observability tools.
 
-        Args:
-            st: A Locust stats object (total, entry, or error).
+        Parameters
+        ----------
+        st : Any
+            A Locust stats object (total, entry, or error).
 
-        Returns:
-            Dict[str, Any]: Stats dict including 95th and 99th percentiles.
+        Returns
+        -------
+        Dict[str, Any]
+            Stats dictionary including 95th and 99th percentiles.
         """
         stats = st.to_dict()
         stats["percentile_95"] = stats.pop("response_time_percentile_0.95", "")
@@ -139,8 +161,10 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
         """
         Log aggregated request statistics.
 
-        Args:
-            final (bool): True for final log on test stop, False for periodic logs.
+        Parameters
+        ----------
+        final : bool, optional
+            True for final log on test stop, False for periodic logs.
         """
         telemetry = (
             RequestMetric.FINAL_STATS.value
@@ -159,7 +183,6 @@ class MasterLocustTelemetryRecorder(BaseTelemetryRecorder):
             self.log_telemetry(
                 telemetry=RequestMetric.ENDPOINT_STATS.value,
                 request_path=url,
-                method=method,
                 **self._get_stats(stats),
             )
 

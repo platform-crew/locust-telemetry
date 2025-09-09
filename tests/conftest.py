@@ -4,11 +4,10 @@ from unittest.mock import MagicMock
 import pytest
 from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
-from locust.runners import MasterRunner
 
-from locust_telemetry.core.manager import TelemetryPluginManager
+from locust_telemetry.core.manager import TelemetryManager
 from locust_telemetry.core.plugin import BaseTelemetryPlugin
-from locust_telemetry.core.telemetry import BaseTelemetryRecorder
+from locust_telemetry.core.recorder import BaseTelemetryRecorder
 
 
 @pytest.fixture
@@ -37,9 +36,9 @@ def mock_env():
 
 @pytest.fixture(autouse=True)
 def reset_singleton() -> None:
-    """Reset the TelemetryPluginManager singleton before each test."""
-    TelemetryPluginManager._instance = None
-    TelemetryPluginManager._initialized = False
+    """Reset the TelemetryManager singleton before each test."""
+    TelemetryManager._instance = None
+    TelemetryManager._initialized = False
 
 
 @pytest.fixture
@@ -57,23 +56,27 @@ def dummy_plugin() -> BaseTelemetryPlugin:
         def add_arguments(self, parser: Any) -> None:
             self.added_args = True
 
-        def register_master_telemetry_recorder(
+        def load_master_telemetry_recorders(
             self, environment: Environment, **kwargs: Any
         ) -> None:
             self.master_loaded = True
 
-        def register_worker_telemetry_recorder(
+        def load_worker_telemetry_recorders(
             self, environment: Environment, **kwargs: Any
         ) -> None:
             self.worker_loaded = True
 
-        def load(self, environment: Environment, **kwargs: Any) -> None:
-            if isinstance(environment.runner, MasterRunner):
-                self.master_loaded = True
-            else:
-                self.worker_loaded = True
-
     return DummyTelemetryPlugin()
+
+
+@pytest.fixture
+def env_with_runner():
+    # Create a real Locust environment with runner + events
+    env = Environment()
+    env.create_local_runner()  # ensures runner is available
+    env.parsed_options = MagicMock()
+    env.parsed_options.testplan = "test-plan"
+    return env
 
 
 @pytest.fixture

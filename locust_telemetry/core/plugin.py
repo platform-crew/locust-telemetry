@@ -1,13 +1,11 @@
 """
-Locust Telemetry - Plugin Architecture
-
 This module defines the base plugin interface for Locust Telemetry extensions.
 
-Responsibilities:
+Responsibilities
+----------------
 - Provide a consistent lifecycle for plugins across master and worker nodes.
 - Allow plugins to define their own CLI arguments and environment variables.
-- Ensure master and worker recorders are registered automatically
-  depending on runner type.
+- Automatically register master and worker recorders depending on runner type.
 - Support multiple telemetry plugins within a single Locust session.
 """
 
@@ -49,7 +47,7 @@ class BaseTelemetryPlugin(ABC):
         pass
 
     @abstractmethod
-    def register_master_telemetry_recorder(
+    def load_master_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
@@ -60,7 +58,7 @@ class BaseTelemetryPlugin(ABC):
         pass
 
     @abstractmethod
-    def register_worker_telemetry_recorder(
+    def load_worker_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
@@ -79,6 +77,6 @@ class BaseTelemetryPlugin(ABC):
         on the current runner type.
         """
         if isinstance(environment.runner, MasterRunner):
-            self.register_master_telemetry_recorder(environment, **kwargs)
+            self.load_master_telemetry_recorders(environment, **kwargs)
         elif isinstance(environment.runner, WorkerRunner):
-            self.register_worker_telemetry_recorder(environment, **kwargs)
+            self.load_worker_telemetry_recorders(environment, **kwargs)

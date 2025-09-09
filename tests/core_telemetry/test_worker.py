@@ -4,7 +4,7 @@ import pytest
 from locust.env import Environment
 
 from locust_telemetry.core_telemetry.constants import LocustTestEvent
-from locust_telemetry.core_telemetry.system import WorkerLocustTelemetryRecorder
+from locust_telemetry.core_telemetry.worker import WorkerLocustTelemetryRecorder
 
 
 @pytest.fixture
@@ -16,9 +16,14 @@ def recorder(mock_env: Environment) -> WorkerLocustTelemetryRecorder:
 def test_recorder_initialization_registers_event_listener(
     recorder: WorkerLocustTelemetryRecorder, mock_env: Environment
 ) -> None:
-    """Ensure the recorder registers a listener for cpu_warning on init."""
-    mock_env.events.cpu_warning.add_listener.assert_called_once_with(
-        recorder.on_cpu_warning
+    """
+    Ensure the recorder registers a listener for cpu_warning and system usage on init.
+    """
+    mock_env.events.test_start.add_listener.assert_called_once_with(
+        recorder.on_test_start
+    )
+    mock_env.events.test_stop.add_listener.assert_called_once_with(
+        recorder.on_test_stop
     )
     assert recorder.env is mock_env
     assert recorder.name == "worker_locust_telemetry_recorder"

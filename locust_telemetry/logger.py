@@ -1,7 +1,23 @@
 """
-Logging configuration for locust-observability.
+This module provides structured JSON logging for Locust Telemetry.
 
-Outputs structured JSON logs with RFC3339 timestamps.
+Features
+--------
+- Outputs logs in JSON format compatible with RFC3339 timestamps.
+- Custom formatter for millisecond-precision timestamps in UTC.
+- Configures loggers specifically for the `locust_telemetry` namespace.
+- Provides a convenience function to apply the logging configuration.
+
+Classes
+-------
+RFC3339JsonFormatter
+    Custom JSON formatter that outputs timestamps in RFC3339 format with
+    millisecond precision.
+
+Functions
+---------
+configure_logging()
+    Apply the logging configuration to the Python logging system.
 """
 
 import logging
@@ -16,13 +32,26 @@ from pythonjsonlogger.json import JsonFormatter
 
 class RFC3339JsonFormatter(JsonFormatter):
     """
-    Custom JSON formatter that outputs timestamps in RFC3339 format with
-    millisecond precision.
+    Custom JSON formatter for RFC3339 timestamps.
+
+    This formatter ensures timestamps are:
+    - in ISO 8601 / RFC3339 format
+    - millisecond-precision
+    - in UTC (Z suffix)
     """
 
     def formatTime(self, record, datefmt=None) -> str:
+        """
+        Format the log record timestamp in RFC3339 with milliseconds.
+
+        Args:
+            record (logging.LogRecord): Log record to format
+            datefmt (Optional[str]): Ignored; kept for compatibility
+
+        Returns:
+            str: ISO 8601 formatted timestamp
+        """
         dt = datetime.fromtimestamp(record.created, tz=timezone.utc)
-        # ISO 8601 / RFC3339 with milliseconds and Zulu indicator
         return dt.isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
 
@@ -30,8 +59,6 @@ class RFC3339JsonFormatter(JsonFormatter):
 # Logging Configuration
 # -------------------------------
 
-# TODO: Change it to env variable
-# TODO: Also, telemetry logging should always set to info
 LOG_LEVEL = "INFO"
 
 LOGGING_CONFIG = {
@@ -42,7 +69,7 @@ LOGGING_CONFIG = {
             "()": RFC3339JsonFormatter,
             "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
             "rename_fields": {"asctime": "time", "levelname": "level"},
-            "json_indent": None,  # single-line JSON
+            "json_indent": None,
         }
     },
     "handlers": {
@@ -57,19 +84,24 @@ LOGGING_CONFIG = {
         },
     },
     "root": {
-        "handlers": ["null"],  # Disable root logger output
-        "level": "WARNING",  # keep root quiet
+        "handlers": ["null"],
+        "level": "WARNING",
     },
     "loggers": {
-        "locust_telemetry": {  # Only this plugin namespace
+        "locust_telemetry": {
             "handlers": ["console"],
             "level": "INFO",
-            "propagate": False,  # prevent double logging to root
+            "propagate": False,
         },
     },
 }
 
 
 def configure_logging():
-    """Apply the LOGGING_CONFIG to the Python logging system."""
+    """
+    Apply the logging configuration to the Python logging system.
+
+    Sets up JSON logging for `locust_telemetry` and disables output
+    from the root logger.
+    """
     logging.config.dictConfig(LOGGING_CONFIG)
