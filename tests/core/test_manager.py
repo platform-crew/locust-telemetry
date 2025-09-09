@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock, patch
 
-from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
 
 from locust_telemetry.core.manager import PluginManager, TelemetryManager
@@ -83,11 +82,33 @@ def test_setup_metadata_for_master(mock_env) -> None:
         )
 
 
-def test_remove_metadata_calls_unset() -> None:
-    """Ensure _remove_metadata calls unset_test_metadata."""
+def test_initialize_is_idempotent():
+    """Ensure initialize() does nothing if already initialized."""
     manager = TelemetryManager(plugin_manager=PluginManager())
-    mock_env = MagicMock(spec=Environment)
+    manager._initialized = True
 
-    with patch("locust_telemetry.core.manager.unset_test_metadata") as mock_unset:
-        manager._remove_metadata(mock_env)
-        mock_unset.assert_called_once_with(mock_env)
+    # Patch events to ensure no listeners added
+    with patch("locust_telemetry.core.manager.events") as mock_events:
+        manager.initialize()
+        mock_events.init_command_line_parser.add_listener.assert_not_called()
+
+
+def test_register_metadata_handler_non_worker(mock_env):
+    """Ensure _register_metadata_handler does nothing if not WorkerRunner."""
+    manager = TelemetryManager(plugin_manager=PluginManager())
+    # runner is MasterRunner by default in mock_env
+    manager._register_metadata_handler(mock_env)
+
+    mock_env.runner.register_message.assert_not_called()
+
+
+def test_setup_metadata_non_master(mock_env):
+    """Ensure _setup_metadata does nothing if not MasterRunner."""
+    manager = TelemetryManager(plugin_manager=PluginManager())
+    # runner is WorkerRunner
+    mock_env.runner.__class__ = WorkerRunner
+
+    with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
+        manager._setup_metadata(mock_env)
+        mock_set.assert_not_called()
+        mock_env.runner.send_message.assert_not_called()

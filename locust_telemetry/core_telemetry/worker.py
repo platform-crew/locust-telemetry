@@ -53,5 +53,5 @@ class WorkerLocustTelemetryRecorder(
         super().__init__(env)
 
         # Register master-only event listeners
-        env.events.test_start.add_listener(self.on_test_start)
-        env.events.test_stop.add_listener(self.on_test_stop)
+        self.env.events.test_start.add_listener(self.on_test_start)
+        self.env.events.test_stop.add_listener(self.on_test_stop)

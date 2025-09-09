@@ -27,7 +27,6 @@ from locust_telemetry.metadata import (
     apply_worker_metadata,
     get_test_metadata,
     set_test_metadata,
-    unset_test_metadata,
 )
 
 logger = logging.getLogger(__name__)
@@ -61,6 +60,10 @@ class PluginManager:
             return
         self._plugins: List[BaseTelemetryPlugin] = []
         self._initialized = True
+
+    @property
+    def plugins(self):
+        return self._plugins
 
     def register_plugin(self, plugin: BaseTelemetryPlugin) -> None:
         """
@@ -151,9 +154,7 @@ class TelemetryManager:
         events.init.add_listener(self._setup_logging)
         events.init.add_listener(self._register_metadata_handler)
         events.init.add_listener(self.plugin_manager.load_plugins)
-
         events.test_start.add_listener(self._setup_metadata)
-        events.test_stop.add_listener(self._remove_metadata)
 
         self._initialized = True
 
@@ -182,6 +183,10 @@ class TelemetryManager:
             env_var="LOCUST_TESTPLAN_NAME",
             required=True,
         )
+
+        # Load and parse env variables per plugin
+        for p in self.plugin_manager.plugins:
+            p.add_arguments(parser)
 
     def _setup_logging(self, environment: Environment, **kwargs: Any) -> None:
         """
@@ -233,14 +238,3 @@ class TelemetryManager:
                 "Sending test metadata to workers", extra={"metadata": metadata}
             )
             environment.runner.send_message("set_metadata", metadata)
-
-    def _remove_metadata(self, environment: Environment, **kwargs: Any) -> None:
-        """
-        Cleanup metadata when a test stops.
-
-        Parameters
-        ----------
-        environment : Environment
-            The Locust environment instance.
-        """
-        unset_test_metadata(environment)

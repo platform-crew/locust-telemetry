@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 import pytest
 from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
-from locust.runners import MasterRunner
 
 from locust_telemetry.core.manager import TelemetryManager
 from locust_telemetry.core.plugin import BaseTelemetryPlugin
@@ -66,12 +65,6 @@ def dummy_plugin() -> BaseTelemetryPlugin:
             self, environment: Environment, **kwargs: Any
         ) -> None:
             self.worker_loaded = True
-
-        def load(self, environment: Environment, **kwargs: Any) -> None:
-            if isinstance(environment.runner, MasterRunner):
-                self.master_loaded = True
-            else:
-                self.worker_loaded = True
 
     return DummyTelemetryPlugin()
 

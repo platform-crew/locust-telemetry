@@ -13,6 +13,7 @@ import logging
 from typing import Any, Optional
 
 from locust.env import Environment
+from locust.runners import MasterRunner
 
 from locust_telemetry.core_telemetry.constants import LocustTestEvent
 
@@ -26,6 +27,13 @@ class LocustTelemetryCommonRecorderMixin:
     This recorder attaches to the ``usage_monitor`` event and logs periodic
     CPU and memory usage from both master and worker processes.
     """
+
+    def get_source_id(self):
+
+        if isinstance(self.env.runner, MasterRunner):
+            return "master"
+        else:
+            return f"worker-{self.env.runner.worker_index}"
 
     def on_usage_monitor(
         self, environment: Environment, cpu_usage: float, memory_usage: int
@@ -49,7 +57,11 @@ class LocustTelemetryCommonRecorderMixin:
         self.log_telemetry(
             telemetry=LocustTestEvent.USAGE.value,
             source_type=environment.runner.__class__.__name__,
-            source_id=getattr(environment.runner, "client_id", "master"),
+            source_id=(
+                "master"
+                if isinstance(self.env.runner, MasterRunner)
+                else f"worker-{self.env.runner.worker_index}"
+            ),
             cpu_usage=cpu_usage,
             memory_usage=memory_usage,
         )

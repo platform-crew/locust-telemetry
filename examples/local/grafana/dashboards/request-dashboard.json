@@ -75,9 +75,9 @@
         "x": 0,
         "y": 0
       },
-      "id": 16,
+      "id": 11,
       "panels": [],
-      "title": "Numbers At Glance",
+      "title": "Application Performance",
       "type": "row"
     },
     {
@@ -160,85 +160,6 @@
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
       },
-      "description": "Total Failures",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 0
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 8,
-        "y": 1
-      },
-      "id": 5,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "direction": "backward",
-          "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Total Failures",
-      "transformations": [
-        {
-          "filter": {
-            "id": "byRefId",
-            "options": "/^(?:A)$/"
-          },
-          "id": "extractFields",
-          "options": {
-            "delimiter": ",",
-            "format": "json",
-            "jsonPaths": [
-              {
-                "alias": "Max Failures",
-                "path": "telemetry.num_failures"
-              }
-            ],
-            "source": "Line"
-          }
-        }
-      ],
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
-      },
       "description": "Minimum Response Time",
       "fieldConfig": {
         "defaults": {
@@ -262,7 +183,7 @@
       "gridPos": {
         "h": 5,
         "w": 8,
-        "x": 16,
+        "x": 8,
         "y": 1
       },
       "id": 9,
@@ -315,6 +236,85 @@
         }
       ],
       "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Total Failures",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "id": 5,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Failures",
+      "transformations": [
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": "/^(?:A)$/"
+          },
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Max Failures",
+                "path": "telemetry.num_failures"
+              }
+            ],
+            "source": "Line"
+          }
+        }
+      ],
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -393,82 +393,6 @@
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
       },
-      "description": "Failure Per Second",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "f/s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 8,
-        "y": 6
-      },
-      "id": 17,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "direction": "backward",
-          "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
-          "queryType": "range",
-          "refId": "A"
-        }
-      ],
-      "title": "Failure Per Second",
-      "transformations": [
-        {
-          "id": "extractFields",
-          "options": {
-            "delimiter": ",",
-            "format": "json",
-            "jsonPaths": [
-              {
-                "alias": "FPS",
-                "path": "telemetry.total_fail_per_sec"
-              }
-            ],
-            "source": "Line"
-          }
-        }
-      ],
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
-      },
       "description": "Maximum Response Time",
       "fieldConfig": {
         "defaults": {
@@ -488,7 +412,7 @@
       "gridPos": {
         "h": 5,
         "w": 8,
-        "x": 16,
+        "x": 8,
         "y": 6
       },
       "id": 8,
@@ -545,17 +469,80 @@
       "type": "stat"
     },
     {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 11
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
       },
-      "id": 11,
-      "panels": [],
-      "title": "Application Performance",
-      "type": "row"
+      "description": "Failure Per Second",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "f/s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "id": 17,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Failure Per Second",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "FPS",
+                "path": "telemetry.total_fail_per_sec"
+              }
+            ],
+            "source": "Line"
+          }
+        }
+      ],
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -641,7 +628,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 12
+        "y": 11
       },
       "id": 2,
       "options": {
@@ -792,7 +779,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 12
+        "y": 11
       },
       "id": 3,
       "options": {
@@ -960,7 +947,7 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 22
+        "y": 21
       },
       "id": 6,
       "options": {
@@ -1084,7 +1071,7 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 22
+        "y": 21
       },
       "id": 7,
       "options": {
@@ -1161,7 +1148,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 31
       },
       "id": 14,
       "options": {
@@ -1273,7 +1260,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 32
+        "y": 31
       },
       "id": 15,
       "options": {
@@ -1360,7 +1347,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 39
       },
       "id": 12,
       "panels": [],
@@ -1421,7 +1408,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 40
       },
       "id": 1,
       "options": {
@@ -1535,7 +1522,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 49
       },
       "id": 13,
       "options": {
@@ -1600,6 +1587,360 @@
         }
       ],
       "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 58
+      },
+      "id": 16,
+      "panels": [],
+      "title": "Load testing Node Statistics",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Master and Nodes CPU Usages Profile",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 11,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 10,
+        "x": 0,
+        "y": 59
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"event.system.usage\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Usage Profile",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "CPU",
+                "path": "telemetry.cpu_usage"
+              },
+              {
+                "alias": "Source",
+                "path": "telemetry.source_id"
+              }
+            ],
+            "keepTime": true,
+            "replace": true,
+            "source": "Line"
+          }
+        },
+        {
+          "id": "prepareTimeSeries",
+          "options": {
+            "format": "multi"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Total Workers",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 4,
+        "x": 10,
+        "y": 59
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-worker\", telemetry_name=\"event.system.usage\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Workers",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Source",
+                "path": "telemetry.source_id"
+              }
+            ],
+            "keepTime": false,
+            "replace": true,
+            "source": "Line"
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "distinctCount"
+            ]
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Master and Nodes Memory Profile",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 11,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 10,
+        "x": 14,
+        "y": 59
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"event.system.usage\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Memory Profile",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Memory",
+                "path": "telemetry.memory_usage"
+              },
+              {
+                "alias": "Source",
+                "path": "telemetry.source_id"
+              }
+            ],
+            "keepTime": true,
+            "replace": true,
+            "source": "Line"
+          }
+        },
+        {
+          "id": "prepareTimeSeries",
+          "options": {
+            "format": "multi"
+          }
+        }
+      ],
+      "type": "timeseries"
     }
   ],
   "preload": false,
@@ -1677,5 +2018,5 @@
   "timezone": "browser",
   "title": "Locust Requests Dashboard",
   "uid": "4a54c6e2-1519-4332-9bb5-fa79c0989ec8",
-  "version": 16
+  "version": 22
 }

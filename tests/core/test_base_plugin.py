@@ -1,3 +1,4 @@
+import pytest
 from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
@@ -51,3 +52,28 @@ def test_load_calls_correct_recorder_multiple_times(
     dummy_plugin.load(mock_env)
     assert dummy_plugin.worker_loaded
     assert not dummy_plugin.master_loaded
+
+
+def test_load_calls_nothing_if_runner_is_unknown(mock_env, dummy_plugin):
+    """
+    Ensure load() does nothing when runner is neither MasterRunner nor WorkerRunner.
+    """
+
+    class FakeRunner:
+        pass
+
+    mock_env.runner = FakeRunner()
+    dummy_plugin.master_loaded = False
+    dummy_plugin.worker_loaded = False
+    dummy_plugin.load(mock_env)
+    assert not dummy_plugin.master_loaded
+    assert not dummy_plugin.worker_loaded
+
+
+def test_abstract_methods_raise_typeerror():
+    """
+    Ensure instantiating BaseTelemetryPlugin without implementing abstract
+    methods fails.
+    """
+    with pytest.raises(TypeError):
+        BaseTelemetryPlugin()

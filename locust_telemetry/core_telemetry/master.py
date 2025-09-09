@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class MasterLocustTelemetryRecorder(
-    BaseTelemetryRecorder, LocustTelemetryCommonRecorderMixin
+    LocustTelemetryCommonRecorderMixin, BaseTelemetryRecorder
 ):
     """
     Telemetry recorder for the Locust master node.
@@ -75,7 +75,7 @@ class MasterLocustTelemetryRecorder(
 
         Starts the background stats logger and emits the test start telemetry.
         """
-        super().on_test_start(args, kwargs)
+        super().on_test_start(*args, **kwargs)
         self._request_stats_logger = gevent.spawn(self._log_request_stats)
         self.log_telemetry(
             telemetry=LocustTestEvent.START.value,
@@ -91,7 +91,7 @@ class MasterLocustTelemetryRecorder(
         Stops background logging, logs final stats and errors,
         and emits the test stop telemetry.
         """
-        super().on_test_stop(args, kwargs)
+        super().on_test_stop(*args, **kwargs)
         self._stop_request_stats_logger()
         self._log_total_stats(final=True)
         self._log_entry_stats()
