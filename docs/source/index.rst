@@ -20,6 +20,7 @@ Configuration
    :maxdepth: 2
 
    configuration
+   telemetry
 
 =======================================
 Examples
@@ -49,5 +50,6 @@ Notes
 .. toctree::
    :maxdepth: 1
 
+   contributing
    faq
    changelog

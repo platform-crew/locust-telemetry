@@ -4,7 +4,8 @@ Configuration
 The core configuration of Locust remains unchanged. However, this plugin
 introduces a few additional environment variables.
 
-To view all available environment variables, run:
+To view all available locust configuration, please refer `here <https://docs.locust.io/en/stable/configuration.html>`_
+or use below command
 
 .. code-block:: bash
 
@@ -12,9 +13,9 @@ To view all available environment variables, run:
 
 .. note::
 
-   Since Locust does not currently support plugin-specific options, these
-   additional configuration variables will **not** appear in the ``--help``
-   output. Support for plugin options is planned for a future release.
+   Since Locust does not currently support plugin-specific options, locust-telemetry
+   configuration variables will **not** appear in the ``--help``
+   output. Support for plugin options is planned for a future release. For now please refer below table.
 
 
 

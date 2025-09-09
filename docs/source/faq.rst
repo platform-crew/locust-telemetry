@@ -9,7 +9,9 @@ Frequently Asked Questions
     However, at the moment, only one plugin is available within telemetry.
 
 **Q: Where are telemetry logs stored?**
-    Logs are printed to **stdout** by default in a structured **JSON format**.
+    By default, logs are printed to **stdout** in a structured **JSON format**.
+    You can then use a log aggregator or any observability tool of your choice to visualize the metrics.
+    Please, see the :ref:`examples-section`.
 
 **Q: Can I customize the metrics that are logged?**
     Yes. The plugin provides a method that can be used to add additional attributes.

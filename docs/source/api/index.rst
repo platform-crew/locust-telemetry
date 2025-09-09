@@ -45,7 +45,7 @@ Core
    core/index
 
 
-Locust Telemetry
+Recorders
 ---------------------------------
 
 .. toctree::

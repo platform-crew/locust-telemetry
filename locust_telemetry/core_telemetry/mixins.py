@@ -86,7 +86,11 @@ class LocustTelemetryCommonRecorderMixin:
         self.log_telemetry(
             telemetry=LocustTestEvent.CPU_WARNING.value,
             source_type=environment.runner.__class__.__name__,
-            source_id=getattr(environment.runner, "client_id", "master"),
+            source_id=(
+                "master"
+                if isinstance(self.env.runner, MasterRunner)
+                else f"worker-{self.env.runner.worker_index}"
+            ),
             cpu_usage=cpu_usage,
             message=message,
             text=(
