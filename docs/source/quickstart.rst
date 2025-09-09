@@ -1,3 +1,5 @@
+.. _quickstart:
+
 Quick Start
 ===========
 
@@ -5,9 +7,8 @@ This extension builds on Locust, and all existing usage and configuration
 options remain unchanged. For details on how Locust works, please refer
 to the official Locust `documentation <https://docs.locust.io/en/stable/index.html>`_.
 
-Once Locust is set up, the following steps demonstrate how to load and use the telemetry plugin.
-
-Load the core telemetry plugin in your Locust test script (e.g., locustfile.py):
+Once Locust is set up, load the core telemetry plugin in your
+Locust test script (e.g., locustfile.py):
 
 .. code-block:: python
 

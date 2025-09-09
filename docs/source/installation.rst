@@ -54,3 +54,9 @@ Validate your installation:
 .. code-block:: bash
 
   poetry show locust-telemetry
+
+
+Next Steps
+--------------------------------
+
+Once the package is installed refer :ref:`quickstart` on how to load plugin.
