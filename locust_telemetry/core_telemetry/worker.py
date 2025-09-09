@@ -41,7 +41,7 @@ class WorkerLocustTelemetryRecorder(
 
     def __init__(self, env: Environment) -> None:
         """
-        Initialize the master telemetry recorder.
+        Initialize the worker telemetry recorder.
 
         Registers event listeners for test lifecycle events.
 
