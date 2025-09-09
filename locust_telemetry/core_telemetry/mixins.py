@@ -28,13 +28,6 @@ class LocustTelemetryCommonRecorderMixin:
     CPU and memory usage from both master and worker processes.
     """
 
-    def get_source_id(self):
-
-        if isinstance(self.env.runner, MasterRunner):
-            return "master"
-        else:
-            return f"worker-{self.env.runner.worker_index}"
-
     def on_usage_monitor(
         self, environment: Environment, cpu_usage: float, memory_usage: int
     ):

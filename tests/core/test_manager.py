@@ -37,6 +37,20 @@ def test_load_plugins_calls_plugin_load(mock_env) -> None:
     dummy_plugin.load.assert_called_once_with(environment=mock_env)
 
 
+def test_load_plugins_with_side_effect(mock_env) -> None:
+    """Ensure load_plugins calls each plugin's load method and handles side effects."""
+    plugin_manager = PluginManager()
+    dummy_plugin = MagicMock(spec=BaseTelemetryPlugin)
+
+    # Some random error
+    dummy_plugin.load.side_effect = AttributeError("load not implemented")
+    plugin_manager.register_plugin(dummy_plugin)
+
+    with patch("locust_telemetry.core.manager.logger.exception") as mock_log:
+        plugin_manager.load_plugins(mock_env)
+        mock_log.assert_called_once()
+
+
 def test_add_arguments() -> None:
     """Ensure TelemetryManager adds CLI arguments."""
     manager = TelemetryManager(plugin_manager=PluginManager())
