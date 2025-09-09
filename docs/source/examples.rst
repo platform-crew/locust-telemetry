@@ -63,10 +63,13 @@ Sample Grafana Dashboards
 ---------------------------------------------------------
 
 Below are sample Grafana dashboards created from the ingested logs.
-These visualizations show how Locust Telemetry metrics can be explored and correlated in your observability stack.
+These visualizations show how Locust Telemetry metrics can be explored
+and correlated in your observability stack.
 
 
 **All Load Test Runs**
+
+Select a test run to view its detailed dashboard.
 
 .. image:: _static/load-test-runs.png
    :alt: All Load Test Runs
@@ -80,26 +83,27 @@ These visualizations show how Locust Telemetry metrics can be explored and corre
 
 **Load Test Request Dashboard**
 
+The dashboard provides a comprehensive view of request statistics,
+failure rates, endpoint performance, and system metrics from both the
+master and worker nodes, along with additional telemetry insights.
+
 .. image:: _static/request-dashboard-1.png
    :alt: Request Dashboard - Overview
    :width: 100%
    :align: center
 
-.. raw:: html
-
-   <br><br>
-
 .. image:: _static/request-dashboard-2.png
-   :alt: Request Dashboard - Latency
+   :alt: Request Dashboard
    :width: 100%
    :align: center
 
-.. raw:: html
-
-   <br><br>
-
 .. image:: _static/request-dashboard-3.png
-   :alt: Request Dashboard - Throughput
+   :alt: Request Dashboard
+   :width: 100%
+   :align: center
+
+.. image:: _static/request-dashboard-4.png
+   :alt: Request Dashboard
    :width: 100%
    :align: center
 

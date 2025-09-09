@@ -16,19 +16,28 @@ Plugin
    :undoc-members:
 
 
-Request Stats Recorder
+Recorder Mixins
 -------------------------------
 
-.. automodule:: locust_telemetry.core_telemetry.stats
+.. automodule:: locust_telemetry.core_telemetry.mixins
    :members:
    :show-inheritance:
    :undoc-members:
 
 
-System Stats Recorder
+Master Recorder
 -------------------------------
 
-.. automodule:: locust_telemetry.core_telemetry.system
+.. automodule:: locust_telemetry.core_telemetry.master
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+
+Worker Recorder
+-------------------------------
+
+.. automodule:: locust_telemetry.core_telemetry.worker
    :members:
    :show-inheritance:
    :undoc-members:

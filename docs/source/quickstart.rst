@@ -11,8 +11,8 @@ Load the core telemetry plugin in your Locust test script (e.g., locustfile.py):
 
 .. code-block:: python
 
-    from locust_telemetry.core_telemetry.plugin import load_plugin
-    load_plugin()
+    from locust_telemetry.core_telemetry.plugin import entry_point
+    entry_point()
 
 
 
@@ -28,8 +28,13 @@ It shows how Locust metrics can be transformed into meaningful insights with jus
 
 For a full walkthrough on setting up dashboards locally, see the :ref:`examples-section`.
 
-.. image:: _static/quick-start-dashboard.png
-   :alt: Quickstart Dashboard Overview
+.. image:: _static/request-dashboard-1.png
+   :alt: Request Dashboard - Overview
+   :width: 100%
+   :align: center
+
+.. image:: _static/request-dashboard-2.png
+   :alt: Request Dashboard
    :width: 100%
    :align: center
 

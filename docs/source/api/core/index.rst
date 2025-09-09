@@ -18,7 +18,7 @@ Base Plugin
 Base Telemetry Recorder
 -------------------------------
 
-.. automodule:: locust_telemetry.core.telemetry
+.. automodule:: locust_telemetry.core.recorder
    :members:
    :show-inheritance:
    :undoc-members:
