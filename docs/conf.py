@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath("../"))
 
 # -- Project information -----------------------------------------------------
 
-project = "Locust Telemetry"
+project = "Locust Telemetry Plugin"
 author = "Swaroop Shubhakrishna Bhat"
 copyright = f"{datetime.now().year}, {author}"
 release = "v0.1.0"
@@ -75,3 +75,9 @@ extlinks = {
 # -- TODO settings -----------------------------------------------------------
 
 todo_include_todos = False
+
+html_title = "Locust Telemetry Documentation"
+html_short_title = "Locust Telemetry Plugin"
+html_theme_options = {
+    "description": "Logs Locust stats to JSON for easy monitoring and dashboards."
+}

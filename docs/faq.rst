@@ -15,3 +15,7 @@ Frequently Asked Questions
 
 **Q: Can I customize the metrics that are logged?**
     Yes. The plugin provides a method that can be used to add additional attributes.
+
+**Q: How long are logs retained?**
+    The plugin only emits structured JSON metric logs (not raw application logs).
+    Retention depends on your log storage system (Grafana Loki, ELK, Datadog, etc.).

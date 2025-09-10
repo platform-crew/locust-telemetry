@@ -15,14 +15,19 @@ authors = [
 ]
 keywords = [
     "locust",
-    "locust-plugin",
-    "json-logging",
+    "plugin",
+    "telemetry",
     "observability",
-    "locust-telemetry",
-    "locust-stats",
-    "load-testing",
-    "metrics-recorder"
+    "json",
+    "logging",
+    "metrics",
+    "stats",
+    "load testing",
+    "locust telemetry",
+    "locust plugin",
+    "locust metrics recorder"
 ]
+
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
