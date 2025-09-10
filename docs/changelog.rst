@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v0.1.0 (2025-09-09)
+v0.1.3 (2025-09-10)
 -------------------
 
 - Initial release of Locust Telemetry Plugin.

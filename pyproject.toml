@@ -46,7 +46,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/platform-crew/locust-observability"
+Homepage = "https://github.com/platform-crew/locust-observability#readme"
 Documentation = "https://github.com/platform-crew/locust-observability#readme"
 Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
 
