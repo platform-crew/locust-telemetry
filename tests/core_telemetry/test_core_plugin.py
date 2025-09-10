@@ -10,7 +10,6 @@ These tests verify:
 
 from unittest.mock import patch
 
-import pytest
 from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
@@ -20,12 +19,6 @@ from locust_telemetry.core_telemetry.plugin import (
     LocustTelemetryPlugin,
     entry_point,
 )
-
-
-@pytest.fixture
-def parser() -> LocustArgumentParser:
-    """Provide a fresh Locust argument parser for testing."""
-    return LocustArgumentParser()
 
 
 def test_add_arguments_creates_parser_group(parser: LocustArgumentParser) -> None:
@@ -46,7 +39,8 @@ def test_add_arguments_creates_parser_group(parser: LocustArgumentParser) -> Non
 
     # Ensure the specific argument exists
     arg_names = [a.option_strings[0] for a in group._group_actions]
-    assert "--locust-telemetry-recorder-interval" in arg_names
+    assert "--lt-stats-recorder-interval" in arg_names
+    assert "--lt-system-usage-recorder-interval" in arg_names
 
 
 def test_register_master_telemetry_recorder_calls_master_recorder(

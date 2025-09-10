@@ -37,11 +37,30 @@ or use below command
      - Unique identifier for the test run or the service
        under test. This value is mandatory and must be
        provided for every execution.
-   * - ``--locust-telemetry-recorder-interval``
-     - ``LOCUST_TELEMETRY_RECORDER_INTERVAL``
+   * - ``--lt-stats-recorder-interval``
+     - ``LOCUST_TELEMETRY_STATS_RECORDER_INTERVAL``
      - ``int``
      - ``2``
      - No
-     - Interval (in seconds) for telemetry recorder
+     - Interval (in seconds) for telemetry stats recorder
        updates. If not specified, the default interval
        of ``2`` seconds will be applied.
+   * - ``--lt-system-usage-recorder-interval``
+     - ``LOCUST_TELEMETRY_SYSTEM_USAGE_RECORDER_INTERVAL``
+     - ``int``
+     - ``2``
+     - No
+     - Interval (seconds) for system usage monitoring.
+       If not specified, the default interval
+       of ``2`` seconds will be applied.
+
+
+
+The package also provides an entry point that can be used for automatic plugin
+discovery and loading. However, this requires corresponding
+changes on the Locust side.
+
+.. code-block:: bash
+
+   [project.entry-points."locust_plugins"]
+   telemetry_locust = "locust_telemetry.core_telemetry.plugin:entry_point"

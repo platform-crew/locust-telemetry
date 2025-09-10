@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "locust-telemetry"
-version = "0.1.1"
+version = "0.0.0" # Taken care by CICD, automatically bumps version based on the tag
 description = "A Locust plugin to log load test metrics to observability tools (DB-free)."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -1,3 +1,7 @@
+from unittest.mock import MagicMock, patch
+
+import gevent
+import pytest
 from locust.runners import MasterRunner
 
 from locust_telemetry.core_telemetry.constants import LocustTestEvent
@@ -16,7 +20,7 @@ class DummyRecorder(LocustTelemetryCommonRecorderMixin):
         self.logged.append(kwargs)
 
 
-def test_on_usage_monitor_logs_telemetry(mock_env):
+def test_log_usage_monitor_telemetry(mock_env):
     """
     Test that on_usage_monitor logs CPU and memory usage correctly.
 
@@ -24,17 +28,24 @@ def test_on_usage_monitor_logs_telemetry(mock_env):
     """
     mock_env.runner.__class__ = MasterRunner
     recorder = DummyRecorder(env=mock_env)
-    cpu_usage = 55.5
-    memory_bytes = 50 * 1024 * 1024  # 50 MiB in bytes
 
-    recorder.on_usage_monitor(mock_env, cpu_usage=cpu_usage, memory_usage=memory_bytes)
+    # Patch psutil.Process().cpu_percent and memory_info
+    with patch("psutil.Process") as mock_process_cls:
+        mock_process = mock_process_cls.return_value
+        mock_process.cpu_percent.return_value = 50.0
+        mock_process.memory_info.return_value.rss = 1024 * 1024 * 100  # 100 MiB
 
-    log = recorder.logged[0]
-    assert log["telemetry"] == LocustTestEvent.USAGE.value
-    assert log["cpu_usage"] == cpu_usage
-    # Memory should be in MiB
-    assert log["memory_usage"] == memory_bytes / 1024 / 1024
-    assert log["source_type"] == "MasterRunner"
+        # Patch gevent.sleep to break after first iteration
+        with patch("gevent.sleep", side_effect=gevent.GreenletExit):
+            with pytest.raises(gevent.GreenletExit):
+                recorder._log_usage_monitor()
+
+    # Validate that log_telemetry was called at least once
+    assert len(recorder.logged) > 0
+    log_entry = recorder.logged[0]
+    assert log_entry["telemetry"] == LocustTestEvent.USAGE.value
+    assert log_entry["cpu_usage"] == 50.0
+    assert log_entry["memory_usage"] == 100  # in MiB
 
 
 def test_on_cpu_warning_logs_telemetry(mock_env):
@@ -66,24 +77,62 @@ def test_on_test_start_adds_listeners(mock_env):
     recorder = DummyRecorder(env=mock_env)
     recorder.on_test_start()
 
+    # Assert CPU warning listener added
     mock_env.events.cpu_warning.add_listener.assert_called_once_with(
         recorder.on_cpu_warning
     )
-    mock_env.events.usage_monitor.add_listener.assert_called_once_with(
-        recorder.on_usage_monitor
-    )
+
+    # Patch gevent.spawn to return a mock greenlet
+    mock_greenlet = MagicMock()
+    with patch("gevent.spawn", return_value=mock_greenlet) as mock_spawn:
+        recorder.on_test_start()
+
+        # Assert gevent.spawn called with _log_usage_monitor
+        mock_spawn.assert_called_once_with(recorder._log_usage_monitor)
+
+        # Assert the greenlet is stored in _usage_monitor_logger
+        assert recorder._usage_monitor_logger == mock_greenlet
 
 
-def test_on_test_stop_removes_listeners(mock_env):
+def test_on_test_stop_removes_listeners_and_kills_logger(mock_env):
     """
-    Test that on_test_stop removes CPU and usage_monitor listeners from the environment.
+    On test stop make sure, events listeners are removed and gevent process are killed
     """
     recorder = DummyRecorder(env=mock_env)
+    # Mock a running gevent Greenlet
+    mock_greenlet = MagicMock()
+    recorder._usage_monitor_logger = mock_greenlet
+
+    # Call the method
     recorder.on_test_stop()
 
+    # Assert CPU warning listener removed
     mock_env.events.cpu_warning.remove_listener.assert_called_once_with(
         recorder.on_cpu_warning
     )
-    mock_env.events.usage_monitor.remove_listener.assert_called_once_with(
-        recorder.on_usage_monitor
+
+    # Assert greenlet is killed and attribute cleared
+    mock_greenlet.kill.assert_called_once()
+    assert recorder._usage_monitor_logger is None
+
+
+def test_on_test_stop_without_logger():
+    """
+    On test stop if there are gvent process, make sure test_
+    stop doesn't raise any error
+    """
+    # Setup mock environment
+    mock_env = MagicMock()
+    recorder = DummyRecorder(env=mock_env)
+    recorder._usage_monitor_logger = None  # no logger running
+
+    # Call the method
+    recorder.on_test_stop()
+
+    # CPU listener should still be removed
+    mock_env.events.cpu_warning.remove_listener.assert_called_once_with(
+        recorder.on_cpu_warning
     )
+
+    # No greenlet, attribute should remain None
+    assert recorder._usage_monitor_logger is None

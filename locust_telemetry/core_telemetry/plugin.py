@@ -49,11 +49,18 @@ class LocustTelemetryPlugin(BaseTelemetryPlugin):
             "Environment variables for configuring the telemetry plugin",
         )
         group.add_argument(
-            "--locust-telemetry-recorder-interval",
+            "--lt-stats-recorder-interval",
             type=int,
             help="Interval (seconds) for telemetry recorder updates.",
-            env_var="LOCUST_TELEMETRY_RECORDER_INTERVAL",
-            default=config.DEFAULT_RECORDER_INTERVAL,
+            env_var="LOCUST_TELEMETRY_STATS_RECORDER_INTERVAL",
+            default=config.DEFAULT_STATS_RECORDER_INTERVAL,
+        )
+        group.add_argument(
+            "--lt-system-usage-recorder-interval",
+            type=int,
+            help="Interval (seconds) for system usage monitoring.",
+            env_var="LOCUST_TELEMETRY_SYSTEM_USAGE_RECORDER_INTERVAL",
+            default=config.DEFAULT_SYSTEM_USAGE_RECORDER_INTERVAL,
         )
 
     def load_master_telemetry_recorders(

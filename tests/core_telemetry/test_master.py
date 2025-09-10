@@ -44,12 +44,12 @@ def test_on_test_start_starts_greenlet_and_logs_telemetry(
     """Test that on_test_start spawns the background logger and emits telemetry."""
     with (
         patch.object(recorder, "log_telemetry") as mock_log,
-        patch("gevent.spawn") as mock_spawn,
+        patch("gevent.spawn") as mock_gevent_spawn,
     ):
         mock_greenlet = MagicMock()
-        mock_spawn.return_value = mock_greenlet
+        mock_gevent_spawn.return_value = mock_greenlet
         recorder.on_test_start()
-        mock_spawn.assert_called_once()
+        assert mock_gevent_spawn.call_count == 2
         mock_log.assert_called_once_with(
             telemetry=LocustTestEvent.START.value,
             num_clients=recorder.env.parsed_options.num_users,

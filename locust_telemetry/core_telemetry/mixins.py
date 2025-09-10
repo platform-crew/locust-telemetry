@@ -12,6 +12,8 @@ Responsibilities
 import logging
 from typing import Any, Optional
 
+import gevent
+import psutil
 from locust.env import Environment
 from locust.runners import MasterRunner
 
@@ -24,40 +26,11 @@ class LocustTelemetryCommonRecorderMixin:
     """
     Event handler mixn that are common for both master and worker
 
-    This recorder attaches to the ``usage_monitor`` event and logs periodic
-    CPU and memory usage from both master and worker processes.
+    This recorder attaches to the ``cpu_warning`` event and also logs periodic
+    system usage from both master and worker processes.
     """
 
-    def on_usage_monitor(
-        self, environment: Environment, cpu_usage: float, memory_usage: int
-    ):
-        """
-        Event handler for ``usage_monitor`` events.
-
-        Logs periodic system usage metrics (CPU and memory) from either master
-        or worker nodes. Memory usage is automatically converted from bytes to
-        Mebibytes (MiB).
-
-        :param environment: The current Locust environment.
-        :type environment: Environment
-        :param cpu_usage: CPU usage percentage reported by Locust.
-        :type cpu_usage: float
-        :param memory_usage: Memory usage in bytes (will be converted to MiB).
-        :type memory_usage: int
-        """
-        # Convert from bytes to Mebibytes
-        memory_usage = memory_usage / 1024 / 1024
-        self.log_telemetry(
-            telemetry=LocustTestEvent.USAGE.value,
-            source_type=environment.runner.__class__.__name__,
-            source_id=(
-                "master"
-                if isinstance(self.env.runner, MasterRunner)
-                else f"worker-{self.env.runner.worker_index}"
-            ),
-            cpu_usage=cpu_usage,
-            memory_usage=memory_usage,
-        )
+    _usage_monitor_logger = None
 
     def on_cpu_warning(
         self,
@@ -99,6 +72,35 @@ class LocustTelemetryCommonRecorderMixin:
             ),
         )
 
+    def _log_usage_monitor(self):
+        """
+        Periodic tasks that fetches the locust runners usage and logs it to the console.
+        This metrics can be used to observe if there are any bottlenecks with the
+        runner / nodes. Useful for the large tests
+
+        Note: Locust already have usage_monitor event, however it fires every 10
+        seconds and cannot be configured. Hence, this method allows us to monitor system
+        usage according to our convenience.
+
+        """
+        process = psutil.Process()
+        while True:
+            cpu_usage = process.cpu_percent()
+            # Convert from bytes to Mebibytes
+            memory_usage = process.memory_info().rss / 1024 / 1024
+            self.log_telemetry(
+                telemetry=LocustTestEvent.USAGE.value,
+                source_type=self.env.runner.__class__.__name__,
+                source_id=(
+                    "master"
+                    if isinstance(self.env.runner, MasterRunner)
+                    else f"worker-{self.env.runner.worker_index}"
+                ),
+                cpu_usage=cpu_usage,
+                memory_usage=memory_usage,
+            )
+            gevent.sleep(self.env.parsed_options.lt_system_usage_recorder_interval)
+
     def on_test_start(self, *args: Any, **kwargs: Any) -> None:
         """
         Fire CPU warning and memory usage metrics only during tests
@@ -108,7 +110,7 @@ class LocustTelemetryCommonRecorderMixin:
             - usage_monitor
         """
         self.env.events.cpu_warning.add_listener(self.on_cpu_warning)
-        self.env.events.usage_monitor.add_listener(self.on_usage_monitor)
+        self._usage_monitor_logger = gevent.spawn(self._log_usage_monitor)
 
     def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -119,4 +121,6 @@ class LocustTelemetryCommonRecorderMixin:
             - usage_monitor
         """
         self.env.events.cpu_warning.remove_listener(self.on_cpu_warning)
-        self.env.events.usage_monitor.remove_listener(self.on_usage_monitor)
+        if self._usage_monitor_logger is not None:
+            self._usage_monitor_logger.kill()
+            self._usage_monitor_logger = None
