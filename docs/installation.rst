@@ -6,7 +6,7 @@ Requirements
 --------------------------------
 
 .. note::
-   - Python 3.9+
+   - Python >= 3.10
    - locust>=2.37.0
    - python-json-logger>=3.3.0
 

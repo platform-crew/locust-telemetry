@@ -57,7 +57,7 @@ By using log-based pipelines, Locust Telemetry scales effortlessly and integrate
 
 ### Requirements
 
-- Python 3.9+
+- Python >= 3.10
 - locust >= 2.37.0
 - python-json-logger >= 3.3.0
 

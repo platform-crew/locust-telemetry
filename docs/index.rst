@@ -41,6 +41,17 @@ Extending
    extending
 
 =======================================
+Contributing Guide
+=======================================
+
+Contributing guide
+
+.. toctree::
+   :maxdepth: 4
+
+   contributing
+
+=======================================
 API Reference
 =======================================
 
@@ -59,6 +70,5 @@ Notes And Changelog
 .. toctree::
    :maxdepth: 1
 
-   contributing
    faq
    changelog
