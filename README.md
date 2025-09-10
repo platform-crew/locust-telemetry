@@ -6,7 +6,6 @@
 [![codecov](https://codecov.io/gh/platform-crew/locust-telemetry/branch/main/graph/badge.svg)](https://codecov.io/gh/platform-crew/locust-telemetry)
 [![License](https://img.shields.io/github/license/platform-crew/locust-telemetry?color=orange&style=flat-square)](https://github.com/platform-crew/locust-telemetry/blob/main/LICENSE)
 
-# Locust Telemetry
 
 **Locust Telemetry** is a modular plugin for [Locust](https://docs.locust.io/en/stable/)
 that provides **structured observability** for load tests. Both master and
