@@ -45,3 +45,14 @@ or use below command
      - Interval (in seconds) for telemetry recorder
        updates. If not specified, the default interval
        of ``2`` seconds will be applied.
+
+
+
+The package also provides an entry point that can be used for automatic plugin
+discovery and loading. However, this requires corresponding
+changes on the Locust side.
+
+.. code-block:: bash
+
+   [project.entry-points."locust_plugins"]
+   telemetry_locust = "locust_telemetry.core_telemetry.plugin:entry_point"

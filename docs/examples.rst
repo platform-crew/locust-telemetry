@@ -60,7 +60,7 @@ following these steps.
     3. Click on a test run to view its detailed dashboard.
 
 Sample Grafana Dashboards
----------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Below are sample Grafana dashboards created from the ingested logs.
 These visualizations show how Locust Telemetry metrics can be explored

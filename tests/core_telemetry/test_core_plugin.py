@@ -10,7 +10,6 @@ These tests verify:
 
 from unittest.mock import patch
 
-import pytest
 from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
@@ -20,12 +19,6 @@ from locust_telemetry.core_telemetry.plugin import (
     LocustTelemetryPlugin,
     entry_point,
 )
-
-
-@pytest.fixture
-def parser() -> LocustArgumentParser:
-    """Provide a fresh Locust argument parser for testing."""
-    return LocustArgumentParser()
 
 
 def test_add_arguments_creates_parser_group(parser: LocustArgumentParser) -> None:
