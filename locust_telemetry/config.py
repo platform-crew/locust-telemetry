@@ -15,8 +15,11 @@ ENVIRONMENT_METADATA : Dict[str, Callable]
 import uuid
 from typing import Callable, Dict
 
-# Default interval for telemetry recording
-DEFAULT_RECORDER_INTERVAL: int = 2  # seconds
+# Default interval for telemetry stats recording
+DEFAULT_STATS_RECORDER_INTERVAL: int = 2  # seconds
+
+# Default interval for system usage recording
+DEFAULT_SYSTEM_USAGE_RECORDER_INTERVAL: int = 3  # 2 seconds
 
 ENVIRONMENT_METADATA: Dict[str, Callable] = {
     "run_id": lambda: str(uuid.uuid4())[:8]  # first 8 characters of UUID

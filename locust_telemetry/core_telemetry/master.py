@@ -204,6 +204,6 @@ class MasterLocustTelemetryRecorder(
                 if not self.env.runner:
                     return
                 self._log_total_stats(final=False)
-                gevent.sleep(self.env.parsed_options.locust_telemetry_recorder_interval)
+                gevent.sleep(self.env.parsed_options.lt_stats_recorder_interval)
         except gevent.GreenletExit:
             logger.info("Request stats logger stopped cleanly")

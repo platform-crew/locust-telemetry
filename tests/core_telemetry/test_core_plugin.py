@@ -39,7 +39,8 @@ def test_add_arguments_creates_parser_group(parser: LocustArgumentParser) -> Non
 
     # Ensure the specific argument exists
     arg_names = [a.option_strings[0] for a in group._group_actions]
-    assert "--locust-telemetry-recorder-interval" in arg_names
+    assert "--lt-stats-recorder-interval" in arg_names
+    assert "--lt-system-usage-recorder-interval" in arg_names
 
 
 def test_register_master_telemetry_recorder_calls_master_recorder(
