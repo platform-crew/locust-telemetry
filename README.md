@@ -1,43 +1,55 @@
 # Locust Telemetry
 
+
 ![Tests](https://github.com/platform-crew/locust-telemetry/actions/workflows/tests.yaml/badge.svg)
 [![Release](https://img.shields.io/github/v/release/platform-crew/locust-telemetry?color=blue&style=flat-square)](https://github.com/platform-crew/locust-telemetry/releases)
 [![Contributors](https://img.shields.io/github/contributors/platform-crew/locust-telemetry?color=brightgreen&style=flat-square)](https://github.com/platform-crew/locust-telemetry/graphs/contributors)
 [![codecov](https://codecov.io/gh/platform-crew/locust-telemetry/branch/main/graph/badge.svg)](https://codecov.io/gh/platform-crew/locust-telemetry)
 [![License](https://img.shields.io/github/license/platform-crew/locust-telemetry?color=orange&style=flat-square)](https://github.com/platform-crew/locust-telemetry/blob/main/LICENSE)
+[![Documentation Status](https://readthedocs.org/projects/locust-telemetry/badge/?version=latest)](https://locust-telemetry.readthedocs.io/en/latest/?badge=latest)
 
+**Locust Telemetry Plugin** is an open-source plugin for [Locust](https://docs.locust.io/en/stable/)
+that adds telemetry, metrics, and observability to your load tests.
 
-**Locust Telemetry** is a modular plugin for [Locust](https://docs.locust.io/en/stable/)
-that provides **structured observability** for load tests. Both master and
-worker nodes emit **JSON-formatted logs**, which can be ingested by any
-observability tool, including Grafana, ELK, Loki, or Datadog.
+It logs Locust stats and events (requests, failures, users, system metrics) as
+structured JSON logs, which can be ingested into Grafana, ELK, Loki, Datadog,
+or any observability platform.
 
-It can also be extended to include custom metrics (e.g., Kubernetes), helping
-you analyze system performance and scalability under load.
+The plugin is fully extensible — you can add custom metrics
+(e.g., Kubernetes resource usage) to analyze application performance
+and scalability under load.
+
+📖 Full documentation is available on [Read the Docs](https://locust-telemetry.readthedocs.io/).
+
+---
+## Why Locust Telemetry Plugin?
+
+While Locust is great for load testing, its built-in stats are not always easy to integrate into modern observability platforms.
+The **Locust Telemetry Plugin** bridges this gap by exporting all test metrics as JSON logs, making it simple to send data into Grafana, ELK, Loki, Prometheus, or Datadog.
 
 ---
 
 ## Key Features
 
-- **Structured Logging**: Logs test start/stop, user spawn, request stats, and errors in JSON.
-- **Master & Worker Recorders**: Aggregates metrics on the master; monitors CPU/memory on workers.
-- **Plugin Architecture**: Easily extend with custom telemetry plugins.
-- **Distributed System Support**: Works seamlessly in master-slave Locust setups.
-- **CLI & Configurable**: Configure via command-line arguments or environment variables.
+- **Structured JSON Logging**: Captures test lifecycle events, request stats, and errors in a machine-readable format.
+- **Master & Worker Metrics**: Aggregates stats on the master; monitors CPU and memory usage on workers.
+- **Plugin Architecture**: Extend with custom telemetry modules (e.g., Kubernetes metrics).
+- **Distributed Load Testing**: Works seamlessly in master–worker Locust setups.
+- **Configurable**: Control behavior via CLI arguments or environment variables.
 
 ---
 
 ## Motivation
 
-Load testing is crucial to understanding how applications and systems behave under stress. Most load-testing tools provide their own dashboards, which makes it difficult to integrate results with existing observability stacks.
+Load testing is critical for understanding how applications behave under stress, but most tools lock results into their own dashboards. That makes it hard to integrate with existing **observability stacks** like Grafana, Loki, ELK, or Datadog.
 
-**Locust Telemetry** solves this problem by emitting structured, JSON-formatted logs for all test metrics. These logs can be ingested by any observability tool—Grafana, Loki, ELK, Datadog, or others—allowing you to:
+The **Locust Telemetry Plugin** bridges this gap by exporting all Locust test metrics as **structured JSON logs**. This allows you to:
 
-- Visualize load test metrics directly in your preferred observability platform.
-- Correlate load test data with application and infrastructure metrics (CPU, memory, latency, errors) for deeper insights.
-- Standardize monitoring and logging across systems without introducing additional dependencies.
+- Visualize load test results in your existing monitoring dashboards
+- Correlate test metrics with infrastructure telemetry (CPU, memory, latency, errors)
+- Standardize logging across distributed environments without extra dependencies
 
-By leveraging log-based pipelines, Locust Telemetry handles high-volume, distributed load testing efficiently and integrates seamlessly with modern observability workflows.
+By using log-based pipelines, Locust Telemetry scales effortlessly and integrates into modern observability workflows.
 
 ---
 
@@ -116,7 +128,7 @@ Below are sample dashboards showing how Locust Telemetry metrics can be explored
 
 ### 🚀 Full Setup Instructions
 
-For complete setup details and examples, refer to the [Read the Docs examples section](https://your-docs-link/examples-section).
+For complete setup details and examples, refer to the [Read the Docs examples section](https://locust-telemetry.readthedocs.io/en/latest/examples.html).
 
 ---
 
