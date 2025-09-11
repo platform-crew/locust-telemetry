@@ -100,13 +100,6 @@ class TelemetryRecorderPluginManager:
             environment.parsed_options, "enable_telemetry_recorder", None
         )
 
-        if not enabled_plugins:
-            logger.info(
-                "No telemetry recorder plugin enabled. Use "
-                "'--enable-telemetry-recorder' to activate one or more plugins."
-            )
-            return
-
         logger.info(
             "[TelemetryRecorderPluginManager] Following recorders are enabled",
             extra={"recorders": enabled_plugins},
