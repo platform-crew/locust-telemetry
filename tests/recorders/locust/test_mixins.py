@@ -4,8 +4,8 @@ import gevent
 import pytest
 from locust.runners import MasterRunner
 
-from locust_telemetry.core_telemetry.constants import LocustTestEvent
-from locust_telemetry.core_telemetry.mixins import LocustTelemetryCommonRecorderMixin
+from locust_telemetry.recorders.locust.constants import LocustTestEvent
+from locust_telemetry.recorders.locust.mixins import LocustTelemetryCommonRecorderMixin
 
 
 class DummyRecorder(LocustTelemetryCommonRecorderMixin):

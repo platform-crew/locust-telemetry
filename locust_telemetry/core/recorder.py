@@ -1,6 +1,5 @@
 """
-
-This module provides the `BaseTelemetryRecorder` class, which serves as the foundation
+This module provides the `TelemetryBaseRecorder` class, which serves as the foundation
 for all telemetry recorders (metrics or events) in a Locust environment.
 
 Usage
@@ -24,29 +23,34 @@ from locust_telemetry.common.telemetry import TelemetryData
 logger = logging.getLogger(__name__)
 
 
-class BaseTelemetryRecorder:
+class TelemetryBaseRecorder:
     """
     Base class for telemetry recorders.
 
-    Responsibilities:
-    - Maintain access to the Locust environment
+    Responsibilities
+    ----------------
+    - Maintain access to the Locust environment.
     - Provide a standardized logging method for structured telemetry
-      (both metrics and events)
+      (both metrics and events).
 
-    Attributes:
-        name (ClassVar[str]): Identifier for the telemetry recorder.
-            Should be overridden by subclasses.
-        env (Environment): The Locust environment instance.
+    Attributes
+    ----------
+    name : ClassVar[str]
+        Identifier for the recorder. Should be overridden by subclasses.
+    env : Environment
+        The Locust environment instance.
     """
 
     name: ClassVar[str] = "base"
 
     def __init__(self, env: Environment) -> None:
         """
-        Initialize the telemetry recorder with the Locust environment.
+        Initialize the base recorder with the Locust environment.
 
-        Args:
-            env (Environment): The Locust environment instance.
+        Parameters
+        ----------
+        env : Environment
+            The Locust environment instance.
         """
         self.env = env
         self._username: str = os.getenv("USER", "unknown")
@@ -57,9 +61,12 @@ class BaseTelemetryRecorder:
         """
         Record structured telemetry data with environment context.
 
-        Args:
-            telemetry (TelemetryData): The telemetry descriptor (event or metric)
-            **kwargs: Additional attributes to include in the telemetry log
+        Parameters
+        ----------
+        telemetry : TelemetryData
+            The telemetry descriptor (event or metric)
+        **kwargs : Any
+            Additional attributes to include in the telemetry log
         """
         logger.info(
             f"Recording telemetry: {telemetry.name}",

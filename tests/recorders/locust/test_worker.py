@@ -3,8 +3,8 @@ from unittest.mock import patch
 import pytest
 from locust.env import Environment
 
-from locust_telemetry.core_telemetry.constants import LocustTestEvent
-from locust_telemetry.core_telemetry.worker import WorkerLocustTelemetryRecorder
+from locust_telemetry.recorders.locust.constants import LocustTestEvent
+from locust_telemetry.recorders.locust.worker import WorkerLocustTelemetryRecorder
 
 
 @pytest.fixture

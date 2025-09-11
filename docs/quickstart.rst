@@ -12,8 +12,8 @@ Locust test script (e.g., locustfile.py):
 
 .. code-block:: python
 
-    from locust_telemetry.core_telemetry.plugin import entry_point
-    entry_point()
+    from locust_telemetry.core_telemetry.plugin import setup_telemetry
+    setup_telemetry()
 
 
 

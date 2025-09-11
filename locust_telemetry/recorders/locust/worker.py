@@ -14,14 +14,14 @@ from typing import ClassVar
 
 from locust.env import Environment
 
-from locust_telemetry.core.recorder import BaseTelemetryRecorder
-from locust_telemetry.core_telemetry.mixins import LocustTelemetryCommonRecorderMixin
+from locust_telemetry.core.recorder import TelemetryBaseRecorder
+from locust_telemetry.recorders.locust.mixins import LocustTelemetryCommonRecorderMixin
 
 logger = logging.getLogger(__name__)
 
 
 class WorkerLocustTelemetryRecorder(
-    BaseTelemetryRecorder, LocustTelemetryCommonRecorderMixin
+    TelemetryBaseRecorder, LocustTelemetryCommonRecorderMixin
 ):
     """
     Telemetry recorder for Locust worker nodes.
