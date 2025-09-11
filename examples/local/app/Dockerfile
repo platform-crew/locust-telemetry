@@ -28,4 +28,4 @@ COPY app/ $APP_DIR
 # Install Python dependencies without cache to reduce layer size
 RUN pip install --no-cache-dir -r $APP_DIR/requirements.txt
 
-RUN pip install $APP_DIR/locust_telemetry-0.1.1-py3-none-any.whl
+RUN pip install $APP_DIR/locust_telemetry-0.0.0-py3-none-any.whl

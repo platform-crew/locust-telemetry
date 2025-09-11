@@ -1,12 +1,12 @@
 """
-This module defines the base plugin interface for Locust Telemetry extensions.
+Base interface for Telemetry Recorder plugins in Locust.
 
 Responsibilities
 ----------------
-- Provide a consistent lifecycle for plugins across master and worker nodes.
-- Allow plugins to define their own CLI arguments and environment variables.
-- Automatically register master and worker recorders depending on runner type.
-- Support multiple telemetry plugins within a single Locust session.
+- Provide a consistent lifecycle for recorder plugins across master and worker nodes.
+- Allow recorder plugins to define their own CLI arguments and environment variables.
+- Automatically dispatch recorder setup depending on runner type (master vs worker).
+- Support multiple recorder plugins within a single Locust session.
 """
 
 from __future__ import annotations
@@ -15,67 +15,92 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any
 
-from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
 
 logger = logging.getLogger(__name__)
 
 
-# -------------------------------
-# Base Telemetry Plugin Interface
-# -------------------------------
-class BaseTelemetryPlugin(ABC):
+class TelemetryRecorderPluginBase(ABC):
     """
-    Abstract base class for Locust Telemetry plugins.
+    Abstract base class for all telemetry recorder plugins.
 
-    Extend this class to implement custom telemetry features.
+    Extend this class to implement custom telemetry features such as
+    metrics reporting, external integrations, or event capture.
 
-    Each plugin can:
-    - Define optional CLI arguments for configuration
-    - Register master-side recorders (for aggregating results/metrics)
-    - Register worker-side recorders (for local data capture)
+    Each recorder plugin can:
+    - Define optional CLI arguments for runtime configuration.
+    - Register master-side recorders (for aggregation, central logging, etc.).
+    - Register worker-side recorders (for local metric capture).
     """
 
-    def add_arguments(self, parser: LocustArgumentParser) -> None:
+    RECORDER_PLUGIN_ID: str | None = None
+
+    @abstractmethod
+    def add_cli_arguments(self, group: Any) -> None:
         """
-        Hook for registering plugin-specific CLI arguments or environment variables.
+        Register recorder plugin-specific CLI arguments or environment variables.
 
-        Default: does nothing.
         Override in your plugin if runtime configuration is required.
+
+        Parameters
+        ----------
+        group : _ArgumentGroup
+            The argument parser group to which options can be added.
         """
-        pass
 
     @abstractmethod
     def load_master_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
-        Register recorders to run on the master process.
+        Register telemetry recorders that should run on the master process.
 
-        Override this in your plugin to implement master-side behavior.
+        Override this method in your recorder plugin to implement master-side behavior.
+
+        Parameters
+        ----------
+        environment : Environment
+            The Locust environment instance.
+        **kwargs : Any
+            Additional context passed by the coordinator or event system.
         """
-        pass
 
     @abstractmethod
     def load_worker_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
-        Register recorders to run on each worker process.
+        Register telemetry recorders that should run on each worker process.
 
-        Override this in your plugin to implement worker-side behavior.
+        Override this method in your recorder plugin to implement worker-side behavior.
+
+        Parameters
+        ----------
+        environment : Environment
+            The Locust environment instance.
+        **kwargs : Any
+            Additional context passed by the coordinator or event system.
         """
-        pass
 
     def load(self, environment: Environment, **kwargs: Any) -> None:
         """
-        Entry point for plugin initialization.
+        Entry point for recorder plugin initialization.
 
-        Automatically called by the plugin manager at test start.
-        Dispatches to master or worker recorder registration depending
-        on the current runner type.
+        Automatically invoked by ``TelemetryRecorderPluginManager`` during
+        Locust's init phase. Dispatches to the correct recorder registration
+        method depending on runner type.
+
+        Parameters
+        ----------
+        environment : Environment
+            The Locust environment instance.
+        **kwargs : Any
+            Additional context passed by the coordinator or event system.
         """
+        if self.RECORDER_PLUGIN_ID is None:
+            raise RuntimeError("Recorder plugin not configured appropriately.")
+
         if isinstance(environment.runner, MasterRunner):
             self.load_master_telemetry_recorders(environment, **kwargs)
         elif isinstance(environment.runner, WorkerRunner):

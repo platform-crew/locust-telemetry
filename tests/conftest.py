@@ -1,13 +1,37 @@
-from typing import Any
+from typing import Any, Type
 from unittest.mock import MagicMock
 
 import pytest
 from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 
-from locust_telemetry.core.manager import TelemetryManager
-from locust_telemetry.core.plugin import BaseTelemetryPlugin
-from locust_telemetry.core.recorder import BaseTelemetryRecorder
+from locust_telemetry.core.coordinator import TelemetryCoordinator
+from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
+from locust_telemetry.core.recorder import TelemetryBaseRecorder
+
+
+class DummyTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
+    """Simple telemetry recorder plugin for testing manager behavior."""
+
+    RECORDER_PLUGIN_ID = "dummy"
+
+    def __init__(self) -> None:
+        self.master_loaded = False
+        self.worker_loaded = False
+        self.added_cli_args = False
+
+    def add_cli_arguments(self, group) -> None:
+        self.added_cli_args = True
+
+    def load_master_telemetry_recorders(
+        self, environment: Environment, **kwargs: Any
+    ) -> None:
+        self.master_loaded = True
+
+    def load_worker_telemetry_recorders(
+        self, environment: Environment, **kwargs: Any
+    ) -> None:
+        self.worker_loaded = True
 
 
 @pytest.fixture
@@ -36,43 +60,27 @@ def mock_env():
 
 
 @pytest.fixture(autouse=True)
-def reset_singleton() -> None:
-    """Reset the TelemetryManager singleton before each test."""
-    TelemetryManager._instance = None
-    TelemetryManager._initialized = False
+def reset_coordinator_singleton() -> None:
+    """Reset the TelemetryCoordinator singleton before each test."""
+    TelemetryCoordinator._instance = None
+    TelemetryCoordinator._initialized = False
 
 
 @pytest.fixture
-def dummy_plugin() -> BaseTelemetryPlugin:
-    """Return a fresh DummyTelemetryPlugin for testing."""
+def dummy_recorder_plugin_class() -> Type[DummyTelemetryRecorderPlugin]:
+    """Return a fresh DummyTelemetryRecorderPlugin class for testing."""
+    return DummyTelemetryRecorderPlugin
 
-    class DummyTelemetryPlugin(BaseTelemetryPlugin):
-        """Simple telemetry plugin for testing manager behavior."""
 
-        def __init__(self) -> None:
-            self.master_loaded = False
-            self.worker_loaded = False
-            self.added_args = False
-
-        def add_arguments(self, parser: Any) -> None:
-            self.added_args = True
-
-        def load_master_telemetry_recorders(
-            self, environment: Environment, **kwargs: Any
-        ) -> None:
-            self.master_loaded = True
-
-        def load_worker_telemetry_recorders(
-            self, environment: Environment, **kwargs: Any
-        ) -> None:
-            self.worker_loaded = True
-
-    return DummyTelemetryPlugin()
+@pytest.fixture
+def dummy_recorder_plugin() -> TelemetryRecorderPluginBase:
+    """Return a fresh DummyTelemetryRecorderPlugin instance for testing."""
+    return DummyTelemetryRecorderPlugin()
 
 
 @pytest.fixture
 def env_with_runner():
-    # Create a real Locust environment with runner + events
+    """Create a real Locust environment with a runner and parsed options."""
     env = Environment()
     env.create_local_runner()  # ensures runner is available
     env.parsed_options = MagicMock()
@@ -81,17 +89,18 @@ def env_with_runner():
 
 
 @pytest.fixture
-def recorder(mock_env: Environment) -> BaseTelemetryRecorder:
-    """Return a BaseTelemetryRecorder instance for testing."""
-    return BaseTelemetryRecorder(env=mock_env)
+def recorder(mock_env: Environment) -> TelemetryBaseRecorder:
+    """Return a TelemetryBaseRecorder instance for testing."""
+    return TelemetryBaseRecorder(env=mock_env)
 
 
 @pytest.fixture
 def parser() -> LocustArgumentParser:
+    """Return a fresh Locust argument parser for testing CLI integration."""
     return LocustArgumentParser()
 
 
 @pytest.fixture
 def sample_metadata():
-    """Return a sample metadata dict."""
+    """Return a sample test metadata dictionary."""
     return {"run_id": "1234", "env": "staging"}

@@ -1,128 +1,132 @@
-from unittest.mock import MagicMock, patch
-
 from locust.runners import MasterRunner, WorkerRunner
 
-from locust_telemetry.core.manager import PluginManager, TelemetryManager
-from locust_telemetry.core.plugin import BaseTelemetryPlugin
+from locust_telemetry.core.manager import TelemetryRecorderPluginManager
 
 
-def test_singleton() -> None:
-    """Ensure TelemetryManager implements a singleton pattern."""
-    manager1 = TelemetryManager(plugin_manager=PluginManager())
-    manager2 = TelemetryManager(plugin_manager=PluginManager())
-    assert manager1 is manager2
-    assert manager1.plugin_manager is manager2.plugin_manager
+def test_singleton_behavior():
+    """
+    Ensure TelemetryRecorderPluginManager implements the singleton pattern.
+
+    Only one instance should exist per process. Multiple instantiations
+    should return the same object reference.
+    """
+    mgr1 = TelemetryRecorderPluginManager()
+    mgr2 = TelemetryRecorderPluginManager()
+    assert mgr1 is mgr2
 
 
-def test_register_plugin(dummy_plugin) -> None:
-    """Verify that plugins can be registered and are not duplicated."""
-    plugin_manager = PluginManager()
+def test_register_plugin_adds_instance(dummy_recorder_plugin):
+    """
+    Verify that registering a plugin adds it to the internal registry.
 
-    plugin_manager.register_plugin(dummy_plugin)
-    assert dummy_plugin in plugin_manager._plugins
-
-    # Re-registering should not duplicate
-    plugin_manager.register_plugin(dummy_plugin)
-    assert plugin_manager._plugins.count(dummy_plugin) == 1
-
-
-def test_load_plugins_calls_plugin_load(mock_env) -> None:
-    """Ensure load_plugins calls each plugin's load method."""
-    plugin_manager = PluginManager()
-    dummy_plugin = MagicMock(spec=BaseTelemetryPlugin)
-
-    plugin_manager.register_plugin(dummy_plugin)
-    plugin_manager.load_plugins(mock_env)
-
-    dummy_plugin.load.assert_called_once_with(environment=mock_env)
+    Checks that the plugin instance appears in the manager's plugin list
+    after registration.
+    """
+    mgr = TelemetryRecorderPluginManager()
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+    assert dummy_recorder_plugin in mgr.recorder_plugins
 
 
-def test_load_plugins_with_side_effect(mock_env) -> None:
-    """Ensure load_plugins calls each plugin's load method and handles side effects."""
-    plugin_manager = PluginManager()
-    dummy_plugin = MagicMock(spec=BaseTelemetryPlugin)
+def test_register_plugin_avoids_duplicates(dummy_recorder_plugin):
+    """
+    Ensure registering the same plugin multiple times does not create duplicates.
 
-    # Some random error
-    dummy_plugin.load.side_effect = AttributeError("load not implemented")
-    plugin_manager.register_plugin(dummy_plugin)
-
-    with patch("locust_telemetry.core.manager.logger.exception") as mock_log:
-        plugin_manager.load_plugins(mock_env)
-        mock_log.assert_called_once()
-
-
-def test_add_arguments() -> None:
-    """Ensure TelemetryManager adds CLI arguments."""
-    manager = TelemetryManager(plugin_manager=PluginManager())
-    parser = MagicMock()
-    manager._add_arguments(parser)
-    parser.add_argument_group.assert_called_once()
+    The manager should only store unique plugin instances, even if
+    register_recorder_plugin is called more than once with the same object.
+    """
+    mgr = TelemetryRecorderPluginManager()
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+    assert mgr.recorder_plugins.count(dummy_recorder_plugin) == 1
 
 
-def test_setup_logging_calls_configure_logging(mock_env) -> None:
-    """Ensure configure_logging is called during _setup_logging."""
-    manager = TelemetryManager(plugin_manager=PluginManager())
+def test_load_plugins_only_loads_enabled(mock_env, dummy_recorder_plugin):
+    """
+    Verify that only plugins listed in enable_telemetry_plugin are loaded.
 
-    with patch("locust_telemetry.core.manager.configure_logging") as mock_log:
-        manager._setup_logging(mock_env)
-        mock_log.assert_called_once()
+    - MasterRunner triggers master recorder.
+    - WorkerRunner triggers worker recorder.
+    - Disabled plugins are skipped.
+    """
+    mgr = TelemetryRecorderPluginManager()
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
 
-
-def test_register_metadata_handler_for_worker(mock_env) -> None:
-    """Ensure worker message handler is registered for WorkerRunner."""
-    manager = TelemetryManager(plugin_manager=PluginManager())
-    mock_env.runner.__class__ = WorkerRunner
-    manager._register_metadata_handler(mock_env)
-
-    mock_env.runner.register_message.assert_called_once()
-    msg_type, func = mock_env.runner.register_message.call_args[0]
-    assert msg_type == "set_metadata"
-    assert callable(func)
-
-
-def test_setup_metadata_for_master(mock_env) -> None:
-    """Ensure master runner sets and sends metadata."""
-    manager = TelemetryManager(plugin_manager=PluginManager())
+    # Master runner
     mock_env.runner.__class__ = MasterRunner
+    mock_env.parsed_options.enable_telemetry_recorder = ["dummy"]
+    mgr.load_recorder_plugins(mock_env)
+    assert dummy_recorder_plugin.master_loaded is True
+    assert dummy_recorder_plugin.worker_loaded is False
 
-    with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set, patch(
-        "locust_telemetry.core.manager.get_test_metadata",
-        return_value={"run_id": "123"},
-    ) as _:
-        manager._setup_metadata(mock_env)
-        mock_set.assert_called_once_with(mock_env)
-        mock_env.runner.send_message.assert_called_once_with(
-            "set_metadata", {"run_id": "123"}
-        )
-
-
-def test_initialize_is_idempotent():
-    """Ensure initialize() does nothing if already initialized."""
-    manager = TelemetryManager(plugin_manager=PluginManager())
-    manager._initialized = True
-
-    # Patch events to ensure no listeners added
-    with patch("locust_telemetry.core.manager.events") as mock_events:
-        manager.initialize()
-        mock_events.init_command_line_parser.add_listener.assert_not_called()
-
-
-def test_register_metadata_handler_non_worker(mock_env):
-    """Ensure _register_metadata_handler does nothing if not WorkerRunner."""
-    manager = TelemetryManager(plugin_manager=PluginManager())
-    # runner is MasterRunner by default in mock_env
-    manager._register_metadata_handler(mock_env)
-
-    mock_env.runner.register_message.assert_not_called()
-
-
-def test_setup_metadata_non_master(mock_env):
-    """Ensure _setup_metadata does nothing if not MasterRunner."""
-    manager = TelemetryManager(plugin_manager=PluginManager())
-    # runner is WorkerRunner
+    # Worker runner
+    dummy_recorder_plugin.master_loaded = dummy_recorder_plugin.worker_loaded = False
     mock_env.runner.__class__ = WorkerRunner
+    mock_env.parsed_options.enable_telemetry_recorder = ["dummy"]
+    mgr.load_recorder_plugins(mock_env)
+    assert dummy_recorder_plugin.master_loaded is False
+    assert dummy_recorder_plugin.worker_loaded is True
 
-    with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
-        manager._setup_metadata(mock_env)
-        mock_set.assert_not_called()
-        mock_env.runner.send_message.assert_not_called()
+    # Plugin not enabled
+    dummy_recorder_plugin.master_loaded = dummy_recorder_plugin.worker_loaded = False
+    mock_env.parsed_options.enable_telemetry_recorder = ["other"]
+    mgr.load_recorder_plugins(mock_env)
+    assert dummy_recorder_plugin.master_loaded is False
+    assert dummy_recorder_plugin.worker_loaded is False
+
+
+def test_load_plugins_no_enabled_plugins(mock_env, dummy_recorder_plugin):
+    """
+    Ensure that if no plugins are enabled, load_plugins does not invoke any plugin.
+
+    This simulates the scenario where the user has not provided
+    any --enable-telemetry-plugin CLI arguments.
+    """
+    mgr = TelemetryRecorderPluginManager()
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+
+    mock_env.parsed_options.enable_telemetry_plugin = None
+    mgr.load_recorder_plugins(mock_env)
+    assert (
+        not dummy_recorder_plugin.master_loaded
+        and not dummy_recorder_plugin.worker_loaded
+    )
+
+
+def test_load_plugins_logs_enabled_plugins(caplog, mock_env, dummy_recorder_plugin):
+    """
+    Ensure that load_recorder_plugins logs the enabled plugins.
+    """
+    mgr = TelemetryRecorderPluginManager()
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+
+    mock_env.runner.__class__ = MasterRunner
+    mock_env.parsed_options.enable_telemetry_recorder = ["dummy"]
+
+    with caplog.at_level("INFO"):
+        mgr.load_recorder_plugins(mock_env)
+
+    assert any("Following recorders are enabled" in msg for msg in caplog.messages)
+
+
+def test_load_plugins_handles_plugin_exception(
+    caplog, mock_env, dummy_recorder_plugin, monkeypatch
+):
+    """
+    Verify that if a plugin raises during load, the manager logs the exception.
+    """
+    mgr = TelemetryRecorderPluginManager()
+
+    # Replace plugin.load with a failing one
+    def failing_load(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    dummy_recorder_plugin.load = failing_load
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+
+    mock_env.runner.__class__ = MasterRunner
+    mock_env.parsed_options.enable_telemetry_recorder = ["dummy"]
+
+    with caplog.at_level("ERROR"):
+        mgr.load_recorder_plugins(mock_env)
+
+    assert any("Failed to load recorder plugin" in msg for msg in caplog.messages)

@@ -1,5 +1,5 @@
 =======================================
-Locust Telemetry Plugin Documentation
+Locust Telemetry Documentation
 =======================================
 
 Getting Started
@@ -62,13 +62,21 @@ The API reference is automatically generated from docstrings.
 
    api/index
 
-
 =======================================
-Notes And Changelog
+FAQ
 =======================================
 
 .. toctree::
    :maxdepth: 1
 
    faq
+
+
+=======================================
+Changelog
+=======================================
+
+.. toctree::
+   :maxdepth: 1
+
    changelog

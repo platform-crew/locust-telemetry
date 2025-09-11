@@ -18,19 +18,19 @@ from typing import Any, ClassVar, Dict, Optional
 import gevent
 from locust.env import Environment
 
-from locust_telemetry.core.recorder import BaseTelemetryRecorder
-from locust_telemetry.core_telemetry.constants import (
+from locust_telemetry.core.recorder import TelemetryBaseRecorder
+from locust_telemetry.recorders.locust.constants import (
     TEST_STOP_BUFFER_FOR_GRAPHS,
     LocustTestEvent,
     RequestMetric,
 )
-from locust_telemetry.core_telemetry.mixins import LocustTelemetryCommonRecorderMixin
+from locust_telemetry.recorders.locust.mixins import LocustTelemetryCommonRecorderMixin
 
 logger = logging.getLogger(__name__)
 
 
 class MasterLocustTelemetryRecorder(
-    LocustTelemetryCommonRecorderMixin, BaseTelemetryRecorder
+    LocustTelemetryCommonRecorderMixin, TelemetryBaseRecorder
 ):
     """
     Telemetry recorder for the Locust master node.

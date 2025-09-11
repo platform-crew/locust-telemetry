@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath("../"))
 
 # -- Project information -----------------------------------------------------
 
-project = "Locust Telemetry Plugin"
+project = "Locust Telemetry"
 author = "Swaroop Shubhakrishna Bhat"
 copyright = f"{datetime.now().year}, {author}"
 release = "v0.1.0"
