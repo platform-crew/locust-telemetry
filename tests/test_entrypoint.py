@@ -21,10 +21,10 @@ def test_initialize_calls(monkeypatch):
         entrypoint, "TelemetryRecorderPluginManager", lambda: plugin_manager_mock
     )
 
-    # Patch LocustTelemetryRecorderPlugin
+    # Patch CONFIGURED_RECORDER_PLUGINS to use a fake plugin class
     plugin_instance_mock = MagicMock()
     plugin_class_mock = MagicMock(return_value=plugin_instance_mock)
-    monkeypatch.setattr(entrypoint, "LocustTelemetryRecorderPlugin", plugin_class_mock)
+    monkeypatch.setattr(entrypoint, "CONFIGURED_RECORDER_PLUGINS", (plugin_class_mock,))
 
     # Call initialize
     entrypoint.initialize()
