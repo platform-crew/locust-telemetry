@@ -9,27 +9,37 @@ from locust_telemetry import entrypoint
 
 def test_initialize_calls(monkeypatch):
     """
-    Verify that initialize calls configure_logging and starts the orchestrator.
+    Verify that initialize registers the default plugin and starts the coordinator.
     """
     # Patch TelemetryCoordinator
     coordinator_mock = MagicMock()
     monkeypatch.setattr(entrypoint, "TelemetryCoordinator", coordinator_mock)
 
-    # Patch TelemetryRecorderPluginManager so orchestrator is initialized with it
+    # Patch TelemetryRecorderPluginManager
     plugin_manager_mock = MagicMock()
     monkeypatch.setattr(
         entrypoint, "TelemetryRecorderPluginManager", lambda: plugin_manager_mock
     )
 
+    # Patch LocustTelemetryRecorderPlugin
+    plugin_instance_mock = MagicMock()
+    plugin_class_mock = MagicMock(return_value=plugin_instance_mock)
+    monkeypatch.setattr(entrypoint, "LocustTelemetryRecorderPlugin", plugin_class_mock)
+
     # Call initialize
     entrypoint.initialize()
 
-    # Assert orchestrator was initialized with the plugin manager
+    # Assert coordinator initialized with plugin manager
     coordinator_mock.assert_called_once_with(
         recorder_plugin_manager=plugin_manager_mock
     )
 
-    # Assert orchestrator.initialize() was called
+    # Assert recorder plugin was registered
+    plugin_manager_mock.register_recorder_plugin.assert_called_once_with(
+        plugin_instance_mock
+    )
+
+    # Assert coordinator.initialize() was called
     coordinator_mock.return_value.initialize.assert_called_once()
 
 

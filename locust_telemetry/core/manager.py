@@ -97,15 +97,20 @@ class TelemetryRecorderPluginManager:
             Additional context passed by the event system.
         """
         enabled_plugins = getattr(
-            environment.parsed_options, "enable_telemetry_plugin", None
+            environment.parsed_options, "enable_telemetry_recorder", None
         )
 
         if not enabled_plugins:
             logger.info(
-                "No telemetry recorder plugin enabled. Use '--enable-telemetry-plugin' "
-                "to activate one or more plugins."
+                "No telemetry recorder plugin enabled. Use "
+                "'--enable-telemetry-recorder' to activate one or more plugins."
             )
             return
+
+        logger.info(
+            "[TelemetryRecorderPluginManager] Following recorders are enabled",
+            extra={"recorders": enabled_plugins},
+        )
 
         for plugin in self._recorder_plugins:
             if plugin.RECORDER_PLUGIN_ID not in enabled_plugins:
@@ -124,18 +129,3 @@ class TelemetryRecorderPluginManager:
                     f"in {environment.runner.__class__.__name__}. "
                     f"Enabled recorder plugins: {enabled_plugins}"
                 )
-
-
-def telemetry_recorder_plugin(cls):
-    """
-    Class decorator to register a telemetry recorder plugin automatically.
-
-    Usage
-    -----
-    @telemetry_recorder_plugin
-    class MyRecorderPlugin(TelemetryRecorderPluginBase):
-        ...
-    """
-    manager = TelemetryRecorderPluginManager()
-    manager.register_recorder_plugin(cls())
-    return cls

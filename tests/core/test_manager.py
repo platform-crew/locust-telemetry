@@ -1,9 +1,6 @@
 from locust.runners import MasterRunner, WorkerRunner
 
-from locust_telemetry.core.manager import (
-    TelemetryRecorderPluginManager,
-    telemetry_recorder_plugin,
-)
+from locust_telemetry.core.manager import TelemetryRecorderPluginManager
 
 
 def test_singleton_behavior():
@@ -56,7 +53,7 @@ def test_load_plugins_only_loads_enabled(mock_env, dummy_recorder_plugin):
 
     # Master runner
     mock_env.runner.__class__ = MasterRunner
-    mock_env.parsed_options.enable_telemetry_plugin = ["dummy"]
+    mock_env.parsed_options.enable_telemetry_recorder = ["dummy"]
     mgr.load_recorder_plugins(mock_env)
     assert dummy_recorder_plugin.master_loaded is True
     assert dummy_recorder_plugin.worker_loaded is False
@@ -64,14 +61,14 @@ def test_load_plugins_only_loads_enabled(mock_env, dummy_recorder_plugin):
     # Worker runner
     dummy_recorder_plugin.master_loaded = dummy_recorder_plugin.worker_loaded = False
     mock_env.runner.__class__ = WorkerRunner
-    mock_env.parsed_options.enable_telemetry_plugin = ["dummy"]
+    mock_env.parsed_options.enable_telemetry_recorder = ["dummy"]
     mgr.load_recorder_plugins(mock_env)
     assert dummy_recorder_plugin.master_loaded is False
     assert dummy_recorder_plugin.worker_loaded is True
 
     # Plugin not enabled
     dummy_recorder_plugin.master_loaded = dummy_recorder_plugin.worker_loaded = False
-    mock_env.parsed_options.enable_telemetry_plugin = ["other"]
+    mock_env.parsed_options.enable_telemetry_recorder = ["other"]
     mgr.load_recorder_plugins(mock_env)
     assert dummy_recorder_plugin.master_loaded is False
     assert dummy_recorder_plugin.worker_loaded is False
@@ -95,18 +92,41 @@ def test_load_plugins_no_enabled_plugins(mock_env, dummy_recorder_plugin):
     )
 
 
-def test_telemetry_plugin_decorator_registers_class(dummy_recorder_plugin_class):
+def test_load_plugins_logs_enabled_plugins(caplog, mock_env, dummy_recorder_plugin):
     """
-    Verify that the @telemetry_plugin decorator auto-registers a plugin.
-
-    When a class is decorated with @telemetry_plugin, an instance
-    should be automatically added to TelemetryRecorderPluginManager's registry.
+    Ensure that load_recorder_plugins logs the enabled plugins.
     """
-
-    @telemetry_recorder_plugin
-    class AutoRegisteredPlugin(dummy_recorder_plugin_class):
-        pass
-
     mgr = TelemetryRecorderPluginManager()
-    found = any(isinstance(p, AutoRegisteredPlugin) for p in mgr.recorder_plugins)
-    assert found
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+
+    mock_env.runner.__class__ = MasterRunner
+    mock_env.parsed_options.enable_telemetry_recorder = ["dummy"]
+
+    with caplog.at_level("INFO"):
+        mgr.load_recorder_plugins(mock_env)
+
+    assert any("Following recorders are enabled" in msg for msg in caplog.messages)
+
+
+def test_load_plugins_handles_plugin_exception(
+    caplog, mock_env, dummy_recorder_plugin, monkeypatch
+):
+    """
+    Verify that if a plugin raises during load, the manager logs the exception.
+    """
+    mgr = TelemetryRecorderPluginManager()
+
+    # Replace plugin.load with a failing one
+    def failing_load(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    dummy_recorder_plugin.load = failing_load
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+
+    mock_env.runner.__class__ = MasterRunner
+    mock_env.parsed_options.enable_telemetry_recorder = ["dummy"]
+
+    with caplog.at_level("ERROR"):
+        mgr.load_recorder_plugins(mock_env)
+
+    assert any("Failed to load recorder plugin" in msg for msg in caplog.messages)

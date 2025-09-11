@@ -12,10 +12,6 @@ from unittest.mock import MagicMock, patch
 from locust.runners import MasterRunner, WorkerRunner
 
 from locust_telemetry import config
-from locust_telemetry.core.manager import (
-    TelemetryRecorderPluginManager,
-    telemetry_recorder_plugin,
-)
 from locust_telemetry.recorders.locust.master import MasterLocustTelemetryRecorder
 from locust_telemetry.recorders.locust.plugin import LocustTelemetryRecorderPlugin
 from locust_telemetry.recorders.locust.worker import WorkerLocustTelemetryRecorder
@@ -63,18 +59,6 @@ def test_load_dispatches_to_worker_recorder_when_worker(mock_env):
     with patch.object(plugin, "load_worker_telemetry_recorders") as mock_worker:
         plugin.load(mock_env)
         mock_worker.assert_called_once_with(mock_env)
-
-
-def test_telemetry_plugin_decorator_registers_plugin():
-    """Ensure @telemetry_plugin decorator auto-registers the plugin in the manager."""
-
-    @telemetry_recorder_plugin
-    class DummyPlugin(LocustTelemetryRecorderPlugin):
-        RECORDER_PLUGIN_ID = "dummy"
-
-    manager = TelemetryRecorderPluginManager()
-    found = any(isinstance(p, DummyPlugin) for p in manager.recorder_plugins)
-    assert found
 
 
 def test_add_cli_arguments_registers_expected_arguments():

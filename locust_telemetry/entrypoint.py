@@ -9,8 +9,12 @@ import logging
 
 from locust_telemetry.core.coordinator import TelemetryCoordinator
 from locust_telemetry.core.manager import TelemetryRecorderPluginManager
+from locust_telemetry.recorders.locust.plugin import LocustTelemetryRecorderPlugin
 
 logger = logging.getLogger(__name__)
+
+
+CONFIGURED_RECORDER_PLUGINS = (LocustTelemetryRecorderPlugin,)  # Locust stats recorder.
 
 
 def initialize(*args, **kwargs) -> None:
@@ -19,9 +23,11 @@ def initialize(*args, **kwargs) -> None:
 
     For autodiscovery use only. Manual users should call `setup_telemetry()`.
     """
-    coordinator = TelemetryCoordinator(
-        recorder_plugin_manager=TelemetryRecorderPluginManager()
-    )
+    recorder_plugin_manager = TelemetryRecorderPluginManager()
+    for plugin_cls in CONFIGURED_RECORDER_PLUGINS:
+        recorder_plugin_manager.register_recorder_plugin(plugin_cls())
+
+    coordinator = TelemetryCoordinator(recorder_plugin_manager=recorder_plugin_manager)
     coordinator.initialize()
 
 

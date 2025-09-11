@@ -48,7 +48,7 @@ Example
         def record_event(self, data):
             self.log_telemetry(data, source="custom")
 
-    @telemetry_recorder_plugin
+
     class CustomTelemetryPlugin(TelemetryRecorderPluginBase):
         RECORDER_PLUGIN_ID = "custom_plugin"
 
@@ -66,14 +66,25 @@ Example
         def load_worker_telemetry_recorders(self, environment: Environment, **kwargs):
             CustomTelemetryRecorder(env=environment)
 
-Registering the Plugin
----------------------
+Registering a Plugin
+--------------------
 
-Use the ``@telemetry_recorder_plugin`` decorator to automatically register
-your plugin with the `TelemetryRecorderPluginManager`.
+To make your telemetry plugin available during a Locust run, you need to
+register it in the ``locust_telemetry.entrypoint`` module.
 
-This ensures that it is loaded during Locust's init phase when
-`TelemetryCoordinator` calls `load_recorder_plugins`.
+For example:
+
+.. code-block:: python
+
+   CONFIGURED_RECORDER_PLUGINS = (
+       LocustTelemetryRecorderPlugin, # Locust stats recorder.
+   )
+
+When Locust starts, the :class:`~locust_telemetry.core.coordinator.TelemetryCoordinator`
+will automatically iterate through the configured plugins and invoke their
+:py:meth:`load_recorder_plugins <locust_telemetry.core.manager.TelemetryRecorderPluginManager.load_recorder_plugins>`
+method. This ensures that your plugin is properly initialized during
+Locust's init phase.
 
 Creating a Custom Recorder
 --------------------------

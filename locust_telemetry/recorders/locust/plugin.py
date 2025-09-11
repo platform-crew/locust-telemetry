@@ -20,7 +20,6 @@ from typing import Any
 from locust.env import Environment
 
 from locust_telemetry import config
-from locust_telemetry.core.manager import telemetry_recorder_plugin
 from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
 from locust_telemetry.recorders.locust.master import MasterLocustTelemetryRecorder
 from locust_telemetry.recorders.locust.worker import WorkerLocustTelemetryRecorder
@@ -28,7 +27,6 @@ from locust_telemetry.recorders.locust.worker import WorkerLocustTelemetryRecord
 logger = logging.getLogger(__name__)
 
 
-@telemetry_recorder_plugin
 class LocustTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
     """
     Core telemetry recorder plugin for Locust.
