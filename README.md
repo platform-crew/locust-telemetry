@@ -94,19 +94,19 @@ Run with telemetry enabled. Specify the test plan and the recorder plugin:
 $ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder stats
 ```
 
-> **Note**
->
-> * CLI arguments can also be configured via environment variables:
->
->   * `LOCUST_TESTPLAN_NAME` → equivalent to `--testplan`
->   * `LOCUST_ENABLE_TELEMETRY_RECORDER` → equivalent to `--enable-telemetry-recorder`
-> * For a complete list of telemetry configuration options, see the configuration section.
-> * For guidance on setting up Locust tests, consult the [Locust Quick Start Guide](https://docs.locust.io/en/stable/quickstart.html).
+##### Note
 
-> **Warning**
->
-> * Locust currently does not support plugin arguments (`--plugin` or `-p`). Therefore, plugins must be loaded manually in `locustfile.py`.
-> * The Locust team is planning to add native support for CLI and environment variables for plugins, which will allow direct plugin specification in the run command. Track progress in issue [#3212](https://github.com/locustio/locust/issues/3212).
+* CLI arguments can also be configured via environment variables:
+
+  * `LOCUST_TESTPLAN_NAME` → equivalent to `--testplan`
+  * `LOCUST_ENABLE_TELEMETRY_RECORDER` → equivalent to `--enable-telemetry-recorder`
+* For a complete list of telemetry configuration options, see the [configuration section](https://locust-telemetry.readthedocs.io/en/latest/configuration.html).
+* For guidance on setting up Locust tests, consult the [Locust Quick Start Guide](https://docs.locust.io/en/stable/quickstart.html).
+
+##### Warning
+
+* Locust currently does not support plugin arguments (`--plugin` or `-p`). Therefore, plugins must be loaded manually in `locustfile.py`.
+* The Locust team is planning to add native support for CLI and environment variables for plugins, which will allow direct plugin specification in the run command. Track progress in issue [#3212](https://github.com/locustio/locust/issues/3212).
 
 ---
 
