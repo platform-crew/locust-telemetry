@@ -1,5 +1,5 @@
 """
-This module provides the `MasterLocustTelemetryRecorder` class, which runs on
+This module provides the `MasterLocustJsonTelemetryRecorder` class, which runs on
 the Locust master node. It captures lifecycle events and request statistics,
 logging them in a format suitable for observability tools.
 
@@ -19,18 +19,20 @@ import gevent
 from locust.env import Environment
 
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
-from locust_telemetry.recorders.locust.constants import (
+from locust_telemetry.recorders.json.locust.constants import (
     TEST_STOP_BUFFER_FOR_GRAPHS,
     LocustTestEvent,
     RequestMetric,
 )
-from locust_telemetry.recorders.locust.mixins import LocustTelemetryCommonRecorderMixin
+from locust_telemetry.recorders.json.locust.mixins import (
+    LocustJsonTelemetryCommonRecorderMixin,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class MasterLocustTelemetryRecorder(
-    LocustTelemetryCommonRecorderMixin, TelemetryBaseRecorder
+class MasterLocustJsonTelemetryRecorder(
+    LocustJsonTelemetryCommonRecorderMixin, TelemetryBaseRecorder
 ):
     """
     Telemetry recorder for the Locust master node.

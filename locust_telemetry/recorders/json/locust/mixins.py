@@ -17,12 +17,12 @@ import psutil
 from locust.env import Environment
 from locust.runners import MasterRunner
 
-from locust_telemetry.recorders.locust.constants import LocustTestEvent
+from locust_telemetry.recorders.json.locust.constants import LocustTestEvent
 
 logger = logging.getLogger(__name__)
 
 
-class LocustTelemetryCommonRecorderMixin:
+class LocustJsonTelemetryCommonRecorderMixin:
     """
     Event handler mixn that are common for both master and worker
 

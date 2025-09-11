@@ -2,7 +2,7 @@
 Locust Telemetry Recorder Plugin
 --------------------------------
 
-This module defines the `LocustTelemetryRecorderPlugin`, which integrates
+This module defines the `LocustJsonTelemetryRecorderPlugin`, which integrates
 telemetry recording into Locust runs. It initializes master and
 worker telemetry recorders to capture lifecycle events, request
 statistics, and worker system metrics.
@@ -21,13 +21,17 @@ from locust.env import Environment
 
 from locust_telemetry import config
 from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
-from locust_telemetry.recorders.locust.master import MasterLocustTelemetryRecorder
-from locust_telemetry.recorders.locust.worker import WorkerLocustTelemetryRecorder
+from locust_telemetry.recorders.json.locust.master import (
+    MasterLocustJsonTelemetryRecorder,
+)
+from locust_telemetry.recorders.json.locust.worker import (
+    WorkerLocustJsonTelemetryRecorder,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class LocustTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
+class LocustJsonTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
     """
     Core telemetry recorder plugin for Locust.
 
@@ -77,7 +81,7 @@ class LocustTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
         **kwargs : Any
             Additional context passed by the TelemetryCoordinator.
         """
-        MasterLocustTelemetryRecorder(env=environment)
+        MasterLocustJsonTelemetryRecorder(env=environment)
 
     def load_worker_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
@@ -92,4 +96,4 @@ class LocustTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
         **kwargs : Any
             Additional context passed by the TelemetryCoordinator.
         """
-        WorkerLocustTelemetryRecorder(env=environment)
+        WorkerLocustJsonTelemetryRecorder(env=environment)
