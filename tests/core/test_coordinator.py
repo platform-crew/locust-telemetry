@@ -50,6 +50,7 @@ def test_initialize_registers_hooks(mock_env):
     # Assert CLI, init, test_start hooks registered
     assert coo._initialized is True
     assert coo._add_cli_arguments in called_hooks["init_parser"]
+    assert coo._configure_logging in called_hooks["init"]
     assert coo._register_metadata_handler in called_hooks["init"]
     assert coo.recorder_plugin_manager.load_recorder_plugins in called_hooks["init"]
     assert coo._setup_metadata in called_hooks["test_start"]
@@ -60,6 +61,17 @@ def test_initialize_registers_hooks(mock_env):
     # 3 init listeners: logging + metadata + plugin
     assert len(called_hooks["init"]) == 3
     assert len(called_hooks["test_start"]) == 1
+
+
+def test_configure_logging_calls_login_setup():
+    """Verify coordinator setups logging calls actual logging configuration func"""
+    mgr = TelemetryRecorderPluginManager()
+    coo = TelemetryCoordinator(mgr)
+    with patch(
+        "locust_telemetry.core.coordinator.configure_logging"
+    ) as mock_configure_logging:
+        coo._configure_logging()
+        mock_configure_logging.assert_called_once()
 
 
 def test_add_cli_arguments_calls_plugins():

@@ -77,3 +77,12 @@ def test_abstract_methods_raise_typeerror():
     """
     with pytest.raises(TypeError):
         TelemetryRecorderPluginBase()
+
+
+def test_load_without_plugin_id(mock_env, dummy_recorder_plugin):
+    """
+    Verify that loading the plugin without plugin id causes RunTimeError
+    """
+    dummy_recorder_plugin.RECORDER_PLUGIN_ID = None
+    with pytest.raises(RuntimeError):
+        dummy_recorder_plugin.load(mock_env)

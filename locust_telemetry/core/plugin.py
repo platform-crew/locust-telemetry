@@ -48,7 +48,6 @@ class TelemetryRecorderPluginBase(ABC):
         group : _ArgumentGroup
             The argument parser group to which options can be added.
         """
-        pass
 
     @abstractmethod
     def load_master_telemetry_recorders(
@@ -66,7 +65,6 @@ class TelemetryRecorderPluginBase(ABC):
         **kwargs : Any
             Additional context passed by the coordinator or event system.
         """
-        pass
 
     @abstractmethod
     def load_worker_telemetry_recorders(
@@ -84,7 +82,6 @@ class TelemetryRecorderPluginBase(ABC):
         **kwargs : Any
             Additional context passed by the coordinator or event system.
         """
-        pass
 
     def load(self, environment: Environment, **kwargs: Any) -> None:
         """
