@@ -1,106 +1,63 @@
-Extending Guide
-=======================================
+Extending Locust Telemetry
+==========================
 
-``locust-telemetry`` is designed to be **easily extensible**.
-You can add your own custom telemetry plugins and recorders to capture
-domain-specific metrics or integrate with other observability systems.
+Locust Telemetry is designed to be easily extendable. This guide explains
+how to create custom telemetry recorder plugins and recorders to capture
+metrics, events, or system data during your Locust tests.
 
-This guide explains the main extension points and demonstrates
-how to implement them effectively.
+Overview
+--------
 
-Project Repository
-------------------
-Source code is available on GitHub:
+The telemetry system consists of:
 
-:link: `Locust Telemetry Repository <https://github.com/platform-crew/locust-telemetry>`_
+- **TelemetryCoordinator**: Singleton responsible for lifecycle coordination
+  between master and worker nodes.
+- **TelemetryRecorderPluginManager**: Singleton that manages recorder plugin
+  registration and loading.
+- **TelemetryRecorderPluginBase**: Base class for all telemetry recorder
+  plugins.
+- **TelemetryBaseRecorder**: Base class for telemetry recorders (metrics or events).
 
-Extension Points Overview
--------------------------
-Before extending, it's important to understand the three key components:
+This layered design allows developers to create plugins that register multiple
+recorders, each running on master or worker nodes.
 
-1. **Plugins**
-   - Extend :class:`locust_telemetry.core.plugin.BaseTelemetryPlugin`
-   - Register CLI arguments if needed
-   - Register master and worker telemetry recorders
+Creating a Telemetry Recorder Plugin
+-----------------------------------
 
-2. **Recorders**
-   - Extend :class:`locust_telemetry.core.recorder.BaseTelemetryRecorder`
-   - Implement structured logging for your telemetry data
-   - Attach to Locust events (``test_start``, ``test_stop``, request stats, etc.)
+A telemetry recorder plugin manages one or more recorders and provides CLI
+integration.
 
-3. **Manager**
-   - :class:`locust_telemetry.core.manager.PluginManager` handles plugin registration
-   - :class:`locust_telemetry.core.manager.TelemetryManager` orchestrates plugin initialization
+1. Inherit from ``TelemetryRecorderPluginBase``.
 
-Creating a Custom Recorder
---------------------------
-A recorder is responsible for capturing metrics or events and logging them
-in a **structured format** compatible with observability pipelines.
+2. Define a unique ``RECORDER_PLUGIN_ID``.
 
-Example: ``CustomTelemetryRecorder``
+3. Override methods to register CLI arguments and master/worker recorders.
+
+Example
+^^^^^^^^
 
 .. code-block:: python
 
+    from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
+    from locust_telemetry.recorder import TelemetryBaseRecorder
     from locust.env import Environment
-    from locust_telemetry.core.recorder import BaseTelemetryRecorder
-    from locust_telemetry.common.telemetry import TelemetryData
 
-    class CustomTelemetryRecorder(BaseTelemetryRecorder):
-        name = "custom_telemetry_recorder"
+    class CustomTelemetryRecorder(TelemetryBaseRecorder):
+        name = "custom_recorder"
 
-        def __init__(self, env: Environment):
-            super().__init__(env)
-            # Register event listeners
-            env.events.test_start.add_listener(self.on_test_start)
-            env.events.test_stop.add_listener(self.on_test_stop)
+        def record_event(self, data):
+            self.log_telemetry(data, source="custom")
 
-        def on_test_start(self, *args, **kwargs):
-            self.log_telemetry(
-                telemetry=TelemetryData(type="event", name="CUSTOM_START"),
-                message="Custom telemetry recorder started"
-            )
+    @telemetry_recorder_plugin
+    class CustomTelemetryPlugin(TelemetryRecorderPluginBase):
+        RECORDER_PLUGIN_ID = "custom_plugin"
 
-        def on_test_stop(self, *args, **kwargs):
-            self.log_telemetry(
-                telemetry=TelemetryData(type="event", name="CUSTOM_STOP"),
-                message="Custom telemetry recorder stopped"
-            )
-
-.. note::
-
-   **Tip:** Keep each recorder focused on a single responsibility,
-   e.g., request stats, system metrics, or external integrations.
-
-Creating a Custom Plugin
-------------------------
-A plugin ties together your recorder(s) and optional CLI arguments,
-making them reusable and configurable.
-
-Example: ``CustomTelemetryPlugin``
-
-.. code-block:: python
-
-    import logging
-    from locust.argument_parser import LocustArgumentParser
-    from locust.env import Environment
-    from locust_telemetry.core.plugin import BaseTelemetryPlugin
-
-    from my_project.recorder import CustomTelemetryRecorder
-
-    logger = logging.getLogger(__name__)
-
-    class CustomTelemetryPlugin(BaseTelemetryPlugin):
-        def add_arguments(self, parser: LocustArgumentParser) -> None:
-            group = parser.add_argument_group(
-                "telemetry.custom",
-                "Environment variables for the custom telemetry plugin"
-            )
+        def add_cli_arguments(self, group):
             group.add_argument(
-                "--custom-option",
-                type=str,
-                help="Example custom argument",
-                env_var="LOCUST_CUSTOM_OPTION",
-                default="default-value"
+                "--custom-interval",
+                type=int,
+                help="Custom interval for recording metrics",
+                default=5,
             )
 
         def load_master_telemetry_recorders(self, environment: Environment, **kwargs):
@@ -110,30 +67,50 @@ Example: ``CustomTelemetryPlugin``
             CustomTelemetryRecorder(env=environment)
 
 Registering the Plugin
-----------------------
-Finally, register your plugin with the ``PluginManager`` at test startup:
+---------------------
+
+Use the ``@telemetry_recorder_plugin`` decorator to automatically register
+your plugin with the `TelemetryRecorderPluginManager`.
+
+This ensures that it is loaded during Locust's init phase when
+`TelemetryCoordinator` calls `load_recorder_plugins`.
+
+Creating a Custom Recorder
+--------------------------
+
+If your plugin requires custom data collection:
+
+1. Inherit from ``TelemetryBaseRecorder``.
+2. Override methods or add new methods to capture and log telemetry.
+3. Use ``self.env`` for Locust environment access and ``self.log_telemetry()`` for logging.
+
+Example
+^^^^^^^^
 
 .. code-block:: python
 
-    from locust_telemetry.core.manager import PluginManager, TelemetryManager
-    from my_project.plugin import CustomTelemetryPlugin
+    class WorkerMetricsRecorder(TelemetryBaseRecorder):
+        name = "worker_metrics"
 
-    def entry_point(*args, **kwargs):
-        plugin_manager = PluginManager()
-        plugin_manager.register_plugin(plugin=CustomTelemetryPlugin())
-        telemetry_manager = TelemetryManager(plugin_manager=plugin_manager)
-        telemetry_manager.initialize()
+        def record_metrics(self, metrics):
+            self.log_telemetry(metrics, node_type="worker")
 
 Best Practices
 --------------
-* Keep recorders **focused** on a single responsibility (e.g., system metrics, request stats, external integrations).
-* Use **structured JSON logs** via the `log_telemetry` method provided by `BaseTelemetryRecorder`.
-* Add **CLI arguments** for configurability instead of hardcoding values.
-* Handle the **lifecycle of events** within each recorder to avoid unintended side effects.
-* Test your plugin in both **master** and **worker** modes to ensure full compatibility.
-* Consider contributing your plugin back if it could be useful for the community 🚀
 
-.. note::
+* Keep each recorder **focused** on a single responsibility (e.g., metrics, events, integrations).
+* Use **structured logs** via ``log_telemetry`` for consistent context.
+* Add **CLI arguments** via ``add_cli_arguments`` instead of hardcoding values.
+* Respect **master/worker separation** and recorder lifecycle events.
+* Test in both **master** and **worker** modes for distributed compatibility.
+* Keep plugins **modular** and use a unique ``RECORDER_PLUGIN_ID``.
+* Include sufficient **context** (run ID, testplan, environment) in logs.
+* Contribute useful recorders back to the community 🚀
 
-   **Pro Tip:** Early contributors often shape the project.
-   Even a small telemetry plugin can help others gain deeper insights from their Locust tests.
+
+References
+----------
+
+- See `TelemetryCoordinator` for lifecycle management.
+- See `TelemetryRecorderPluginManager` for plugin registration and loading.
+- Refer to :ref:`quickstart` for setup instructions.

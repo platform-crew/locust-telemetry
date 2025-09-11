@@ -70,23 +70,43 @@ pip show locust-telemetry  # validate installation
 
 ### Load the core telemetry plugin
 
-Add the following to your `locustfile.py`:
+This extension enhances Locust with telemetry recording while preserving all existing Locust usage patterns and configuration options.
+For details on Locust itself, refer to the official [Locust documentation](https://docs.locust.io/en/stable/index.html).
+
+---
+
+#### 1. Initialize the telemetry plugin
+
+In your Locust test script (e.g., `locustfile.py`):
 
 ```python
-from locust_telemetry.recorders.locust import setup_telemetry
+from locust_telemetry import entrypoint
+entrypoint.initialize()
+````
 
-setup_telemetry()
+---
+
+#### 2. Run your Locust tests
+
+Run with telemetry enabled. Specify the test plan and the recorder plugin:
+
+```bash
+$ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder stats
 ```
 
-### Run your first test
+> **Note**
+>
+> * CLI arguments can also be configured via environment variables:
+>
+>   * `LOCUST_TESTPLAN_NAME` → equivalent to `--testplan`
+>   * `LOCUST_ENABLE_TELEMETRY_RECORDER` → equivalent to `--enable-telemetry-recorder`
+> * For a complete list of telemetry configuration options, see the configuration section.
+> * For guidance on setting up Locust tests, consult the [Locust Quick Start Guide](https://docs.locust.io/en/stable/quickstart.html).
 
-Please refer to the official [Locust Quick Start Guide](https://docs.locust.io/en/stable/quickstart.html).
-
-### Notes
-
-* Telemetry plugins are singletons; loading a plugin multiple times will **not** generate duplicate events.
-* Locust currently does **not** support CLI plugin arguments (`--plugin` or `-p`), so plugins must be loaded manually in `locustfile.py`.
-* The Locust team is planning to add support for CLI and environment variables in the future. You can track progress here: [Issue #3212](https://github.com/locustio/locust/issues/3212).
+> **Warning**
+>
+> * Locust currently does not support plugin arguments (`--plugin` or `-p`). Therefore, plugins must be loaded manually in `locustfile.py`.
+> * The Locust team is planning to add native support for CLI and environment variables for plugins, which will allow direct plugin specification in the run command. Track progress in issue [#3212](https://github.com/locustio/locust/issues/3212).
 
 ---
 

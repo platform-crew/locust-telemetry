@@ -7,12 +7,12 @@ data as JSON logs, enabling seamless integration with existing observability
 tools and offering detailed insights into system performance.
 
 Compatible with distributed systems, both master and worker nodes periodically
-emit logs that can be easily ingested. The plugin is also extensible—custom
+emit logs that can be easily ingested. This plugin is also extensible—custom
 metrics (e.g., Kubernetes metrics) can be added to analyze scalability and
 infrastructure behavior under load.
 
 We welcome contributions—please help expand this project with additional
-telemetry plugins!
+telemetry recorders!
 
 Motivation
 ----------
@@ -47,9 +47,9 @@ Features
    Master aggregates request stats and errors; workers report node-specific metrics,
    including CPU usage.
 
-- **Plugin Architecture**
-   Easily extend with custom plugins (e.g., Kubernetes metrics) within a single
-   Locust run. Designed to support multiple entry points.
+- **Modular Architecture**
+   Easily extend this plugin with custom recorders (e.g., Kubernetes metrics) within a single
+   Locust run. Designed to support multiple recorders.
 
 - **Observability Integration**
    Works with any log-based observability tool, enabling customizable dashboards

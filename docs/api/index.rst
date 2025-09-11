@@ -51,4 +51,4 @@ Recorders
 .. toctree::
    :maxdepth: 4
 
-   core_telemetry/index
+   recorders/index

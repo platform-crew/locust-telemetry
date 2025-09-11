@@ -1,3 +1,4 @@
+.. _configuration:
 Configuration
 =======================
 
@@ -37,6 +38,12 @@ or use below command
      - Unique identifier for the test run or the service
        under test. This value is mandatory and must be
        provided for every execution.
+   * - ``--enable-telemetry-recorder``
+     - ``LOCUST_ENABLE_TELEMETRY_RECORDER``
+     - ``str``
+     - ``stats``
+     - No
+     - Since this telemetry supports multiple recorders, this is needed. For now it supports only ``stats``
    * - ``--lt-stats-recorder-interval``
      - ``LOCUST_TELEMETRY_STATS_RECORDER_INTERVAL``
      - ``int``
@@ -56,11 +63,11 @@ or use below command
 
 
 
-The package also provides an entry point that can be used for automatic plugin
+The package also provides an entry point that can be used for auto
 discovery and loading. However, this requires corresponding
 changes on the Locust side.
 
 .. code-block:: bash
 
    [project.entry-points."locust_plugins"]
-   telemetry_locust = "locust_telemetry.core_telemetry.plugin:entry_point"
+   telemetry_locust = "locust_telemetry.entrypoint"

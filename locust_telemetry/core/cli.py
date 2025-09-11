@@ -59,7 +59,7 @@ def register_telemetry_cli_args(parser: LocustArgumentParser):
             "Can be specified multiple times or via environment variable."
         ),
         env_var="LOCUST_ENABLE_TELEMETRY_RECORDER",
-        default=None,
+        default=[TELEMETRY_STATS_RECORDER_PLUGIN_ID],
     )
 
     return group

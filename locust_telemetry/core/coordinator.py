@@ -58,7 +58,7 @@ class TelemetryCoordinator:
 
         Parameters
         ----------
-        recorder_manager : TelemetryRecorderPluginManager
+        recorder_plugin_manager : TelemetryRecorderPluginManager
             Manager responsible for registering and loading telemetry recorders.
         """
         self.recorder_plugin_manager = (
