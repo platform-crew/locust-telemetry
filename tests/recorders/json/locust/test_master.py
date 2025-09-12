@@ -1,5 +1,5 @@
 """
-Tests for MasterLocustTelemetryRecorder.
+Tests for MasterLocustJsonTelemetryRecorder.
 
 These tests verify:
 - Proper initialization and event listener registration
@@ -14,19 +14,24 @@ import gevent
 import pytest
 from locust.env import Environment
 
-from locust_telemetry.recorders.locust.constants import LocustTestEvent, RequestMetric
-from locust_telemetry.recorders.locust.master import MasterLocustTelemetryRecorder
+from locust_telemetry.recorders.json.locust.constants import (
+    LocustTestEvent,
+    RequestMetric,
+)
+from locust_telemetry.recorders.json.locust.master import (
+    MasterLocustJsonTelemetryRecorder,
+)
 
 
 @pytest.fixture
-def recorder(mock_env: Environment) -> MasterLocustTelemetryRecorder:
-    """Return an initialized MasterLocustTelemetryRecorder."""
-    return MasterLocustTelemetryRecorder(env=mock_env)
+def recorder(mock_env: Environment) -> MasterLocustJsonTelemetryRecorder:
+    """Return an initialized MasterLocustJsonTelemetryRecorder."""
+    return MasterLocustJsonTelemetryRecorder(env=mock_env)
 
 
 def test_initialization_registers_event_listeners(mock_env: Environment) -> None:
     """Ensure event listeners are registered on initialization."""
-    recorder = MasterLocustTelemetryRecorder(env=mock_env)
+    recorder = MasterLocustJsonTelemetryRecorder(env=mock_env)
     mock_env.events.test_start.add_listener.assert_called_once_with(
         recorder.on_test_start
     )
@@ -39,7 +44,7 @@ def test_initialization_registers_event_listeners(mock_env: Environment) -> None
 
 
 def test_on_test_start_starts_greenlet_and_logs_telemetry(
-    recorder: MasterLocustTelemetryRecorder,
+    recorder: MasterLocustJsonTelemetryRecorder,
 ) -> None:
     """Test that on_test_start spawns the background logger and emits telemetry."""
     with (
@@ -59,7 +64,7 @@ def test_on_test_start_starts_greenlet_and_logs_telemetry(
 
 
 def test_on_test_stop_stops_logger_and_logs_final_stats(
-    recorder: MasterLocustTelemetryRecorder,
+    recorder: MasterLocustJsonTelemetryRecorder,
 ) -> None:
     """Test that on_test_stop stops greenlet, logs stats, and emits telemetry."""
     stats_logger_mock = MagicMock()
@@ -84,7 +89,7 @@ def test_on_test_stop_stops_logger_and_logs_final_stats(
 
 
 def test_on_spawning_complete_logs_telemetry(
-    recorder: MasterLocustTelemetryRecorder,
+    recorder: MasterLocustJsonTelemetryRecorder,
 ) -> None:
     """Test that on_spawning_complete logs the correct telemetry."""
     with patch.object(recorder, "log_telemetry") as mock_log:
@@ -100,7 +105,7 @@ def test_on_spawning_complete_logs_telemetry(
 
 
 def test_get_stats_formats_percentiles(
-    recorder: MasterLocustTelemetryRecorder, mock_env: Environment
+    recorder: MasterLocustJsonTelemetryRecorder, mock_env: Environment
 ) -> None:
     """Ensure _get_stats correctly maps percentile keys."""
     # Mock the stats dict returned by .to_dict()
@@ -118,7 +123,7 @@ def test_get_stats_formats_percentiles(
 
 
 def test_stop_request_stats_logger_kills_greenlet(
-    recorder: MasterLocustTelemetryRecorder,
+    recorder: MasterLocustJsonTelemetryRecorder,
 ) -> None:
     """Verify that _stop_request_stats_logger kills the greenlet if running."""
     mock_greenlet = MagicMock()
@@ -129,7 +134,7 @@ def test_stop_request_stats_logger_kills_greenlet(
 
 
 def test_log_total_stats_calls_log_telemetry(
-    recorder: MasterLocustTelemetryRecorder,
+    recorder: MasterLocustJsonTelemetryRecorder,
 ) -> None:
     """Ensure _log_total_stats calls log_telemetry with the correct telemetry type."""
     with patch.object(recorder, "log_telemetry") as mock_log:
@@ -140,7 +145,7 @@ def test_log_total_stats_calls_log_telemetry(
 
 
 def test_log_request_stats_handles_greenlet_exit(
-    recorder: MasterLocustTelemetryRecorder, mock_env: Environment
+    recorder: MasterLocustJsonTelemetryRecorder, mock_env: Environment
 ) -> None:
     """Verify _log_request_stats loops and stops cleanly on GreenletExit."""
     with (
@@ -159,7 +164,7 @@ def test_log_request_stats_handles_greenlet_exit(
 
 
 def test_log_entry_stats_calls_log_telemetry_for_each_entry(
-    recorder: MasterLocustTelemetryRecorder, mock_env: Environment
+    recorder: MasterLocustJsonTelemetryRecorder, mock_env: Environment
 ) -> None:
     """Ensure _log_entry_stats logs telemetry for each endpoint entry."""
     # Setup mock entries
@@ -186,7 +191,7 @@ def test_log_entry_stats_calls_log_telemetry_for_each_entry(
 
 
 def test_log_error_stats_calls_log_telemetry_for_each_error(
-    recorder: MasterLocustTelemetryRecorder, mock_env: Environment
+    recorder: MasterLocustJsonTelemetryRecorder, mock_env: Environment
 ) -> None:
     """Ensure _log_error_stats logs telemetry for each error entry."""
     # Setup mock errors
@@ -212,7 +217,7 @@ def test_log_error_stats_calls_log_telemetry_for_each_error(
 
 
 def test_log_request_stats_loops_and_calls_sleep(
-    recorder: MasterLocustTelemetryRecorder,
+    recorder: MasterLocustJsonTelemetryRecorder,
 ):
     """Ensure _log_request_stats loops and sleeps at the configured interval."""
     # Patch env.runner and parsed_options
@@ -246,7 +251,7 @@ def test_log_request_stats_loops_and_calls_sleep(
 
 
 def test_log_request_stats_returns_if_runner_none(
-    recorder: MasterLocustTelemetryRecorder,
+    recorder: MasterLocustJsonTelemetryRecorder,
 ):
     """Ensure _log_request_stats returns immediately if runner is None."""
     recorder.env.runner = None

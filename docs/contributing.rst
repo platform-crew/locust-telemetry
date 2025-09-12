@@ -1,3 +1,4 @@
+.. _contributing:
 Contributing Guide
 =======================================
 
@@ -9,9 +10,7 @@ Don't worry if this is your first time contributing—every small contribution c
 
 Project Repository
 ------------------
-You can find the source code and all issues on GitHub:
-
-:link: `Locust Telemetry Repository <https://github.com/platform-crew/locust-telemetry>`_
+You can find the source code and all issues on GitHub: `Locust Telemetry Repository <https://github.com/platform-crew/locust-telemetry>`_
 
 Getting Started
 ---------------
@@ -75,15 +74,11 @@ Reporting Issues
 Encountered a bug or unexpected behavior?
 
 1. Check the existing issues to avoid duplicates.
-2. If none exist, create a new issue on GitHub:
-
-   :link: `Report an Issue <https://github.com/platform-crew/locust-telemetry/issues>`_
+2. If none exist, create a new issue on GitHub: `Report an Issue <https://github.com/platform-crew/locust-telemetry/issues>`_
 
 Discussions
 -----------
-For questions, ideas, or general discussions, join our community:
-
-:link: `GitHub Discussions <https://github.com/platform-crew/locust-telemetry/discussions>`_
+For questions, ideas, or general discussions, join our community: `GitHub Discussions <https://github.com/platform-crew/locust-telemetry/discussions>`_
 
 💡 **Tip:** Even small contributions like improving documentation, adding examples, or reporting issues are highly appreciated!
 

@@ -4,11 +4,13 @@ import gevent
 import pytest
 from locust.runners import MasterRunner
 
-from locust_telemetry.recorders.locust.constants import LocustTestEvent
-from locust_telemetry.recorders.locust.mixins import LocustTelemetryCommonRecorderMixin
+from locust_telemetry.recorders.json.locust.constants import LocustTestEvent
+from locust_telemetry.recorders.json.locust.mixins import (
+    LocustJsonTelemetryCommonRecorderMixin,
+)
 
 
-class DummyRecorder(LocustTelemetryCommonRecorderMixin):
+class DummyRecorder(LocustJsonTelemetryCommonRecorderMixin):
     """A dummy class to test the telemetry mixin."""
 
     def __init__(self, env):

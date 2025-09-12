@@ -8,34 +8,58 @@
 [![License](https://img.shields.io/github/license/platform-crew/locust-telemetry?color=orange&style=flat-square)](https://github.com/platform-crew/locust-telemetry/blob/main/LICENSE)
 [![Documentation Status](https://readthedocs.org/projects/locust-telemetry/badge/?version=latest)](https://locust-telemetry.readthedocs.io/en/latest/?badge=latest)
 
-**Locust Telemetry Plugin** is an open-source plugin for [Locust](https://docs.locust.io/en/stable/)
-that adds telemetry, metrics, and observability to your load tests.
+Locust Telemetry is a modular plugin for Locust that provides structured
+observability for load and performance tests. It captures telemetry data in a
+flexible, structured format, enabling integration with existing observability
+tools and delivering detailed insights into system performance.
 
-It logs Locust stats and events (requests, failures, users, system metrics) as
-structured JSON logs, which can be ingested into Grafana, ELK, Loki, Datadog,
-or any observability platform.
+Load testing often requires correlating metrics with infrastructure data—CPU,
+memory, latency, errors—but traditional tools provide limited ways to export
+this information. Locust Telemetry addresses this by using log-based pipelines
+to efficiently handle high-volume, distributed metrics. Both master and worker
+nodes emit telemetry data, which can be buffered and batched by observability
+agents to avoid central bottlenecks.
 
-The plugin is fully extensible — you can add custom metrics
-(e.g., Kubernetes resource usage) to analyze application performance
-and scalability under load.
+Currently, telemetry is logged as structured JSON, making it easy to ingest
+into modern observability systems. In the future, we are also planning to
+support the OpenTelemetry standard for broader observability integration.
+
+By using Locust Telemetry, you can:
+
+- View load testing metrics in your preferred observability tool
+- Correlate them with application and infrastructure metrics
+- Standardize monitoring across systems without introducing extra dependencies
+
+The plugin is highly extensible—custom metrics and recorders can be added to
+monitor scalability and infrastructure behavior under load. We welcome
+contributions to expand this project with additional telemetry recorders!
 
 📖 Full documentation is available on [Read the Docs](https://locust-telemetry.readthedocs.io/).
 
----
-## Why Locust Telemetry Plugin?
-
-While Locust is great for load testing, its built-in stats are not always easy to integrate into modern observability platforms.
-The **Locust Telemetry Plugin** bridges this gap by exporting all test metrics as JSON logs, making it simple to send data into Grafana, ELK, Loki, Prometheus, or Datadog.
-
----
-
 ## Key Features
 
-- **Structured JSON Logging**: Captures test lifecycle events, request stats, and errors in a machine-readable format.
-- **Master & Worker Metrics**: Aggregates stats on the master; monitors CPU and memory usage on workers.
-- **Plugin Architecture**: Extend with custom telemetry modules (e.g., Kubernetes metrics).
-- **Distributed Load Testing**: Works seamlessly in master–worker Locust setups.
-- **Configurable**: Control behavior via CLI arguments or environment variables.
+- **Structured Telemetry**
+  Captures key events—test lifecycle, request stats, errors, and resource
+  warnings—in a structured format suitable for observability pipelines.
+
+- **Master & Worker Metrics**
+  Master nodes aggregate overall stats and errors; worker nodes report
+  node-specific metrics, including CPU usage.
+
+- **Modular & Extensible**
+  Easily add custom recorders (e.g., Kubernetes metrics) and support multiple
+  recorders in a single Locust run.
+
+- **Observability Integration**
+  Compatible with any log-based or structured telemetry tool, enabling
+  flexible dashboards and analysis.
+
+- **Distributed Support**
+  Fully compatible with Locust’s master–worker architecture.
+
+- **Flexible Configuration**
+  Configurable via CLI arguments or environment variables for easy setup.
+
 
 ---
 
@@ -91,7 +115,7 @@ entrypoint.initialize()
 Run with telemetry enabled. Specify the test plan and the recorder plugin:
 
 ```bash
-$ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder stats
+$ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder stats-json
 ```
 
 ##### Note

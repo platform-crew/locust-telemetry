@@ -12,18 +12,24 @@ from unittest.mock import MagicMock, patch
 from locust.runners import MasterRunner, WorkerRunner
 
 from locust_telemetry import config
-from locust_telemetry.recorders.locust.master import MasterLocustTelemetryRecorder
-from locust_telemetry.recorders.locust.plugin import LocustTelemetryRecorderPlugin
-from locust_telemetry.recorders.locust.worker import WorkerLocustTelemetryRecorder
+from locust_telemetry.recorders.json.locust.master import (
+    MasterLocustJsonTelemetryRecorder,
+)
+from locust_telemetry.recorders.json.locust.plugin import (
+    LocustJsonTelemetryRecorderPlugin,
+)
+from locust_telemetry.recorders.json.locust.worker import (
+    WorkerLocustJsonTelemetryRecorder,
+)
 
 
 def test_register_master_telemetry_recorder_calls_master_recorder(mock_env):
     """Ensure the master recorder is instantiated during master registration."""
-    plugin = LocustTelemetryRecorderPlugin()
+    plugin = LocustJsonTelemetryRecorderPlugin()
     mock_env.runner.__class__ = MasterRunner
 
     with patch.object(
-        MasterLocustTelemetryRecorder, "__init__", return_value=None
+        MasterLocustJsonTelemetryRecorder, "__init__", return_value=None
     ) as mock_recorder:
         plugin.load_master_telemetry_recorders(mock_env)
         mock_recorder.assert_called_once_with(env=mock_env)
@@ -31,11 +37,11 @@ def test_register_master_telemetry_recorder_calls_master_recorder(mock_env):
 
 def test_register_worker_telemetry_recorder_calls_worker_recorder(mock_env):
     """Ensure the worker recorder is instantiated during worker registration."""
-    plugin = LocustTelemetryRecorderPlugin()
+    plugin = LocustJsonTelemetryRecorderPlugin()
     mock_env.runner.__class__ = WorkerRunner
 
     with patch.object(
-        WorkerLocustTelemetryRecorder, "__init__", return_value=None
+        WorkerLocustJsonTelemetryRecorder, "__init__", return_value=None
     ) as mock_recorder:
         plugin.load_worker_telemetry_recorders(mock_env)
         mock_recorder.assert_called_once_with(env=mock_env)
@@ -43,7 +49,7 @@ def test_register_worker_telemetry_recorder_calls_worker_recorder(mock_env):
 
 def test_load_dispatches_to_master_recorder_when_master(mock_env):
     """Verify that load() dispatches to master recorder when runner is MasterRunner."""
-    plugin = LocustTelemetryRecorderPlugin()
+    plugin = LocustJsonTelemetryRecorderPlugin()
     mock_env.runner.__class__ = MasterRunner
 
     with patch.object(plugin, "load_master_telemetry_recorders") as mock_master:
@@ -53,7 +59,7 @@ def test_load_dispatches_to_master_recorder_when_master(mock_env):
 
 def test_load_dispatches_to_worker_recorder_when_worker(mock_env):
     """Verify that load() dispatches to worker recorder when runner is WorkerRunner."""
-    plugin = LocustTelemetryRecorderPlugin()
+    plugin = LocustJsonTelemetryRecorderPlugin()
     mock_env.runner.__class__ = WorkerRunner
 
     with patch.object(plugin, "load_worker_telemetry_recorders") as mock_worker:
@@ -65,7 +71,7 @@ def test_add_cli_arguments_registers_expected_arguments():
     """
     Ensure that add_cli_arguments adds both stats and system usage interval arguments.
     """
-    plugin = LocustTelemetryRecorderPlugin()
+    plugin = LocustJsonTelemetryRecorderPlugin()
 
     # Mock a parser group
     mock_group = MagicMock()
@@ -98,7 +104,7 @@ def test_add_cli_arguments_sets_env_var_and_type():
     """
     Ensure that each CLI argument has correct type and env_var.
     """
-    plugin = LocustTelemetryRecorderPlugin()
+    plugin = LocustJsonTelemetryRecorderPlugin()
     mock_group = MagicMock()
     plugin.add_cli_arguments(mock_group)
 

@@ -1,5 +1,5 @@
 """
-This module provides the `WorkerLocustTelemetryRecorder` class, which runs on
+This module provides the `WorkerLocustJsonTelemetryRecorder` class, which runs on
 Locust worker nodes. It captures worker-specific telemetry such as CPU warnings,
 System usage and logs them in a format suitable for observability tools.
 
@@ -15,13 +15,15 @@ from typing import ClassVar
 from locust.env import Environment
 
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
-from locust_telemetry.recorders.locust.mixins import LocustTelemetryCommonRecorderMixin
+from locust_telemetry.recorders.json.locust.mixins import (
+    LocustJsonTelemetryCommonRecorderMixin,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class WorkerLocustTelemetryRecorder(
-    TelemetryBaseRecorder, LocustTelemetryCommonRecorderMixin
+class WorkerLocustJsonTelemetryRecorder(
+    TelemetryBaseRecorder, LocustJsonTelemetryCommonRecorderMixin
 ):
     """
     Telemetry recorder for Locust worker nodes.

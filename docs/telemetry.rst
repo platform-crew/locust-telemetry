@@ -1,9 +1,12 @@
 .. _telemetry:
 
-Telemetry
-=========
+Telemetry Recorders
+==============================
 
-Locust Telemetry produces two main types of structured logs:
+Locust Json
+--------------
+
+Locust Json Telemetry plugin produces two main types of structured logs:
 
 - **Events** – lifecycle and system-level signals (e.g., test start, stop, CPU warnings).
 - **Metrics / Request Stats** – periodic performance data such as request rates, latencies, and error counts.
@@ -14,8 +17,12 @@ For a complete list of Locust’s native events, refer to the official
 This plugin extends those capabilities by emitting additional **telemetry events**
 and **metrics** in JSON format, making it easy to ingest into your observability tools.
 
+.. note::
+   - This telemetry is corresponding to the recorder plugin ``stats-json``
+   - To select this recorder plugin you should use cli or env variables as ``LOCUST_ENABLE_TELEMETRY_RECORDER=stats-json`` OR ``--enable-telemetry-recorder stats-json``
+
 Events
-------
+~~~~~~~~~~~~~~~~~~~~
 
 The following telemetry events are emitted by the **locust-telemetry** plugin:
 
@@ -49,8 +56,7 @@ The following telemetry events are emitted by the **locust-telemetry** plugin:
      - See example below
 
 
-Events Examples
---------
+**Events Examples**
 
 **Test Start**
 
@@ -130,7 +136,7 @@ Events Examples
 
 
 Metrics
------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -158,8 +164,7 @@ Metrics
      - See example below
 
 
-Metrics Examples
---------
+**Metrics Examples**
 
 **Current Stats**
 

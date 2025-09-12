@@ -9,12 +9,16 @@ import logging
 
 from locust_telemetry.core.coordinator import TelemetryCoordinator
 from locust_telemetry.core.manager import TelemetryRecorderPluginManager
-from locust_telemetry.recorders.locust.plugin import LocustTelemetryRecorderPlugin
+from locust_telemetry.recorders.json.locust.plugin import (
+    LocustJsonTelemetryRecorderPlugin,
+)
 
 logger = logging.getLogger(__name__)
 
 
-CONFIGURED_RECORDER_PLUGINS = (LocustTelemetryRecorderPlugin,)  # Locust stats recorder.
+CONFIGURED_RECORDER_PLUGINS = (
+    LocustJsonTelemetryRecorderPlugin,
+)  # Locust stats recorder.
 
 
 def initialize(*args, **kwargs) -> None:

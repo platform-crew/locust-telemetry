@@ -3,18 +3,20 @@ from unittest.mock import patch
 import pytest
 from locust.env import Environment
 
-from locust_telemetry.recorders.locust.constants import LocustTestEvent
-from locust_telemetry.recorders.locust.worker import WorkerLocustTelemetryRecorder
+from locust_telemetry.recorders.json.locust.constants import LocustTestEvent
+from locust_telemetry.recorders.json.locust.worker import (
+    WorkerLocustJsonTelemetryRecorder,
+)
 
 
 @pytest.fixture
-def recorder(mock_env: Environment) -> WorkerLocustTelemetryRecorder:
-    """Return a WorkerLocustTelemetryRecorder instance for testing."""
-    return WorkerLocustTelemetryRecorder(env=mock_env)
+def recorder(mock_env: Environment) -> WorkerLocustJsonTelemetryRecorder:
+    """Return a WorkerLocustJsonTelemetryRecorder instance for testing."""
+    return WorkerLocustJsonTelemetryRecorder(env=mock_env)
 
 
 def test_recorder_initialization_registers_event_listener(
-    recorder: WorkerLocustTelemetryRecorder, mock_env: Environment
+    recorder: WorkerLocustJsonTelemetryRecorder, mock_env: Environment
 ) -> None:
     """
     Ensure the recorder registers a listener for cpu_warning and system usage on init.
@@ -30,7 +32,7 @@ def test_recorder_initialization_registers_event_listener(
 
 
 def test_on_cpu_warning_calls_log_telemetry(
-    recorder: WorkerLocustTelemetryRecorder,
+    recorder: WorkerLocustJsonTelemetryRecorder,
 ) -> None:
     """Ensure on_cpu_warning logs telemetry with correct payload."""
     cpu_usage = 85.5
@@ -52,7 +54,7 @@ def test_on_cpu_warning_calls_log_telemetry(
 
 
 def test_on_cpu_warning_with_default_message(
-    recorder: WorkerLocustTelemetryRecorder,
+    recorder: WorkerLocustJsonTelemetryRecorder,
 ) -> None:
     """Ensure on_cpu_warning works if message is None."""
     cpu_usage = 92.3

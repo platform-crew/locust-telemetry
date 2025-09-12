@@ -12,7 +12,7 @@ from locust.argument_parser import LocustArgumentParser
 
 from locust_telemetry.config import (
     TELEMETRY_CLI_GROUP_NAME,
-    TELEMETRY_STATS_RECORDER_PLUGIN_ID,
+    TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID,
 )
 
 
@@ -53,13 +53,13 @@ def register_telemetry_cli_args(parser: LocustArgumentParser):
     group.add_argument(
         "--enable-telemetry-recorder",
         action="append",
-        choices=[TELEMETRY_STATS_RECORDER_PLUGIN_ID],
+        choices=[TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID],
         help=(
             "Enable one or more telemetry recorder plugins. "
             "Can be specified multiple times or via environment variable."
         ),
         env_var="LOCUST_ENABLE_TELEMETRY_RECORDER",
-        default=[TELEMETRY_STATS_RECORDER_PLUGIN_ID],
+        default=[TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID],
     )
 
     return group
