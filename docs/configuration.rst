@@ -12,7 +12,7 @@ or use below command
 
    $locust --help
 
-.. note::
+.. warning::
 
    Since Locust does not currently support plugin-specific options, locust-telemetry
    configuration variables will **not** appear in the ``--help``

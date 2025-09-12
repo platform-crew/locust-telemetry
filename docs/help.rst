@@ -1,7 +1,11 @@
 .. _help:
 
-OpenTelemetry Support (Help Wanted)
-================================
+Help Needed
+-----------
+
+OpenTelemetry Support
+~~~~~~~~~~~~~~~~~~~~
+
 We are actively working on adding **OpenTelemetry support** to `locust-telemetry` and
 would love community contributions. The goal is to provide:
 
@@ -15,8 +19,8 @@ With OpenTelemetry, users will be able to:
 - Monitor system usage and request performance in real-time
 - Correlate load tests with infrastructure metrics and distributed services
 
-Help Needed
------------
+**Help Needed**
+
 We need help from the community to build and improve OpenTelemetry support.
 Specifically, contributions are welcome in the following areas:
 

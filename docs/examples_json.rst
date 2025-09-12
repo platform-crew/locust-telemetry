@@ -1,6 +1,6 @@
 .. _examples-json-section:
 
-Structure Json Logging
+Json Telemetry
 =======================================
 
 The following example demonstrates how to run **locust_telemetry** locally

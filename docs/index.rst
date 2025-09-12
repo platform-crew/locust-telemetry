@@ -23,31 +23,13 @@ Configuration
    telemetry
 
 =======================================
-Examples
-=======================================
-
-.. toctree::
-   :maxdepth: 2
-
-   examples
-
-=======================================
-Extending
+Extending Guide
 =======================================
 
 .. toctree::
    :maxdepth: 2
 
    extending
-
-=======================================
-Help Wanted
-=======================================
-
-.. toctree::
-   :maxdepth: 2
-
-   help
 
 =======================================
 Contributing Guide
@@ -61,15 +43,34 @@ Contributing guide
    contributing
 
 =======================================
+Examples
+=======================================
+
+.. toctree::
+   :maxdepth: 2
+
+   examples
+
+=======================================
 API Reference
 =======================================
 
 The API reference is automatically generated from docstrings.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    api/index
+
+=======================================
+Help Needed
+=======================================
+
+.. toctree::
+   :maxdepth: 2
+
+   help
+
 
 =======================================
 FAQ
