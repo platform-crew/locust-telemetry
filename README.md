@@ -13,7 +13,8 @@ that adds telemetry, metrics, and observability to your load tests.
 
 It logs Locust stats and events (requests, failures, users, system metrics) as
 structured JSON logs, which can be ingested into Grafana, ELK, Loki, Datadog,
-or any observability platform.
+or any observability platform. OpenTelemetry (OTel) support is planned soon to
+provide standardized metrics and traces for even deeper observability.
 
 The plugin is fully extensible — you can add custom metrics
 (e.g., Kubernetes resource usage) to analyze application performance
@@ -91,7 +92,7 @@ entrypoint.initialize()
 Run with telemetry enabled. Specify the test plan and the recorder plugin:
 
 ```bash
-$ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder stats
+$ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder stats-json
 ```
 
 ##### Note

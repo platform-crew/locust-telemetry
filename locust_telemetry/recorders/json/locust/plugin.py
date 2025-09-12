@@ -42,7 +42,7 @@ class LocustJsonTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
     - Load worker-side telemetry recorders.
     """
 
-    RECORDER_PLUGIN_ID = config.TELEMETRY_STATS_RECORDER_PLUGIN_ID
+    RECORDER_PLUGIN_ID = config.TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID
 
     def add_cli_arguments(self, group: Any) -> None:
         """

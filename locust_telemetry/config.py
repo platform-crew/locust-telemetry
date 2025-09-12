@@ -32,4 +32,4 @@ ENVIRONMENT_METADATA: Dict[str, Callable] = {
     "run_id": lambda: str(uuid.uuid4())[:8]  # first 8 characters of UUID
 }
 
-TELEMETRY_STATS_RECORDER_PLUGIN_ID = "stats"
+TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID = "stats-json"

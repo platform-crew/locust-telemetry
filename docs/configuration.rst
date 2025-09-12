@@ -41,9 +41,9 @@ or use below command
    * - ``--enable-telemetry-recorder``
      - ``LOCUST_ENABLE_TELEMETRY_RECORDER``
      - ``str``
-     - ``stats``
+     - ``stats-json``
      - No
-     - Since this telemetry supports multiple recorders, this is needed. For now it supports only ``stats``
+     - Since this telemetry supports multiple recorders, this is needed. For now it supports only jjson telemetry - ``stats-json``
    * - ``--lt-stats-recorder-interval``
      - ``LOCUST_TELEMETRY_STATS_RECORDER_INTERVAL``
      - ``int``

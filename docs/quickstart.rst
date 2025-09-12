@@ -17,7 +17,7 @@ For details on Locust itself, refer to the official `Locust documentation <https
 
 .. code-block:: bash
 
-    $ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder stats
+    $ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder stats-json
 
 .. note::
    - CLI arguments can also be configured via environment variables:
@@ -38,7 +38,7 @@ For details on Locust itself, refer to the official `Locust documentation <https
 Here’s an example of a Grafana dashboard built using telemetry from this plugin.
 It shows how Locust metrics can be transformed into meaningful insights with just a few steps.
 
-For a full walkthrough on setting up dashboards locally, see the :ref:`examples-section`.
+For a full walkthrough on setting up dashboards locally, see the :ref:`examples-json-section`.
 
 .. image:: _static/request-dashboard-1.png
    :alt: Request Dashboard - Overview
