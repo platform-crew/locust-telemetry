@@ -6,6 +6,7 @@ from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 
 from locust_telemetry.core.coordinator import TelemetryCoordinator
+from locust_telemetry.core.manager import TelemetryRecorderPluginManager
 from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
 
@@ -19,6 +20,9 @@ class DummyTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
         self.master_loaded = False
         self.worker_loaded = False
         self.added_cli_args = False
+
+    def add_test_metadata(self):
+        return {"dummy_key": "dummy_value"}
 
     def add_cli_arguments(self, group) -> None:
         self.added_cli_args = True
@@ -104,3 +108,13 @@ def parser() -> LocustArgumentParser:
 def sample_metadata():
     """Return a sample test metadata dictionary."""
     return {"run_id": "1234", "env": "staging"}
+
+
+@pytest.fixture(autouse=True)
+def reset_manager_singleton():
+    """Reset singleton between tests to avoid state leakage."""
+    TelemetryRecorderPluginManager._instance = None
+    TelemetryRecorderPluginManager._initialized = False
+    yield
+    TelemetryRecorderPluginManager._instance = None
+    TelemetryRecorderPluginManager._initialized = False

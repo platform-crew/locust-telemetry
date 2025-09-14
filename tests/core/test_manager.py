@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 from locust.runners import MasterRunner, WorkerRunner
 
 from locust_telemetry.core.manager import TelemetryRecorderPluginManager
@@ -130,3 +132,55 @@ def test_load_plugins_handles_plugin_exception(
         mgr.load_recorder_plugins(mock_env)
 
     assert any("Failed to load recorder plugin" in msg for msg in caplog.messages)
+
+
+def test_register_plugin_clis_invokes_plugin_method(dummy_recorder_plugin):
+    """
+    Ensure that register_plugin_clis calls add_cli_arguments on all plugins.
+    """
+    mgr = TelemetryRecorderPluginManager()
+    dummy_recorder_plugin.add_cli_arguments = MagicMock()
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+
+    fake_group = MagicMock()
+    mgr.register_plugin_clis(fake_group)
+
+    dummy_recorder_plugin.add_cli_arguments.assert_called_once_with(fake_group)
+
+
+def test_register_plugin_metadata_merges_and_sets(
+    monkeypatch, mock_env, dummy_recorder_plugin
+):
+    """
+    Ensure metadata from all plugins is merged and applied to the environment.
+    """
+    mgr = TelemetryRecorderPluginManager()
+    dummy_recorder_plugin.add_test_metadata = MagicMock(
+        return_value={"plugin_key": "plugin_value"}
+    )
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+
+    # Patch set_test_metadata to spy on it
+    with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
+        metadata = mgr.register_plugin_metadata(mock_env)
+
+    # DEFAULT_ENVIRONMENT_METADATA comes from config, so plugin updates it
+    assert "plugin_key" in metadata
+    mock_set.assert_called_once_with(mock_env, metadata)
+
+
+def test_register_plugin_metadata_handles_empty_plugins(monkeypatch, mock_env):
+    """
+    If no plugins are registered, metadata should equal DEFAULT_ENVIRONMENT_METADATA.
+    """
+    mgr = TelemetryRecorderPluginManager()
+
+    with patch(
+        "locust_telemetry.core.manager.config.DEFAULT_ENVIRONMENT_METADATA",
+        {"foo": "bar"},
+    ):
+        with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
+            metadata = mgr.register_plugin_metadata(mock_env)
+
+    assert metadata == {"foo": "bar"}
+    mock_set.assert_called_once_with(mock_env, {"foo": "bar"})

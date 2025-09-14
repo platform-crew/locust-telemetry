@@ -22,11 +22,7 @@ from locust.runners import MasterRunner, WorkerRunner
 from locust_telemetry.core.cli import register_telemetry_cli_args
 from locust_telemetry.core.manager import TelemetryRecorderPluginManager
 from locust_telemetry.logger import configure_logging
-from locust_telemetry.metadata import (
-    apply_worker_metadata,
-    get_test_metadata,
-    set_test_metadata,
-)
+from locust_telemetry.metadata import set_test_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -105,8 +101,7 @@ class TelemetryCoordinator:
             The Locust LocustArgumentParser instance.
         """
         group = register_telemetry_cli_args(parser)
-        for p in self.recorder_plugin_manager.recorder_plugins:
-            p.add_cli_arguments(group)
+        self.recorder_plugin_manager.register_plugin_clis(group)
 
     def _configure_logging(self, *args, **kwargs):
         """Register the logging configuration"""
@@ -131,7 +126,7 @@ class TelemetryCoordinator:
         if isinstance(environment.runner, WorkerRunner):
             environment.runner.register_message(
                 "set_metadata",
-                lambda msg, **kw: apply_worker_metadata(environment, msg.data),
+                lambda msg, **kw: set_test_metadata(environment, msg.data),
             )
             logger.info("[Worker] Metadata handler registered successfully")
 
@@ -150,8 +145,9 @@ class TelemetryCoordinator:
             Additional event system arguments (unused).
         """
         if isinstance(environment.runner, MasterRunner):
-            set_test_metadata(environment)
-            metadata = get_test_metadata(environment)
+            metadata = self.recorder_plugin_manager.register_plugin_metadata(
+                environment
+            )
             logger.info(
                 "Sending test metadata to workers", extra={"metadata": metadata}
             )

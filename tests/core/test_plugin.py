@@ -86,3 +86,28 @@ def test_load_without_plugin_id(mock_env, dummy_recorder_plugin):
     dummy_recorder_plugin.RECORDER_PLUGIN_ID = None
     with pytest.raises(RuntimeError):
         dummy_recorder_plugin.load(mock_env)
+
+
+def test_add_test_metadata_contract(dummy_recorder_plugin):
+    """
+    Ensure add_test_metadata returns a dict and can be merged into environment metadata.
+    """
+    metadata = dummy_recorder_plugin.add_test_metadata()
+    assert isinstance(metadata, dict)
+    assert "dummy_key" in metadata
+
+
+def test_load_logs_when_invalid_runner(mock_env, dummy_recorder_plugin, caplog):
+    """
+    Ensure load() logs at debug level when runner type is unsupported.
+    """
+
+    class StrangeRunner:
+        pass
+
+    mock_env.runner = StrangeRunner()
+    with caplog.at_level("DEBUG"):
+        dummy_recorder_plugin.load(mock_env)
+
+    # should not crash, should log nothing critical
+    assert all("Failed" not in m for m in caplog.messages)
