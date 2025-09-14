@@ -12,11 +12,13 @@ Responsibilities
 from __future__ import annotations
 
 import logging
-from typing import Any, List
+from typing import Any, Dict, List
 
 from locust.env import Environment
 
+from locust_telemetry import config
 from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
+from locust_telemetry.metadata import set_test_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +44,12 @@ class TelemetryRecorderPluginManager:
         return cls._instance
 
     def __init__(self):
-        """Initialize the recorder plugin registry if not already initialized."""
+        """
+        Initialize the plugin manager.
+
+        Ensures that the plugin registry is created only once for the process.
+        Subsequent instantiations will reuse the existing singleton instance.
+        """
         if self._initialized:
             return
         self._recorder_plugins: List[TelemetryRecorderPluginBase] = []
@@ -51,7 +58,7 @@ class TelemetryRecorderPluginManager:
     @property
     def recorder_plugins(self) -> List[TelemetryRecorderPluginBase]:
         """
-        Return the list of registered recorder plugins.
+        Get the list of registered recorder plugins.
 
         Returns
         -------
@@ -63,6 +70,8 @@ class TelemetryRecorderPluginManager:
     def register_recorder_plugin(self, plugin: TelemetryRecorderPluginBase) -> None:
         """
         Register a telemetry recorder plugin for later loading.
+
+        A plugin will only be added once to prevent duplicate registration.
 
         Parameters
         ----------
@@ -81,13 +90,56 @@ class TelemetryRecorderPluginManager:
                 f"{plugin.__class__.__name__}"
             )
 
-    def load_recorder_plugins(self, environment: Environment, **kwargs: Any) -> None:
+    def register_plugin_clis(self, group: Any) -> None:
         """
-        Load all registered recorder plugins.
+        Register CLI arguments for all recorder plugins.
 
         This method is typically invoked by ``TelemetryOrchestrator`` during
-        Locust's init phase. Each recorder plugin receives the current
-        environment and optional event context.
+        Locust's ``init_command_line_parser`` phase. Each recorder plugin
+        receives the locust-telemetry CLI argument group.
+
+        Parameters
+        ----------
+        group : argparse._ArgumentGroup
+            The Locust CLI argument group.
+        """
+        for plugin in self._recorder_plugins:
+            plugin.add_cli_arguments(group)
+
+    def register_plugin_metadata(self, environment: Environment) -> Dict:
+        """
+        Collect and register test metadata from all recorder plugins.
+
+        This method aggregates metadata contributed by each registered
+        recorder plugin, merges it into the default environment metadata,
+        and sets it on the given Locust environment.
+
+        Parameters
+        ----------
+        environment : Environment
+            The Locust environment instance where the metadata will be stored.
+
+        Returns
+        -------
+        Dict
+            A dictionary containing the merged environment metadata,
+            including contributions from all recorder plugins.
+        """
+        metadata = config.DEFAULT_ENVIRONMENT_METADATA
+        for plugin in self._recorder_plugins:
+            metadata.update(plugin.add_test_metadata())
+
+        set_test_metadata(environment, metadata)
+
+        return metadata
+
+    def load_recorder_plugins(self, environment: Environment, **kwargs: Any) -> None:
+        """
+        Load and activate all registered recorder plugins.
+
+        This method is typically invoked by ``TelemetryOrchestrator`` during
+        Locust's ``init`` phase. Each recorder plugin receives the current
+        environment and any additional context provided by the event system.
 
         Parameters
         ----------
@@ -95,6 +147,11 @@ class TelemetryRecorderPluginManager:
             The Locust environment instance.
         **kwargs : Any
             Additional context passed by the event system.
+
+        Raises
+        ------
+        Exception
+            Logs and propagates plugin load failures with context.
         """
         enabled_plugins = getattr(
             environment.parsed_options, "enable_telemetry_recorder", None

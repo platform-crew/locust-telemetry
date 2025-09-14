@@ -7,7 +7,7 @@ DEFAULT_RECORDER_INTERVAL : int
     Default interval in seconds for recording stats is 2 seconds. But can be set through
     environment variable LOCUST_TELEMETRY_RECORDER_INTERVAL
 
-ENVIRONMENT_METADATA : Dict[str, Callable]
+DEFAULT_ENVIRONMENT_METADATA : Dict[str, Callable]
     Dictionary of environment metadata functions. For example, 'run_id' returns
     the current UTC timestamp in ISO format. This is for internal use only.
 
@@ -28,7 +28,7 @@ DEFAULT_SYSTEM_USAGE_RECORDER_INTERVAL: int = 3  # 2 seconds
 TELEMETRY_CLI_GROUP_NAME: str = "locust-telemetry"
 
 # Environment metadata which can be access by environment.<metadata>
-ENVIRONMENT_METADATA: Dict[str, Callable] = {
+DEFAULT_ENVIRONMENT_METADATA: Dict[str, Callable] = {
     "run_id": lambda: str(uuid.uuid4())[:8]  # first 8 characters of UUID
 }
 

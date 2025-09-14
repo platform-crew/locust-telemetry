@@ -15,7 +15,7 @@ Responsibilities
 """
 
 import logging
-from typing import Any
+from typing import Any, Dict
 
 from locust.env import Environment
 
@@ -43,6 +43,13 @@ class LocustJsonTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
     """
 
     RECORDER_PLUGIN_ID = config.TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID
+
+    def add_test_metadata(self) -> Dict:
+        """
+        This recorder plugin doesn't need any metadata other than the default
+        available at config.DEFAULT_ENVIRONMENT_METADATA
+        """
+        return {}
 
     def add_cli_arguments(self, group: Any) -> None:
         """

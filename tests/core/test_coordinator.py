@@ -4,23 +4,12 @@ Tests for TelemetryCoordinator with updated CLI hook handling.
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 from locust import events
 from locust.argument_parser import LocustArgumentParser
 from locust.runners import MasterRunner, WorkerRunner
 
 from locust_telemetry.core.coordinator import TelemetryCoordinator
 from locust_telemetry.core.manager import TelemetryRecorderPluginManager
-
-
-@pytest.fixture
-def mock_env():
-    """Return a mocked Locust Environment with runner."""
-    env = MagicMock()
-    env.runner = MagicMock()
-    env.parsed_options = MagicMock()
-    env.parsed_options.testplan = "test-plan"
-    return env
 
 
 def test_singleton_behavior():
@@ -107,30 +96,34 @@ def test_register_metadata_handler_skips_non_worker(mock_env):
     assert not mock_env.runner.register_message.called
 
 
-def test_setup_metadata_sends_metadata_to_workers(mock_env):
-    """_setup_metadata gathers metadata on MasterRunner and sends it to workers."""
+def test_setup_metadata_for_master_sends_message(mock_env):
+    """
+    Verify on master node, coordinator initiates the metadata setup and
+    sends message to worker
+    """
+    mgr = MagicMock(spec=TelemetryRecorderPluginManager)
+    mgr.register_plugin_metadata.return_value = {"foo": "bar"}
+
+    coord = TelemetryCoordinator(mgr)
     mock_env.runner.__class__ = MasterRunner
-    coo = TelemetryCoordinator(MagicMock())
 
-    # Patch metadata helpers
-    with (
-        patch("locust_telemetry.core.coordinator.set_test_metadata") as mock_set,
-        patch(
-            "locust_telemetry.core.coordinator.get_test_metadata",
-            return_value={"run_id": "123"},
-        ) as mock_get,
-    ):
-        coo._setup_metadata(mock_env)
-        mock_set.assert_called_once_with(mock_env)
-        mock_get.assert_called_once_with(mock_env)
-        mock_env.runner.send_message.assert_called_once_with(
-            "set_metadata", {"run_id": "123"}
-        )
+    coord._setup_metadata(mock_env)
+
+    mgr.register_plugin_metadata.assert_called_once_with(mock_env)
+    mock_env.runner.send_message.assert_called_once_with("set_metadata", {"foo": "bar"})
 
 
-def test_setup_metadata_skips_non_master(mock_env):
-    """_setup_metadata does nothing if runner is not MasterRunner."""
+def test_setup_metadata_does_nothing_for_worker(mock_env):
+    """
+    Verify on worker node, make sure coordinator doesn't initiates metadata
+    collector and does not send any message.
+    """
+    mgr = MagicMock(spec=TelemetryRecorderPluginManager)
+    coord = TelemetryCoordinator(mgr)
+
     mock_env.runner.__class__ = WorkerRunner
-    coo = TelemetryCoordinator(MagicMock())
-    coo._setup_metadata(mock_env)
-    assert not mock_env.runner.send_message.called
+
+    coord._setup_metadata(mock_env)
+
+    mgr.register_plugin_metadata.assert_not_called()
+    mock_env.runner.send_message.assert_not_called()

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Dict
 
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
@@ -35,6 +35,14 @@ class TelemetryRecorderPluginBase(ABC):
     """
 
     RECORDER_PLUGIN_ID: str | None = None
+
+    @abstractmethod
+    def add_test_metadata(self) -> Dict:
+        """
+        Add any metadata required by the plugin to both master and worker environment.
+        Metadata that is returned from this method can be accessed from
+        environment.telemetry_meta
+        """
 
     @abstractmethod
     def add_cli_arguments(self, group: Any) -> None:

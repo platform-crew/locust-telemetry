@@ -1,92 +1,44 @@
-from unittest.mock import patch
-
-import pytest
-
-from locust_telemetry import metadata
+from locust_telemetry.metadata import set_test_metadata
 
 
-def test_set_test_metadata_sets_attributes(mock_env):
-    """Ensure set_test_metadata sets all attributes from config generators."""
-    fake_generators = {
-        "run_id": lambda: "test-run",
-        "env": lambda: "dev",
+def test_static_metadata(mock_env):
+    """Metadata values should be attached as-is to the environment."""
+    metadata = {"test_name": "load_test", "version": "1.0"}
+    set_test_metadata(mock_env, metadata)
+
+    assert hasattr(mock_env, "telemetry_meta")
+    assert mock_env.telemetry_meta.test_name == "load_test"
+    assert mock_env.telemetry_meta.version == "1.0"
+
+
+def test_callable_metadata(mock_env):
+    """Metadata values that are callables should be evaluated before attaching."""
+    metadata = {"dynamic_value": lambda: "computed!"}
+    set_test_metadata(mock_env, metadata)
+
+    assert mock_env.telemetry_meta.dynamic_value == "computed!"
+
+
+def test_mixed_metadata(mock_env):
+    """Supports a mix of static and callable values."""
+    metadata = {
+        "static": 42,
+        "dynamic": lambda: "hello",
     }
-    with patch.dict(
-        metadata.config.__dict__, {"ENVIRONMENT_METADATA": fake_generators}
-    ):
-        metadata.set_test_metadata(mock_env)
-        for key, gen in fake_generators.items():
-            assert getattr(mock_env, key) == gen()
+    set_test_metadata(mock_env, metadata)
+
+    assert mock_env.telemetry_meta.static == 42
+    assert mock_env.telemetry_meta.dynamic == "hello"
 
 
-def test_set_test_metadata_does_overwrite_existing(mock_env):
-    """Ensure set_test_metadata does not overwrite already set attributes."""
-    fake_generators = {"run_id": lambda: "new-run"}
-    mock_env.run_id = "existing-run"
+def test_overrides_existing_metadata(mock_env):
+    """Subsequent calls should overwrite the metadata object entirely."""
+    set_test_metadata(mock_env, {"first": "one"})
+    first_meta = mock_env.telemetry_meta
 
-    with patch.dict(
-        metadata.config.__dict__, {"ENVIRONMENT_METADATA": fake_generators}
-    ):
-        metadata.set_test_metadata(mock_env)
-        # Value should remain unchanged
-        assert mock_env.run_id == "new-run"
+    set_test_metadata(mock_env, {"second": "two"})
+    second_meta = mock_env.telemetry_meta
 
-
-def test_get_test_metadata_returns_all_keys(mock_env):
-    """Ensure get_test_metadata returns correct key/value pairs."""
-    fake_generators = {
-        "run_id": lambda: "test-run",
-        "env": lambda: "dev",
-    }
-    with patch.dict(
-        metadata.config.__dict__, {"ENVIRONMENT_METADATA": fake_generators}
-    ):
-        metadata.set_test_metadata(mock_env)
-        md = metadata.get_test_metadata(mock_env)
-        assert md["run_id"] == "test-run"
-        assert md["env"] == "dev"
-
-
-def test_get_test_metadata_raises_if_missing_key(mock_env):
-    """Ensure get_test_metadata raises AttributeError if metadata key is missing."""
-    fake_generators = {"run_id": lambda: "test-run", "env": lambda: "dev"}
-    with patch.dict(
-        metadata.config.__dict__, {"ENVIRONMENT_METADATA": fake_generators}
-    ):
-        setattr(mock_env, "run_id", "1234")
-        if hasattr(mock_env, "env"):
-            delattr(mock_env, "env")
-
-        with pytest.raises(AttributeError) as exc_info:
-            metadata.get_test_metadata(mock_env)
-        assert "env" in str(exc_info.value)
-
-
-def test_apply_worker_metadata_sets_attributes(mock_env, sample_metadata):
-    """
-    Ensure apply_worker_metadata sets attributes correctly on the
-    worker environment.
-    """
-    metadata.apply_worker_metadata(mock_env, sample_metadata)
-    for key, value in sample_metadata.items():
-        assert getattr(mock_env, key) == value
-
-
-def test_apply_worker_metadata_overwrites_existing(mock_env, sample_metadata):
-    """Ensure apply_worker_metadata overwrites existing values."""
-    mock_env.run_id = "old-run"
-    sample_metadata["run_id"] = "new-run"
-
-    metadata.apply_worker_metadata(mock_env, sample_metadata)
-    assert getattr(mock_env, "run_id") == "new-run"
-
-
-def test_apply_worker_metadata_logs_info(mock_env, sample_metadata):
-    """Ensure apply_worker_metadata logs an info message after applying metadata."""
-    with patch("locust_telemetry.metadata.logger.info") as mock_info:
-        metadata.apply_worker_metadata(mock_env, sample_metadata)
-        mock_info.assert_called_once()
-        args, kwargs = mock_info.call_args
-        assert "Metadata applied" in args[0]
-        assert getattr(mock_env, "run_id") in args
-        assert getattr(mock_env.parsed_options, "testplan") in args
+    assert not hasattr(second_meta, "first")
+    assert second_meta.second == "two"
+    assert first_meta is not second_meta  # replaced, not mutated
