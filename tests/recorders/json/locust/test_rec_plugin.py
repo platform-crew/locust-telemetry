@@ -123,3 +123,14 @@ def test_add_cli_arguments_sets_env_var_and_type():
     assert (
         system_call[1]["env_var"] == "LOCUST_TELEMETRY_SYSTEM_USAGE_RECORDER_INTERVAL"
     )
+
+
+def test_add_test_metadata():
+    """
+    Ensure calling a plugin's add_test_metadata return empty dict and
+    follows the base signature.
+    """
+    plugin = LocustJsonTelemetryRecorderPlugin()
+    metadata = plugin.add_test_metadata()
+    assert isinstance(metadata, dict)
+    assert metadata == {}
