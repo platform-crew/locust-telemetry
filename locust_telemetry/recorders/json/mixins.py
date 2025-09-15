@@ -85,7 +85,7 @@ class LocustJsonTelemetryCommonRecorderMixin:
             severity="warning",
         )
 
-    def log_usage_monitor(self):
+    def record_current_system_metrics(self):
         """
         Periodic tasks that fetches the locust runners usage and logs it to the console.
         This metrics can be used to observe if there are any bottlenecks with the
@@ -94,24 +94,18 @@ class LocustJsonTelemetryCommonRecorderMixin:
         Note: Locust already have usage_monitor event, however it fires every 10
         seconds and cannot be configured. Hence, this method allows us to monitor system
         usage according to our convenience.
-
         """
-        collector_interval = self.env.parsed_options.lt_stats_recorder_interval
         try:
-            while True:
-                cpu_usage = self._process.cpu_percent()
-                # Convert from bytes to Mebibytes
-                memory_usage = self._process.memory_info().rss / (1024 * 1024)
-                self.log_telemetry(
-                    telemetry=LocustTestEvent.USAGE.value,
-                    cpu_usage=cpu_usage,
-                    memory_usage=memory_usage,
-                )
-                gevent.sleep(collector_interval)
-        except gevent.GreenletExit:
-            logger.info("System metrics collection terminated gracefully")
-        except Exception:
-            logger.exception("System metrics collection loop failed")
+            cpu_usage = self._process.cpu_percent()
+            # Convert from bytes to Mebibytes
+            memory_usage = self._process.memory_info().rss / (1024 * 1024)
+            self.log_telemetry(
+                telemetry=LocustTestEvent.USAGE.value,
+                cpu_usage=cpu_usage,
+                memory_usage=memory_usage,
+            )
+        except psutil.Error as e:
+            logger.warning(f"[json] psutil error during metric collection: {e}")
 
     def on_test_start(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -122,7 +116,7 @@ class LocustJsonTelemetryCommonRecorderMixin:
             - usage_monitor
         """
         self.env.events.cpu_warning.add_listener(self.on_cpu_warning)
-        self._system_metrics_logger = gevent.spawn(self.log_usage_monitor)
+        self._system_metrics_logger = gevent.spawn(self._start_recording_system_metrics)
 
     def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -133,9 +127,38 @@ class LocustJsonTelemetryCommonRecorderMixin:
             - usage_monitor
         """
         self.env.events.cpu_warning.remove_listener(self.on_cpu_warning)
+        self._stop_recording_system_metrics()
 
-        # Terminate background collection process
-        if self._system_metrics_logger is not None:
-            self._system_metrics_logger.kill()
-            self._system_metrics_logger = None
-            logger.debug("[json] System metrics collection process terminated")
+    def _start_recording_system_metrics(self) -> None:
+        """
+        Background process for periodic system metric collection.
+
+        Continuously monitors and records system resource utilization metrics
+        at configured intervals until explicitly terminated.
+
+        Notes
+        -----
+        Execution interval controlled by lt_stats_recorder_interval environment option.
+        Implements graceful error handling to ensure continuous operation.
+        """
+        logger.info("Starting system metrics collection loop")
+        collection_interval = self.env.parsed_options.lt_stats_recorder_interval
+        try:
+            while True:
+                self.record_current_system_metrics()
+                gevent.sleep(collection_interval)
+        except gevent.GreenletExit:
+            logger.info("[json] System metrics collection terminated gracefully")
+        except Exception:
+            logger.exception("[json] System metrics collection loop failed")
+
+    def _stop_recording_system_metrics(self) -> None:
+        """
+        Terminate the system metrics recorder gevent
+        """
+        if self._system_metrics_logger is None:
+            return
+
+        self._system_metrics_logger.kill()
+        self._system_metrics_logger = None
+        logger.debug("[json] System metrics collection process terminated")

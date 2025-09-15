@@ -105,28 +105,28 @@ def test_stats_to_dict_maps_percentiles(mock_env, master_json_recorder):
 
 
 def test_stop_recording_request_stats_kills_greenlet(master_json_recorder):
-    """Verify that stop_recording_request_stats kills the greenlet if running."""
+    """Verify that _stop_recording_request_stats kills the greenlet if running."""
     mock_greenlet = MagicMock()
     master_json_recorder._request_stats_recorder = mock_greenlet
-    master_json_recorder.stop_recording_request_stats()
+    master_json_recorder._stop_recording_request_stats()
     mock_greenlet.kill.assert_called_once()
     assert master_json_recorder._request_stats_recorder is None
 
 
 def test_start_recording_request_stats_handles_greenlet_exit(master_json_recorder):
-    """Verify start_recording_request_stats stops cleanly on GreenletExit."""
+    """Verify _start_recording_request_stats stops cleanly on GreenletExit."""
     with (
         patch.object(master_json_recorder, "log_request_stats") as mock_total,
         patch("gevent.sleep") as mock_sleep,
     ):
         mock_total.side_effect = gevent.GreenletExit()
-        master_json_recorder.start_recording_request_stats()
+        master_json_recorder._start_recording_request_stats()
         mock_total.assert_called_once()
         mock_sleep.assert_not_called()
 
 
 def test_start_recording_request_stats_loops_and_calls_sleep(master_json_recorder):
-    """Ensure start_recording_request_stats loops and sleeps at configured interval."""
+    """Ensure _start_recording_request_stats loops and sleeps at configured interval."""
     with (
         patch.object(master_json_recorder, "log_request_stats") as mock_total,
         patch("gevent.sleep") as mock_sleep,
@@ -140,7 +140,7 @@ def test_start_recording_request_stats_loops_and_calls_sleep(master_json_recorde
                 raise gevent.GreenletExit()
 
         mock_total.side_effect = side_effect
-        master_json_recorder.start_recording_request_stats()
+        master_json_recorder._start_recording_request_stats()
         assert mock_total.call_count == 3
         assert mock_sleep.call_count == 2
 

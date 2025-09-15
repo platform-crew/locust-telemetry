@@ -93,7 +93,7 @@ class MasterLocustOtelRecorder(LocustOtelCommonRecorderMixin, TelemetryBaseRecor
         self.metrics.events.test_event.record(self.now_ms, attributes=event_attributes)
 
         # Launch background statistics collection process
-        self._request_stats_recorder = gevent.spawn(self._request_stats_collection_loop)
+        self._request_stats_recorder = gevent.spawn(self._start_recording_request_stats)
 
         logger.info(
             "[otel] Test initiated - OpenTelemetry metrics collection active",
@@ -115,7 +115,7 @@ class MasterLocustOtelRecorder(LocustOtelCommonRecorderMixin, TelemetryBaseRecor
         """
         super().on_test_stop(*args, **kwargs)
 
-        self._terminate_stats_collection()
+        self._stop_recording_request_stats()
 
         # Record test completion events
         stop_attributes = self._get_event_attributes("test_stop")
@@ -235,7 +235,7 @@ class MasterLocustOtelRecorder(LocustOtelCommonRecorderMixin, TelemetryBaseRecor
             extra=self.recorder_context(),
         )
 
-    def _request_stats_collection_loop(self) -> None:
+    def _start_recording_request_stats(self) -> None:
         """
         Background process for periodic request statistics collection.
 
@@ -256,7 +256,7 @@ class MasterLocustOtelRecorder(LocustOtelCommonRecorderMixin, TelemetryBaseRecor
         except gevent.GreenletExit:
             logger.info("[otel] Request statistics collection terminated gracefully")
 
-    def _terminate_stats_collection(self) -> None:
+    def _stop_recording_request_stats(self) -> None:
         """
         Terminate background statistics collection and record final metrics.
 

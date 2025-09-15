@@ -92,7 +92,7 @@ class LocustOtelCommonRecorderMixin:
 
         # Launch background system metrics collection
         self._system_metrics_recorder = gevent.spawn(
-            self._system_metrics_collection_loop
+            self._start_recording_system_metrics
         )
 
         logger.info("[otel] System metrics collection initialized successfully")
@@ -114,11 +114,7 @@ class LocustOtelCommonRecorderMixin:
         # Remove event listeners
         self.env.events.cpu_warning.remove_listener(self.on_cpu_warning)
 
-        # Terminate background collection process
-        if self._system_metrics_recorder:
-            self._system_metrics_recorder.kill()
-            self._system_metrics_recorder = None
-            logger.debug("[otel] System metrics collection process terminated")
+        self._stop_recording_system_metrics()
 
     def on_cpu_warning(
         self,
@@ -144,26 +140,21 @@ class LocustOtelCommonRecorderMixin:
         **kwargs : Any
             Additional event parameters
         """
-        event_timestamp = timestamp if timestamp is not None else self.now_ms
         warning_attributes = {
             **self.recorder_context(),
             "cpu_usage": f"{cpu_usage:.1f}",
             "message": message or "high_cpu_utilization",
             "severity": "warning",
         }
+        self.metrics.events.cpu_warning_event.record(
+            self.now_ms, attributes=warning_attributes
+        )
+        logger.warning(
+            f"[otel] CPU warning recorded: {cpu_usage}% - {message}",
+            extra=warning_attributes,
+        )
 
-        try:
-            self.metrics.events.cpu_warning_event.record(
-                event_timestamp, attributes=warning_attributes
-            )
-            logger.warning(
-                f"[otel] CPU warning recorded: {cpu_usage}% - {message}",
-                extra=warning_attributes,
-            )
-        except Exception:
-            logger.exception("[otel] Failed to record CPU warning event")
-
-    def _system_metrics_collection_loop(self) -> None:
+    def _start_recording_system_metrics(self) -> None:
         """
         Background process for periodic system metric collection.
 
@@ -180,14 +171,25 @@ class LocustOtelCommonRecorderMixin:
         context = self.recorder_context()
         try:
             while True:
-                self._record_current_system_metrics(context)
+                self.record_current_system_metrics(context)
                 gevent.sleep(collection_interval)
         except gevent.GreenletExit:
             logger.info("[otel] System metrics collection terminated gracefully")
         except Exception:
             logger.exception("[otel] System metrics collection loop failed")
 
-    def _record_current_system_metrics(self, context: Dict[str, str]) -> None:
+    def _stop_recording_system_metrics(self) -> None:
+        """
+        Terminate the system metrics recorder gevent
+        """
+        if self._system_metrics_recorder is None:
+            return
+
+        self._system_metrics_recorder.kill()
+        self._system_metrics_recorder = None
+        logger.debug("[otel] System metrics collection process terminated")
+
+    def record_current_system_metrics(self, context: Dict[str, str]) -> None:
         """
         Collect and record current system resource utilization metrics.
 
@@ -242,5 +244,3 @@ class LocustOtelCommonRecorderMixin:
 
         except psutil.Error as e:
             logger.warning(f"[otel] psutil error during metric collection: {e}")
-        except Exception:
-            logger.exception("[otel] Unexpected error during system metric recording")

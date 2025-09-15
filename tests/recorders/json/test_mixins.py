@@ -43,7 +43,7 @@ def test_log_usage_monitor_telemetry(mock_env):
         # Patch gevent.sleep to break after first iteration
         with patch("gevent.sleep", side_effect=gevent.GreenletExit):
             # Should not raise error
-            recorder.log_usage_monitor()
+            recorder._start_recording_system_metrics()
 
     # Validate that log_telemetry was called at least once
     assert len(recorder.logged) > 0
@@ -89,7 +89,7 @@ def test_on_test_start_adds_listeners(mock_env):
         recorder.on_test_start()
 
         # Assert gevent.spawn called with log_usage_monitor
-        mock_spawn.assert_called_once_with(recorder.log_usage_monitor)
+        mock_spawn.assert_called_once_with(recorder._start_recording_system_metrics)
 
         # Assert the greenlet is stored in _usage_monitor_logger
         assert recorder._system_metrics_logger == mock_greenlet

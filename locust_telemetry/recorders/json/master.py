@@ -78,7 +78,7 @@ class MasterLocustJsonTelemetryRecorder(
         Starts the background stats logger and emits the test start telemetry.
         """
         super().on_test_start(*args, **kwargs)
-        self._request_stats_recorder = gevent.spawn(self.start_recording_request_stats)
+        self._request_stats_recorder = gevent.spawn(self._start_recording_request_stats)
         self.log_telemetry(
             telemetry=LocustTestEvent.START.value,
             num_clients=self.env.parsed_options.num_users,
@@ -94,7 +94,7 @@ class MasterLocustJsonTelemetryRecorder(
         and emits the test stop telemetry.
         """
         super().on_test_stop(*args, **kwargs)
-        self.stop_recording_request_stats()
+        self._stop_recording_request_stats()
 
         # Hack: For graphs to create autolink
         # Compute current UTC time + 2 seconds
@@ -186,7 +186,7 @@ class MasterLocustJsonTelemetryRecorder(
                 **self.stats_to_dict(error),
             )
 
-    def start_recording_request_stats(self) -> None:
+    def _start_recording_request_stats(self) -> None:
         """
         Background loop that logs current request stats
         at the configured telemetry recorder interval.
@@ -198,7 +198,7 @@ class MasterLocustJsonTelemetryRecorder(
         except gevent.GreenletExit:
             logger.info("Request stats logger stopped cleanly")
 
-    def stop_recording_request_stats(self) -> None:
+    def _stop_recording_request_stats(self) -> None:
         """Stop the background request stats recorder greenlet, if running."""
         if self._request_stats_recorder:
             self._request_stats_recorder.kill()
