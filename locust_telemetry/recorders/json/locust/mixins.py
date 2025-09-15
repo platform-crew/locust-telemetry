@@ -15,8 +15,8 @@ from typing import Any, Optional
 import gevent
 import psutil
 from locust.env import Environment
-from locust.runners import MasterRunner
 
+from locust_telemetry.common.telemetry import TelemetryData
 from locust_telemetry.recorders.json.locust.constants import LocustTestEvent
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,27 @@ class LocustJsonTelemetryCommonRecorderMixin:
     """
 
     _usage_monitor_logger = None
+
+    def log_telemetry(self, telemetry: TelemetryData, **kwargs: Any) -> None:
+        """
+        Record structured telemetry data with environment context.
+
+        Parameters
+        ----------
+        telemetry : TelemetryData
+            The telemetry descriptor (event or metric)
+        **kwargs : Any
+            Additional attributes to include in the telemetry log
+        """
+        logger.info(
+            f"Recording telemetry: {telemetry.name}",
+            extra={
+                "telemetry": {
+                    **self.recorder_context(),
+                    **kwargs,
+                }
+            },
+        )
 
     def on_cpu_warning(
         self,
@@ -58,12 +79,6 @@ class LocustJsonTelemetryCommonRecorderMixin:
         """
         self.log_telemetry(
             telemetry=LocustTestEvent.CPU_WARNING.value,
-            source_type=environment.runner.__class__.__name__,
-            source_id=(
-                "master"
-                if isinstance(self.env.runner, MasterRunner)
-                else f"worker-{self.env.runner.worker_index}"
-            ),
             cpu_usage=cpu_usage,
             message=message,
             text=(
@@ -90,12 +105,6 @@ class LocustJsonTelemetryCommonRecorderMixin:
             memory_usage = process.memory_info().rss / 1024 / 1024
             self.log_telemetry(
                 telemetry=LocustTestEvent.USAGE.value,
-                source_type=self.env.runner.__class__.__name__,
-                source_id=(
-                    "master"
-                    if isinstance(self.env.runner, MasterRunner)
-                    else f"worker-{self.env.runner.worker_index}"
-                ),
                 cpu_usage=cpu_usage,
                 memory_usage=memory_usage,
             )

@@ -14,11 +14,10 @@ Custom recorders should inherit from this class to ensure:
 import logging
 import os
 import socket
-from typing import Any, ClassVar
+from typing import ClassVar, Dict
 
 from locust.env import Environment
-
-from locust_telemetry.common.telemetry import TelemetryData
+from locust.runners import MasterRunner
 
 logger = logging.getLogger(__name__)
 
@@ -57,27 +56,19 @@ class TelemetryBaseRecorder:
         self._hostname: str = socket.gethostname()
         self._pid: int = os.getpid()
 
-    def log_telemetry(self, telemetry: TelemetryData, **kwargs: Any) -> None:
+    def recorder_context(self) -> Dict:
         """
-        Record structured telemetry data with environment context.
-
-        Parameters
-        ----------
-        telemetry : TelemetryData
-            The telemetry descriptor (event or metric)
-        **kwargs : Any
-            Additional attributes to include in the telemetry log
+        Common recorder context for all the recorders. This will give the context
+        on where this metrics are generated and its details
         """
-        logger.info(
-            f"Recording telemetry: {telemetry.name}",
-            extra={
-                "telemetry": {
-                    "run_id": getattr(self.env, "run_id", None),
-                    "telemetry_type": telemetry.type,
-                    "telemetry_name": telemetry.name,
-                    "recorder": self.name,
-                    "testplan": getattr(self.env.parsed_options, "testplan", None),
-                    **kwargs,
-                }
-            },
-        )
+        return {
+            "run_id": self.env.run_id,
+            "testplan": self.env.testplan,
+            "source_type": self.env.runner.__class__.__name__,
+            "recorder": self.name,
+            "source_id": (
+                "master"
+                if isinstance(self.env.runner, MasterRunner)
+                else f"worker-{self.env.runner.worker_index}"
+            ),
+        }
