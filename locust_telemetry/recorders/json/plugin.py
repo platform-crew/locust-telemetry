@@ -21,10 +21,10 @@ from locust.env import Environment
 
 from locust_telemetry import config
 from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
-from locust_telemetry.recorders.json.locust.master import (
+from locust_telemetry.recorders.json.master import (
     MasterLocustJsonTelemetryRecorder,
 )
-from locust_telemetry.recorders.json.locust.worker import (
+from locust_telemetry.recorders.json.worker import (
     WorkerLocustJsonTelemetryRecorder,
 )
 

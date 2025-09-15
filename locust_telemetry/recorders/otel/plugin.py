@@ -5,8 +5,8 @@ from locust.env import Environment
 
 from locust_telemetry import config
 from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
-from locust_telemetry.recorders.otel.locust.master import MasterLocustOtelRecorder
-from locust_telemetry.recorders.otel.locust.worker import WorkerLocustOtelRecorder
+from locust_telemetry.recorders.otel.master import MasterLocustOtelRecorder
+from locust_telemetry.recorders.otel.worker import WorkerLocustOtelRecorder
 
 logger = logging.getLogger(__name__)
 

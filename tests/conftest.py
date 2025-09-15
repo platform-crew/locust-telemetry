@@ -9,7 +9,7 @@ from locust_telemetry.core.coordinator import TelemetryCoordinator
 from locust_telemetry.core.manager import TelemetryRecorderPluginManager
 from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
-from locust_telemetry.recorders.json.locust.master import (
+from locust_telemetry.recorders.json.master import (
     MasterLocustJsonTelemetryRecorder,
 )
 

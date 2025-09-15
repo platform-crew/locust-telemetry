@@ -19,12 +19,12 @@ import gevent
 from locust.env import Environment
 
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
-from locust_telemetry.recorders.json.locust.constants import (
+from locust_telemetry.recorders.json.constants import (
     TEST_STOP_BUFFER_FOR_GRAPHS,
     LocustTestEvent,
     RequestMetric,
 )
-from locust_telemetry.recorders.json.locust.mixins import (
+from locust_telemetry.recorders.json.mixins import (
     LocustJsonTelemetryCommonRecorderMixin,
 )
 

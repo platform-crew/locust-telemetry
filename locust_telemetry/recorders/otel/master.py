@@ -13,8 +13,8 @@ import gevent
 from locust.env import Environment
 
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
-from locust_telemetry.recorders.otel.locust.metrics import OtelMetricsDefinition
-from locust_telemetry.recorders.otel.locust.mixins import LocustOtelCommonRecorderMixin
+from locust_telemetry.recorders.otel.metrics import OtelMetricsDefinition
+from locust_telemetry.recorders.otel.mixins import LocustOtelCommonRecorderMixin
 
 logger = logging.getLogger(__name__)
 

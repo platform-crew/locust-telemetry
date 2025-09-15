@@ -11,13 +11,13 @@ from unittest.mock import patch
 
 from locust.runners import MasterRunner, WorkerRunner
 
-from locust_telemetry.recorders.json.locust.master import (
+from locust_telemetry.recorders.json.master import (
     MasterLocustJsonTelemetryRecorder,
 )
-from locust_telemetry.recorders.json.locust.plugin import (
+from locust_telemetry.recorders.json.plugin import (
     LocustJsonTelemetryRecorderPlugin,
 )
-from locust_telemetry.recorders.json.locust.worker import (
+from locust_telemetry.recorders.json.worker import (
     WorkerLocustJsonTelemetryRecorder,
 )
 

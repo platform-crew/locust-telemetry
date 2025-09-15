@@ -9,10 +9,10 @@ import logging
 
 from locust_telemetry.core.coordinator import TelemetryCoordinator
 from locust_telemetry.core.manager import TelemetryRecorderPluginManager
-from locust_telemetry.recorders.json.locust.plugin import (
+from locust_telemetry.recorders.json.plugin import (
     LocustJsonTelemetryRecorderPlugin,
 )
-from locust_telemetry.recorders.otel.locust.plugin import (
+from locust_telemetry.recorders.otel.plugin import (
     LocustOtelRecorderPlugin,
 )
 

@@ -14,11 +14,11 @@ from unittest.mock import MagicMock, patch
 import gevent
 from locust.env import Environment
 
-from locust_telemetry.recorders.json.locust.constants import (
+from locust_telemetry.recorders.json.constants import (
     LocustTestEvent,
     RequestMetric,
 )
-from locust_telemetry.recorders.json.locust.master import (
+from locust_telemetry.recorders.json.master import (
     MasterLocustJsonTelemetryRecorder,
 )
 

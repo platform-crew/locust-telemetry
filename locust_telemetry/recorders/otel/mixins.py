@@ -14,7 +14,7 @@ import psutil
 from locust.env import Environment
 
 from locust_telemetry.common.clients import configure_otel
-from locust_telemetry.recorders.otel.locust.metrics import OtelMetricsDefinition
+from locust_telemetry.recorders.otel.metrics import OtelMetricsDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +207,7 @@ class LocustOtelCommonRecorderMixin:
             cpu_usage = self._process.cpu_percent()
             self.metrics.system.cpu_usage.record(
                 current_time,
-                attributes={**metric_attributes, "value": f"{cpu_usage:.1f}"},
+                attributes={**metric_attributes, "value": cpu_usage},
             )
 
             # Memory Consumption (MiB)
@@ -216,7 +216,7 @@ class LocustOtelCommonRecorderMixin:
                 current_time,
                 attributes={
                     **context,
-                    "value": f"{memory_mib:.1f}",
+                    "value": memory_mib,
                     "unit": "mebibytes",
                 },
             )

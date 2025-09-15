@@ -1,11 +1,10 @@
 from unittest.mock import MagicMock, patch
 
 import gevent
-import pytest
 from locust.runners import MasterRunner
 
-from locust_telemetry.recorders.json.locust.constants import LocustTestEvent
-from locust_telemetry.recorders.json.locust.mixins import (
+from locust_telemetry.recorders.json.constants import LocustTestEvent
+from locust_telemetry.recorders.json.mixins import (
     LocustJsonTelemetryCommonRecorderMixin,
 )
 
@@ -32,15 +31,19 @@ def test_log_usage_monitor_telemetry(mock_env):
     recorder = DummyRecorder(env=mock_env)
 
     # Patch psutil.Process().cpu_percent and memory_info
-    with patch("psutil.Process") as mock_process_cls:
-        mock_process = mock_process_cls.return_value
-        mock_process.cpu_percent.return_value = 50.0
-        mock_process.memory_info.return_value.rss = 1024 * 1024 * 100  # 100 MiB
+    with patch(
+        "locust_telemetry.recorders.json.mixins."
+        "LocustJsonTelemetryCommonRecorderMixin._process"
+    ) as mock_process:
+        mock_process.cpu_percent = MagicMock(return_value=50.0)
+        mock_process.memory_info = MagicMock(
+            return_value=MagicMock(rss=1024 * 1024 * 100)
+        )
 
         # Patch gevent.sleep to break after first iteration
         with patch("gevent.sleep", side_effect=gevent.GreenletExit):
-            with pytest.raises(gevent.GreenletExit):
-                recorder.log_usage_monitor()
+            # Should not raise error
+            recorder.log_usage_monitor()
 
     # Validate that log_telemetry was called at least once
     assert len(recorder.logged) > 0
@@ -66,10 +69,6 @@ def test_on_cpu_warning_logs_telemetry(mock_env):
     assert log["telemetry"] == LocustTestEvent.CPU_WARNING.value
     assert log["cpu_usage"] == cpu_usage
     assert log["message"] == message
-    expected_text = (
-        f"{mock_env.parsed_options.testplan} high CPU usage " f"({cpu_usage:.2f}%)"
-    )
-    assert log["text"] == expected_text
 
 
 def test_on_test_start_adds_listeners(mock_env):
@@ -93,7 +92,7 @@ def test_on_test_start_adds_listeners(mock_env):
         mock_spawn.assert_called_once_with(recorder.log_usage_monitor)
 
         # Assert the greenlet is stored in _usage_monitor_logger
-        assert recorder._usage_monitor_logger == mock_greenlet
+        assert recorder._system_metrics_logger == mock_greenlet
 
 
 def test_on_test_stop_removes_listeners_and_kills_logger(mock_env):
@@ -103,7 +102,7 @@ def test_on_test_stop_removes_listeners_and_kills_logger(mock_env):
     recorder = DummyRecorder(env=mock_env)
     # Mock a running gevent Greenlet
     mock_greenlet = MagicMock()
-    recorder._usage_monitor_logger = mock_greenlet
+    recorder._system_metrics_logger = mock_greenlet
 
     # Call the method
     recorder.on_test_stop()
@@ -115,7 +114,7 @@ def test_on_test_stop_removes_listeners_and_kills_logger(mock_env):
 
     # Assert greenlet is killed and attribute cleared
     mock_greenlet.kill.assert_called_once()
-    assert recorder._usage_monitor_logger is None
+    assert recorder._system_metrics_logger is None
 
 
 def test_on_test_stop_without_logger():

@@ -15,7 +15,7 @@ from typing import ClassVar
 from locust.env import Environment
 
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
-from locust_telemetry.recorders.json.locust.mixins import (
+from locust_telemetry.recorders.json.mixins import (
     LocustJsonTelemetryCommonRecorderMixin,
 )
 

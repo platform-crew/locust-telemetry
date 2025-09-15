@@ -3,8 +3,8 @@ from unittest.mock import patch
 import pytest
 from locust.env import Environment
 
-from locust_telemetry.recorders.json.locust.constants import LocustTestEvent
-from locust_telemetry.recorders.json.locust.worker import (
+from locust_telemetry.recorders.json.constants import LocustTestEvent
+from locust_telemetry.recorders.json.worker import (
     WorkerLocustJsonTelemetryRecorder,
 )
 
@@ -48,9 +48,6 @@ def test_on_cpu_warning_calls_log_telemetry(
         assert call_kwargs["cpu_usage"] == cpu_usage
         # Message is passed correctly
         assert call_kwargs["message"] == message
-        # Text contains testplan and CPU usage
-        assert recorder.env.parsed_options.testplan in call_kwargs["text"]
-        assert f"{cpu_usage:.2f}" in call_kwargs["text"]
 
 
 def test_on_cpu_warning_with_default_message(
@@ -63,6 +60,6 @@ def test_on_cpu_warning_with_default_message(
         mock_log.assert_called_once()
         call_kwargs = mock_log.call_args.kwargs
         # Message should be None
-        assert call_kwargs["message"] is None
+        assert call_kwargs["message"] == "high_cpu_utilization"
         # Telemetry type is still correct
         assert call_kwargs["telemetry"] == LocustTestEvent.CPU_WARNING.value

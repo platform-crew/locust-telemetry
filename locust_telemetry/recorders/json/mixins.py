@@ -17,7 +17,7 @@ import psutil
 from locust.env import Environment
 
 from locust_telemetry.common.telemetry import TelemetryData
-from locust_telemetry.recorders.json.locust.constants import LocustTestEvent
+from locust_telemetry.recorders.json.constants import LocustTestEvent
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,7 @@ class LocustJsonTelemetryCommonRecorderMixin:
         """
         self.log_telemetry(
             telemetry=LocustTestEvent.CPU_WARNING.value,
-            cpu_usage=f"{cpu_usage:.1f}",
+            cpu_usage=cpu_usage,
             message=message or "high_cpu_utilization",
             severity="warning",
         )
