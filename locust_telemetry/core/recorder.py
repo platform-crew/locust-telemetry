@@ -14,6 +14,7 @@ Custom recorders should inherit from this class to ensure:
 import logging
 import os
 import socket
+import time
 from typing import ClassVar, Dict
 
 from locust.env import Environment
@@ -56,15 +57,27 @@ class TelemetryBaseRecorder:
         self._hostname: str = socket.gethostname()
         self._pid: int = os.getpid()
 
+    @property
+    def now_ms(self) -> int:
+        """
+        Current wall-clock time in milliseconds.
+
+        Returns
+        -------
+        int
+            Unix timestamp in milliseconds.
+        """
+        return int(time.time() * 1000)
+
     def recorder_context(self) -> Dict:
         """
         Common recorder context for all the recorders. This will give the context
         on where this metrics are generated and its details
         """
         return {
-            "run_id": self.env.run_id,
-            "testplan": self.env.testplan,
-            "source_type": self.env.runner.__class__.__name__,
+            "run_id": self.env.telemetry_meta.run_id,
+            "testplan": self.env.parsed_options.testplan,
+            "source": self.env.runner.__class__.__name__,
             "recorder": self.name,
             "source_id": (
                 "master"

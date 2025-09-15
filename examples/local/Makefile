@@ -1,12 +1,23 @@
 .PHONY: init help
 
+# Directory for built Python artifacts
+DIST_DIR := ./dist
+
 ## Show help for all commands
 help:
 	@echo "Available commands:"
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9._-]+:.*?## / {printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-build: ## Build docker containers
+
+dist: ## Build Python package wheel + sdist
+	@echo "📦 Building Python package into $(DIST_DIR)"
+	python -m build ../../ --outdir $(DIST_DIR)
+
+docker: ## Build docker containers
+	@echo "🐳 Building Docker containers"
 	docker-compose build
+
+build: dist docker ## Build Python package and Docker containers
 
 up: ## Run all the docker containers
 	docker-compose up -d

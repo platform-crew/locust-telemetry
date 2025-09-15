@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class WorkerLocustJsonTelemetryRecorder(
-    TelemetryBaseRecorder, LocustJsonTelemetryCommonRecorderMixin
+    LocustJsonTelemetryCommonRecorderMixin, TelemetryBaseRecorder
 ):
     """
     Telemetry recorder for Locust worker nodes.
@@ -39,7 +39,7 @@ class WorkerLocustJsonTelemetryRecorder(
         Identifier for the recorder.
     """
 
-    name: ClassVar[str] = "worker_locust_telemetry_recorder"
+    name: ClassVar[str] = "worker_json_recorder"
 
     def __init__(self, env: Environment) -> None:
         """

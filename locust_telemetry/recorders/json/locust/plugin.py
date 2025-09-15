@@ -60,20 +60,7 @@ class LocustJsonTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
         group : Any (_ArgumentGroup)
             The argument group to which telemetry recorder options are added.
         """
-        group.add_argument(
-            "--lt-stats-recorder-interval",
-            type=int,
-            help="Interval (in seconds) for telemetry statistics recorder updates.",
-            env_var="LOCUST_TELEMETRY_STATS_RECORDER_INTERVAL",
-            default=config.DEFAULT_STATS_RECORDER_INTERVAL,
-        )
-        group.add_argument(
-            "--lt-system-usage-recorder-interval",
-            type=int,
-            help="Interval (in seconds) for system usage monitoring.",
-            env_var="LOCUST_TELEMETRY_SYSTEM_USAGE_RECORDER_INTERVAL",
-            default=config.DEFAULT_SYSTEM_USAGE_RECORDER_INTERVAL,
-        )
+        pass
 
     def load_master_telemetry_recorders(
         self, environment: Environment, **kwargs: Any

@@ -129,9 +129,11 @@ class TelemetryRecorderPluginManager:
         for plugin in self._recorder_plugins:
             metadata.update(plugin.add_test_metadata())
 
-        set_test_metadata(environment, metadata)
-
-        return metadata
+        cleaned_metadata = {
+            k: val() if callable(val) else val for k, val in metadata.items()
+        }
+        set_test_metadata(environment, cleaned_metadata)
+        return cleaned_metadata
 
     def load_recorder_plugins(self, environment: Environment, **kwargs: Any) -> None:
         """

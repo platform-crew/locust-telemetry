@@ -28,7 +28,7 @@ def test_recorder_initialization_registers_event_listener(
         recorder.on_test_stop
     )
     assert recorder.env is mock_env
-    assert recorder.name == "worker_locust_telemetry_recorder"
+    assert recorder.name == "worker_json_recorder"
 
 
 def test_on_cpu_warning_calls_log_telemetry(

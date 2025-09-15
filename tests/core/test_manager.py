@@ -169,6 +169,27 @@ def test_register_plugin_metadata_merges_and_sets(
     mock_set.assert_called_once_with(mock_env, metadata)
 
 
+def test_register_plugin_callable_metadata_merges_and_sets(
+    monkeypatch, mock_env, dummy_recorder_plugin
+):
+    """
+    Ensure metadata from all plugins is merged and applied to the environment when
+    the metadata contains the callable items
+    """
+    mgr = TelemetryRecorderPluginManager()
+    dummy_recorder_plugin.add_test_metadata = MagicMock(
+        return_value={"plugin_key": lambda: "plugin_value"}
+    )
+    mgr.register_recorder_plugin(dummy_recorder_plugin)
+
+    # Patch set_test_metadata to spy on it
+    with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
+        metadata = mgr.register_plugin_metadata(mock_env)
+
+    assert metadata.get("plugin_key") == "plugin_value"
+    mock_set.assert_called_once_with(mock_env, metadata)
+
+
 def test_register_plugin_metadata_handles_empty_plugins(monkeypatch, mock_env):
     """
     If no plugins are registered, metadata should equal DEFAULT_ENVIRONMENT_METADATA.
@@ -178,6 +199,24 @@ def test_register_plugin_metadata_handles_empty_plugins(monkeypatch, mock_env):
     with patch(
         "locust_telemetry.core.manager.config.DEFAULT_ENVIRONMENT_METADATA",
         {"foo": "bar"},
+    ):
+        with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
+            metadata = mgr.register_plugin_metadata(mock_env)
+
+    assert metadata == {"foo": "bar"}
+    mock_set.assert_called_once_with(mock_env, {"foo": "bar"})
+
+
+def test_register_plugin_metadata_callable_default(monkeypatch, mock_env):
+    """
+    If no plugins are registered, metadata should equal DEFAULT_ENVIRONMENT_METADATA.
+    when DEFAULT_ENVIRONMENT_METADATA contains callable item
+    """
+    mgr = TelemetryRecorderPluginManager()
+
+    with patch(
+        "locust_telemetry.core.manager.config.DEFAULT_ENVIRONMENT_METADATA",
+        {"foo": lambda: "bar"},
     ):
         with patch("locust_telemetry.core.manager.set_test_metadata") as mock_set:
             metadata = mgr.register_plugin_metadata(mock_env)

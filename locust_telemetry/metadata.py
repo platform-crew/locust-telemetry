@@ -31,6 +31,9 @@ def set_test_metadata(environment: Environment, metadata: Dict) -> None:
     """
     telemetry_meta = type("", (object,), {})
     for key, val in metadata.items():
-        setattr(telemetry_meta, key, val() if callable(val) else val)
+        setattr(telemetry_meta, key, val)
 
+    logger.info(
+        f"Setting metadata for {environment.runner.__class__.__name__}", extra=metadata
+    )
     environment.telemetry_meta = telemetry_meta

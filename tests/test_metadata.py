@@ -11,26 +11,6 @@ def test_static_metadata(mock_env):
     assert mock_env.telemetry_meta.version == "1.0"
 
 
-def test_callable_metadata(mock_env):
-    """Metadata values that are callables should be evaluated before attaching."""
-    metadata = {"dynamic_value": lambda: "computed!"}
-    set_test_metadata(mock_env, metadata)
-
-    assert mock_env.telemetry_meta.dynamic_value == "computed!"
-
-
-def test_mixed_metadata(mock_env):
-    """Supports a mix of static and callable values."""
-    metadata = {
-        "static": 42,
-        "dynamic": lambda: "hello",
-    }
-    set_test_metadata(mock_env, metadata)
-
-    assert mock_env.telemetry_meta.static == 42
-    assert mock_env.telemetry_meta.dynamic == "hello"
-
-
 def test_overrides_existing_metadata(mock_env):
     """Subsequent calls should overwrite the metadata object entirely."""
     set_test_metadata(mock_env, {"first": "one"})

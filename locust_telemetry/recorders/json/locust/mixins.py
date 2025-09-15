@@ -30,7 +30,8 @@ class LocustJsonTelemetryCommonRecorderMixin:
     system usage from both master and worker processes.
     """
 
-    _usage_monitor_logger = None
+    _system_metrics_logger: Optional[gevent.Greenlet] = None
+    _process: psutil.Process = psutil.Process()
 
     def log_telemetry(self, telemetry: TelemetryData, **kwargs: Any) -> None:
         """
@@ -79,15 +80,12 @@ class LocustJsonTelemetryCommonRecorderMixin:
         """
         self.log_telemetry(
             telemetry=LocustTestEvent.CPU_WARNING.value,
-            cpu_usage=cpu_usage,
-            message=message,
-            text=(
-                f"{self.env.parsed_options.testplan} high CPU usage "
-                f"({cpu_usage:.2f}%)"
-            ),
+            cpu_usage=f"{cpu_usage:.1f}",
+            message=message or "high_cpu_utilization",
+            severity="warning",
         )
 
-    def _log_usage_monitor(self):
+    def log_usage_monitor(self):
         """
         Periodic tasks that fetches the locust runners usage and logs it to the console.
         This metrics can be used to observe if there are any bottlenecks with the
@@ -98,17 +96,22 @@ class LocustJsonTelemetryCommonRecorderMixin:
         usage according to our convenience.
 
         """
-        process = psutil.Process()
-        while True:
-            cpu_usage = process.cpu_percent()
-            # Convert from bytes to Mebibytes
-            memory_usage = process.memory_info().rss / 1024 / 1024
-            self.log_telemetry(
-                telemetry=LocustTestEvent.USAGE.value,
-                cpu_usage=cpu_usage,
-                memory_usage=memory_usage,
-            )
-            gevent.sleep(self.env.parsed_options.lt_system_usage_recorder_interval)
+        collector_interval = self.env.parsed_options.lt_stats_recorder_interval
+        try:
+            while True:
+                cpu_usage = self._process.cpu_percent()
+                # Convert from bytes to Mebibytes
+                memory_usage = self._process.memory_info().rss / (1024 * 1024)
+                self.log_telemetry(
+                    telemetry=LocustTestEvent.USAGE.value,
+                    cpu_usage=cpu_usage,
+                    memory_usage=memory_usage,
+                )
+                gevent.sleep(collector_interval)
+        except gevent.GreenletExit:
+            logger.info("System metrics collection terminated gracefully")
+        except Exception:
+            logger.exception("System metrics collection loop failed")
 
     def on_test_start(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -119,7 +122,7 @@ class LocustJsonTelemetryCommonRecorderMixin:
             - usage_monitor
         """
         self.env.events.cpu_warning.add_listener(self.on_cpu_warning)
-        self._usage_monitor_logger = gevent.spawn(self._log_usage_monitor)
+        self._system_metrics_logger = gevent.spawn(self.log_usage_monitor)
 
     def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -130,6 +133,9 @@ class LocustJsonTelemetryCommonRecorderMixin:
             - usage_monitor
         """
         self.env.events.cpu_warning.remove_listener(self.on_cpu_warning)
-        if self._usage_monitor_logger is not None:
-            self._usage_monitor_logger.kill()
-            self._usage_monitor_logger = None
+
+        # Terminate background collection process
+        if self._system_metrics_logger is not None:
+            self._system_metrics_logger.kill()
+            self._system_metrics_logger = None
+            logger.debug("[json] System metrics collection process terminated")

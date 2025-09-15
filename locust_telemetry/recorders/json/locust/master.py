@@ -50,7 +50,7 @@ class MasterLocustJsonTelemetryRecorder(
         Identifier for the recorder.
     """
 
-    name: ClassVar[str] = "master_locust_telemetry_recorder"
+    name: ClassVar[str] = "master_json_recorder"
 
     def __init__(self, env: Environment) -> None:
         """
@@ -64,7 +64,7 @@ class MasterLocustJsonTelemetryRecorder(
             The Locust environment instance.
         """
         super().__init__(env)
-        self._request_stats_logger: Optional[gevent.Greenlet] = None
+        self._request_stats_recorder: Optional[gevent.Greenlet] = None
 
         # Register master-only event listeners
         env.events.test_start.add_listener(self.on_test_start)
@@ -78,7 +78,7 @@ class MasterLocustJsonTelemetryRecorder(
         Starts the background stats logger and emits the test start telemetry.
         """
         super().on_test_start(*args, **kwargs)
-        self._request_stats_logger = gevent.spawn(self._log_request_stats)
+        self._request_stats_recorder = gevent.spawn(self.start_recording_request_stats)
         self.log_telemetry(
             telemetry=LocustTestEvent.START.value,
             num_clients=self.env.parsed_options.num_users,
@@ -94,10 +94,7 @@ class MasterLocustJsonTelemetryRecorder(
         and emits the test stop telemetry.
         """
         super().on_test_stop(*args, **kwargs)
-        self._stop_request_stats_logger()
-        self._log_total_stats(final=True)
-        self._log_entry_stats()
-        self._log_error_stats()
+        self.stop_recording_request_stats()
 
         # Hack: For graphs to create autolink
         # Compute current UTC time + 2 seconds
@@ -132,9 +129,8 @@ class MasterLocustJsonTelemetryRecorder(
             ),
         )
 
-    # --- Helpers ---
-
-    def _get_stats(self, st: Any) -> Dict[str, Any]:
+    @staticmethod
+    def stats_to_dict(st: Any) -> Dict[str, Any]:
         """
         Convert a Locust stats object to a dictionary for observability tools.
 
@@ -153,13 +149,7 @@ class MasterLocustJsonTelemetryRecorder(
         stats["percentile_99"] = stats.pop("response_time_percentile_0.99", "")
         return stats
 
-    def _stop_request_stats_logger(self) -> None:
-        """Stop the background request stats logger greenlet, if running."""
-        if self._request_stats_logger:
-            self._request_stats_logger.kill()
-            self._request_stats_logger = None
-
-    def _log_total_stats(self, final: bool = False) -> None:
+    def log_request_stats(self, final: bool = False) -> None:
         """
         Log aggregated request statistics.
 
@@ -176,36 +166,45 @@ class MasterLocustJsonTelemetryRecorder(
         self.log_telemetry(
             telemetry=telemetry,
             user_count=self.env.runner.user_count,
-            **self._get_stats(self.env.stats.total),
+            **self.stats_to_dict(self.env.stats.total),
         )
 
-    def _log_entry_stats(self) -> None:
-        """Log per-endpoint request statistics."""
+    def log_endpoint_success_stats(self) -> None:
+        """Log endpoint success request statistics."""
         for (url, method), stats in self.env.stats.entries.items():
             self.log_telemetry(
                 telemetry=RequestMetric.ENDPOINT_STATS.value,
                 request_path=url,
-                **self._get_stats(stats),
+                **self.stats_to_dict(stats),
             )
 
-    def _log_error_stats(self) -> None:
-        """Log per-endpoint error statistics."""
+    def log_endpoint_error_stats(self) -> None:
+        """Log endpoint error statistics."""
         for key, error in self.env.stats.errors.items():
             self.log_telemetry(
                 telemetry=RequestMetric.ENDPOINT_ERRORS.value,
-                **self._get_stats(error),
+                **self.stats_to_dict(error),
             )
 
-    def _log_request_stats(self) -> None:
+    def start_recording_request_stats(self) -> None:
         """
         Background loop that logs current request stats
         at the configured telemetry recorder interval.
         """
         try:
             while True:
-                if not self.env.runner:
-                    return
-                self._log_total_stats(final=False)
+                self.log_request_stats(final=False)
                 gevent.sleep(self.env.parsed_options.lt_stats_recorder_interval)
         except gevent.GreenletExit:
             logger.info("Request stats logger stopped cleanly")
+
+    def stop_recording_request_stats(self) -> None:
+        """Stop the background request stats recorder greenlet, if running."""
+        if self._request_stats_recorder:
+            self._request_stats_recorder.kill()
+            self._request_stats_recorder = None
+
+        logger.info("Logging the final statistics in json")
+        self.log_request_stats(final=True)
+        self.log_endpoint_success_stats()
+        self.log_endpoint_error_stats()

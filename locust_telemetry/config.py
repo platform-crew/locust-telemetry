@@ -21,9 +21,6 @@ from typing import Callable, Dict
 # Default interval for telemetry stats recording
 DEFAULT_STATS_RECORDER_INTERVAL: int = 2  # seconds
 
-# Default interval for system usage recording
-DEFAULT_SYSTEM_USAGE_RECORDER_INTERVAL: int = 3  # 2 seconds
-
 # Configuration cli group to add all the necessary args
 TELEMETRY_CLI_GROUP_NAME: str = "locust-telemetry"
 
@@ -32,8 +29,8 @@ DEFAULT_ENVIRONMENT_METADATA: Dict[str, Callable] = {
     "run_id": lambda: str(uuid.uuid4())[:8]  # first 8 characters of UUID
 }
 
+# Recorder plugins
 TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID = "stats-json"
-
-TELEMETRY_OTEL_RECORDER_PLUGIN_ID = "otel"
+TELEMETRY_OTEL_RECORDER_PLUGIN_ID = "stats-otel"
 
 TELEMETRY_OTEL_METRICS_METER = "locust_telemetry"

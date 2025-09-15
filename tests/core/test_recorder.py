@@ -1,6 +1,7 @@
-from unittest.mock import patch
+import time
 
-from locust_telemetry.common.telemetry import TelemetryData
+from locust.runners import MasterRunner, WorkerRunner
+
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
 
 
@@ -14,35 +15,37 @@ def test_initialization_sets_env_and_metadata(recorder, mock_env):
     assert hasattr(recorder, "_pid")
 
 
-def test_log_telemetry_calls_logger_info(recorder, mock_env):
+def test_recorder_context(recorder, mock_env):
     """
-    Verify log_telemetry calls logger.info with expected structure.
+    Verify if the created recorder context is correct or not
     """
-    telemetry = TelemetryData(name="event1", type="metric")
-    extra_kwargs = {"custom_field": 42}
+    mock_env.runner.__class__ = MasterRunner
+    context = recorder.recorder_context()
+    assert context["run_id"] == mock_env.telemetry_meta.run_id
+    assert context["testplan"] == mock_env.parsed_options.testplan
+    assert context["recorder"] == recorder.name
+    assert context["source"] == mock_env.runner.__class__.__name__
+    assert context["source_id"] == "master"
 
-    with patch("locust_telemetry.core.recorder.logger.info") as mock_info:
-        recorder.log_telemetry(telemetry, **extra_kwargs)
-
-    # Check logger.info was called
-    mock_info.assert_called_once()
-    args, kwargs = mock_info.call_args
-
-    # First argument is the log message
-    assert args[0] == f"Recording telemetry: {telemetry.name}"
-
-    # 'extra' contains structured telemetry
-    extra = kwargs.get("extra", {})
-    telemetry_dict = extra.get("telemetry", {})
-    assert telemetry_dict["run_id"] == mock_env.run_id
-    assert telemetry_dict["testplan"] == mock_env.parsed_options.testplan
-    assert telemetry_dict["telemetry_name"] == telemetry.name
-    assert telemetry_dict["telemetry_type"] == telemetry.type
-    assert telemetry_dict["recorder"] == recorder.name
-    # Custom kwargs should be merged
-    assert telemetry_dict["custom_field"] == 42
+    mock_env.runner.__class__ = WorkerRunner
+    context = recorder.recorder_context()
+    assert context["run_id"] == mock_env.telemetry_meta.run_id
+    assert context["testplan"] == mock_env.parsed_options.testplan
+    assert context["recorder"] == recorder.name
+    assert context["source"] == mock_env.runner.__class__.__name__
+    assert context["source_id"] == f"worker-{mock_env.runner.worker_index}"
 
 
 def test_default_name_classvar():
     """Ensure the default recorder name is 'base'."""
     assert TelemetryBaseRecorder.name == "base"
+
+
+def test_recorder_property_now_ms(recorder):
+    """Verify if the recorder property now_ms returns as expected"""
+    ms1 = recorder.now_ms
+    time.sleep(0.3)
+    ms2 = recorder.now_ms
+    assert isinstance(ms1, int)
+    assert isinstance(ms2, int)
+    assert ms1 != ms2

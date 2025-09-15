@@ -9,6 +9,9 @@ from locust_telemetry.core.coordinator import TelemetryCoordinator
 from locust_telemetry.core.manager import TelemetryRecorderPluginManager
 from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
+from locust_telemetry.recorders.json.locust.master import (
+    MasterLocustJsonTelemetryRecorder,
+)
 
 
 class DummyTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
@@ -43,14 +46,13 @@ def mock_env():
     env = MagicMock(
         spec=Environment,
         runner=MagicMock(),
-        run_id="1234",
+        telemetry_meta=MagicMock(run_id="1234"),
         parsed_options=MagicMock(
             testplan="test-plan",
             num_users=10,
             profile="default",
             wait_after_test_stop=0.1,
             lt_stats_recorder_interval=1,
-            lt_system_usage_recorder_interval=1,
         ),
         stats=MagicMock(total=MagicMock(), entries={}, errors={}),
         events=MagicMock(),
@@ -118,3 +120,9 @@ def reset_manager_singleton():
     yield
     TelemetryRecorderPluginManager._instance = None
     TelemetryRecorderPluginManager._initialized = False
+
+
+@pytest.fixture
+def master_json_recorder(mock_env):
+    """Return a json stats master recorder"""
+    return MasterLocustJsonTelemetryRecorder(env=mock_env)
