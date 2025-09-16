@@ -69,7 +69,7 @@ class TelemetryBaseRecorder:
         """
         return int(time.time() * 1000)
 
-    def recorder_context(self) -> Dict:
+    def recorder_context(self, **kwargs) -> Dict:
         """
         Common recorder context for all the recorders. This will give the context
         on where this metrics are generated and its details
@@ -84,4 +84,5 @@ class TelemetryBaseRecorder:
                 if isinstance(self.env.runner, MasterRunner)
                 else f"worker-{self.env.runner.worker_index}"
             ),
+            **kwargs,
         }

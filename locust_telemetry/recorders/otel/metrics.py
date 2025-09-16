@@ -1,195 +1,229 @@
-from opentelemetry.metrics import Meter
+from typing import Any, Callable, List, Optional
+
+from opentelemetry.metrics import Histogram, Meter
+
+from locust_telemetry.core.recorder import TelemetryBaseRecorder
+from locust_telemetry.recorders.otel.callbacks import (
+    callback_with_recorder,
+    cpu_usage_callback,
+    failures_count_callback,
+    failures_per_second_callback,
+    memory_usage_callback,
+    network_usage_callback,
+    requests_count_callback,
+    requests_per_second_callback,
+    user_count_callback,
+)
 
 
-def _create_histogram(meter: Meter, name: str, description: str, unit: str = "ms"):
+def _create_histogram(
+    meter: Meter, name: str, description: str, unit: str = "ms"
+) -> Histogram:
     """
-    Create an OpenTelemetry Histogram instrument.
+    Create an OpenTelemetry histogram for recording distributions of values.
 
     Parameters
     ----------
     meter : Meter
-        The OpenTelemetry meter used to create the histogram.
+        OpenTelemetry Meter used to create the histogram.
     name : str
-        The metric name (dot-delimited, e.g., "locust.requests.duration").
+        Name of the metric.
     description : str
         Human-readable description of the metric.
-    unit : str, default="ms"
-        Unit of measurement (milliseconds by default).
+    unit : str, optional
+        Unit of measurement (default is "ms").
 
     Returns
     -------
     Histogram
-        An OpenTelemetry histogram instrument.
+        Configured histogram instrument.
     """
     return meter.create_histogram(name=name, description=description, unit=unit)
 
 
-def _create_counter(meter: Meter, name: str, description: str, unit: str = "1"):
+def _create_observable_gauge(
+    meter: Meter,
+    name: str,
+    description: str,
+    unit: str = "1",
+    callbacks: Optional[List[Callable]] = None,
+) -> Any:
     """
-    Create an OpenTelemetry Counter instrument.
+    Create an OpenTelemetry Observable Gauge.
+
+    Observable gauges capture instantaneous values, which are updated via
+    callback functions.
 
     Parameters
     ----------
     meter : Meter
-        The OpenTelemetry meter used to create the counter.
+        OpenTelemetry Meter used to create the gauge.
     name : str
-        The metric name (dot-delimited, e.g., "locust.requests.count").
+        Name of the metric.
     description : str
         Human-readable description of the metric.
-    unit : str, default="1"
-        Unit of measurement (dimensionless by default).
+    unit : str, optional
+        Unit of measurement (default is dimensionless "1").
+    callbacks : list[Callable], optional
+        List of callback functions to provide gauge values.
 
     Returns
     -------
-    Counter
-        An OpenTelemetry counter instrument.
+    Any
+        Configured Observable Gauge instrument.
     """
-    return meter.create_counter(name=name, description=description, unit=unit)
-
-
-def _create_up_down_counter(meter: Meter, name: str, description: str, unit: str = "1"):
-    """
-    Create an OpenTelemetry UpDownCounter instrument.
-
-    Parameters
-    ----------
-    meter : Meter
-        The OpenTelemetry meter used to create the counter.
-    name : str
-        The metric name (dot-delimited, e.g., "locust.user.count").
-    description : str
-        Human-readable description of the metric.
-    unit : str, default="1"
-        Unit of measurement (dimensionless by default).
-
-    Returns
-    -------
-    UpDownCounter
-        An OpenTelemetry up-down counter instrument.
-    """
-    return meter.create_up_down_counter(name=name, description=description, unit=unit)
+    return meter.create_observable_gauge(
+        name=name,
+        description=description,
+        unit=unit,
+        callbacks=callbacks or [],
+    )
 
 
 class OtelLocustEvents:
     """
-    Telemetry histograms for Locust test lifecycle events.
+    OpenTelemetry metrics for Locust test lifecycle events.
 
-    Metrics provided
-    ----------------
-    - locust.test.start : Timestamp of test start events.
-    - locust.test.stop : Timestamp of test stop events.
-    - locust.test.spawn_complete : Timestamp of spawning completion.
-    - locust.test.cpu_warning : CPU warning events with annotation.
-    - locust.test.event : General test lifecycle events.
+    Records general test lifecycle timestamps as a histogram.
     """
 
-    def __init__(self, meter: Meter):
-        self.test_start_event = _create_histogram(
-            meter, "locust.test.start", "Timestamp of test start events"
-        )
-        self.test_stop_event = _create_histogram(
-            meter, "locust.test.stop", "Timestamp of test stop events"
-        )
-        self.spawn_complete_event = _create_histogram(
-            meter, "locust.test.spawn_complete", "Timestamp of spawn complete events"
-        )
-        self.cpu_warning_event = _create_histogram(
-            meter, "locust.test.cpu_warning", "CPU warning events with annotation"
-        )
+    def __init__(self, recorder: TelemetryBaseRecorder):
+        """
+        Initialize test event metrics.
+
+        Parameters
+        ----------
+        recorder : TelemetryBaseRecorder
+            Recorder instance providing access to the Locust environment.
+        """
+        meter = recorder.env.otel_meter
+
         self.test_event = _create_histogram(
-            meter, "locust.test.event", "General test lifecycle events"
+            meter, "locust.test.event", "General test lifecycle event timestamps"
         )
 
 
 class OtelRequestMetrics:
     """
-    Telemetry counters and histograms for Locust request metrics.
+    OpenTelemetry metrics for Locust request-level telemetry.
 
-    Metrics provided
-    ----------------
-    - locust.requests.count : Total number of requests made.
-    - locust.requests.errors.count : Total number of failed requests.
-    - locust.requests.endpoint.success.count : Successful requests by endpoint.
-    - locust.requests.endpoint.errors.count : Errors by endpoint.
-    - locust.requests.duration : Distribution of request response times (ms).
-    - locust.requests.response_size : Distribution of response sizes (bytes).
-    - locust.user.count : Current number of active virtual users.
+    Includes request durations and observable gauges for request counts,
+    failures, user counts, and request/failure rates.
     """
 
-    def __init__(self, meter: Meter):
-        self.requests_counter = _create_counter(
-            meter, "locust.requests.count", "Total number of requests made"
-        )
-        self.errors_counter = _create_counter(
-            meter, "locust.requests.errors.count", "Total number of failed requests"
-        )
-        self.endpoint_success_counter = _create_counter(
-            meter,
-            "locust.requests.endpoint.success.count",
-            "Successful requests by endpoint",
-        )
-        self.endpoint_errors_counter = _create_counter(
-            meter, "locust.requests.endpoint.errors.count", "Errors by endpoint"
-        )
+    def __init__(self, recorder: TelemetryBaseRecorder):
+        """
+        Initialize request metrics.
+
+        Parameters
+        ----------
+        recorder : TelemetryBaseRecorder
+            Recorder instance providing access to the Locust environment.
+        """
+        meter = recorder.env.otel_meter
+
         self.request_duration = _create_histogram(
-            meter, "locust.requests.duration", "Request response times"
+            meter,
+            "locust.requests.duration",
+            "Request duration distributions",
         )
-        self.response_size = _create_histogram(
-            meter, "locust.requests.response_size", "Response sizes", unit="By"
+
+        # Observable gauges with recorder-wrapped callbacks
+        self.requests_count = _create_observable_gauge(
+            meter,
+            "locust.requests.count",
+            "Current cumulative count of executed requests",
+            callbacks=[callback_with_recorder(recorder, requests_count_callback)],
         )
-        self.user_count = _create_up_down_counter(
-            meter, "locust.user.count", "Current number of active Virtual Users"
+
+        self.errors_count = _create_observable_gauge(
+            meter,
+            "locust.requests.errors.count",
+            "Current cumulative count of failed requests",
+            callbacks=[callback_with_recorder(recorder, failures_count_callback)],
+        )
+
+        self.user_count = _create_observable_gauge(
+            meter,
+            "locust.users.count",
+            "Current number of active virtual users executing requests",
+            callbacks=[callback_with_recorder(recorder, user_count_callback)],
+        )
+
+        self.rps = _create_observable_gauge(
+            meter,
+            "locust.requests.rps",
+            "Requests per second",
+            callbacks=[callback_with_recorder(recorder, requests_per_second_callback)],
+        )
+
+        self.fps = _create_observable_gauge(
+            meter,
+            "locust.requests.fps",
+            "Failures per second",
+            callbacks=[callback_with_recorder(recorder, failures_per_second_callback)],
         )
 
 
 class OtelSystemMetrics:
     """
-    Telemetry histograms and counters for system-level metrics.
+    OpenTelemetry metrics for system-level telemetry.
 
-    Metrics provided
-    ----------------
-    - locust.cpu.usage : CPU usage percentage of the Locust runner process.
-    - locust.memory.usage : Resident memory usage (RSS) in bytes.
-    - locust.network.bytes_sent : Total bytes sent by the Locust process.
-    - locust.network.bytes_received : Total bytes received by the Locust process.
+    Collects CPU usage, memory usage, and network I/O via observable gauges.
     """
 
-    def __init__(self, meter: Meter):
-        # Replace observable gauges with histograms for CPU and memory
-        self.cpu_usage = _create_histogram(
-            meter, "locust.cpu.usage", "CPU usage percentage", "%"
+    def __init__(self, recorder: TelemetryBaseRecorder):
+        """
+        Initialize system metrics.
+
+        Parameters
+        ----------
+        recorder : TelemetryBaseRecorder
+            Recorder instance providing access to the Locust environment.
+        """
+        meter = recorder.env.otel_meter
+
+        self.cpu_usage = _create_observable_gauge(
+            meter,
+            "locust.cpu.usage",
+            "Current CPU utilization percentage",
+            "%",
+            callbacks=[callback_with_recorder(recorder, cpu_usage_callback)],
         )
-        self.memory_usage = _create_histogram(
-            meter, "locust.memory.usage", "Memory usage (RSS)", "By"
+
+        self.memory_usage = _create_observable_gauge(
+            meter,
+            "locust.memory.usage",
+            "Current resident memory usage (RSS)",
+            "By",
+            callbacks=[callback_with_recorder(recorder, memory_usage_callback)],
         )
-        self.network_bytes_sent = _create_counter(
-            meter, "locust.network.bytes_sent", "Total bytes sent", "By"
-        )
-        self.network_bytes_received = _create_counter(
-            meter, "locust.network.bytes_received", "Total bytes received", "By"
+
+        self.network_bytes = _create_observable_gauge(
+            meter,
+            "locust.network.bytes",
+            "Bytes sent/received over network",
+            "By",
+            callbacks=[callback_with_recorder(recorder, network_usage_callback)],
         )
 
 
 class OtelMetricsDefinition:
     """
-    Centralized registry of all Locust OpenTelemetry metrics.
+    Container for all OpenTelemetry metrics instruments.
 
-    Responsibilities
-    ----------------
-    - Group metrics into three domains: events, requests, system.
-    - Provide a single access point for all metric instruments.
-    - Avoid global meter usage by requiring a specific Meter instance.
+    Aggregates event, request, and system metrics for easy access and management.
     """
 
-    def __init__(self, meter: Meter):
+    def __init__(self, recorder: TelemetryBaseRecorder):
         """
-        Initialize all telemetry metrics using the provided OpenTelemetry Meter.
+        Initialize all OpenTelemetry metrics for a recorder.
 
         Parameters
         ----------
-        meter : Meter
-            OpenTelemetry Meter instance for creating all metrics.
+        recorder : TelemetryBaseRecorder
+            Recorder instance providing access to the Locust environment.
         """
-        self.events = OtelLocustEvents(meter)
-        self.requests = OtelRequestMetrics(meter)
-        self.system = OtelSystemMetrics(meter)
+        self.events = OtelLocustEvents(recorder)
+        self.requests = OtelRequestMetrics(recorder)
+        self.system = OtelSystemMetrics(recorder)

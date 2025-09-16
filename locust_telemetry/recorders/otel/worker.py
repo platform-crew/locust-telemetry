@@ -1,15 +1,3 @@
-"""
-This module provides the `WorkerLocustOtelRecorder` class, which runs on
-Locust worker nodes. It captures worker-specific telemetry such as CPU warnings,
-System usage, network usage and records them in a otel format suitable
-for observability tools.
-
-Responsibilities
-----------------
-- Listen to worker-specific events: `cpu_warning`, `system_usage`, `network_usage`.
-- Provide extension points for additional worker-level telemetry.
-"""
-
 import logging
 from typing import ClassVar, Optional
 
@@ -26,37 +14,81 @@ class WorkerLocustOtelRecorder(TelemetryBaseRecorder, LocustOtelCommonRecorderMi
     """
     OpenTelemetry recorder for Locust worker nodes.
 
-    Responsibilities
-    ----------------
-    - Handle worker-specific telemetry, such as CPU warnings.
-    - Provide extension points for additional worker-level telemetry.
+    Collects system and request-level telemetry, including request durations
+    and associated attributes. Integrates with Locust test lifecycle events
+    to start/stop metrics collection appropriately.
+
+    Inherits
+    --------
+    TelemetryBaseRecorder : Base recorder interface for Locust telemetry.
+    LocustOtelCommonRecorderMixin : Provides system metrics (CPU, memory, network).
 
     Attributes
     ----------
     name : ClassVar[str]
-        Identifier for the recorder.
+        Unique identifier for this recorder type.
+    metrics : Optional[OtelMetricsDefinition]
+        Container for all OpenTelemetry metrics instruments (gauges, histograms).
     """
 
     name: ClassVar[str] = "worker_otel_recorder"
 
     def __init__(self, env: Environment) -> None:
         """
-        Initialize the worker telemetry recorder.
+        Initialize the Worker OpenTelemetry recorder.
 
-        Registers event listeners for test lifecycle events.
+        Sets up OpenTelemetry configuration, initializes metrics container,
+        and registers event listeners for test lifecycle and request events.
 
         Parameters
         ----------
         env : Environment
-            The Locust environment instance.
+            Locust environment instance providing access to test state
+            and event hooks.
         """
         super().__init__(env)
 
-        # Configure otel
-        # This will be set by configure otel
         self.metrics: Optional[OtelMetricsDefinition] = None
+
+        # Configure OpenTelemetry meter when environment initializes
         env.events.init.add_listener(self.configure_otel)
 
-        # Register master-only event listeners
+        # Register worker-specific event listeners
         self.env.events.test_start.add_listener(self.on_test_start)
         self.env.events.test_stop.add_listener(self.on_test_stop)
+        self.env.events.request.add_listener(self.on_request)
+
+    def on_request(self, *args, **kwargs) -> None:
+        """
+        Handle request completion events and record request metrics.
+
+        Records request duration along with endpoint, HTTP method, and exception
+        information for observability.
+
+        Parameters
+        ----------
+        *args : Any
+            Positional arguments from the Locust request event.
+        **kwargs : Any
+            Keyword arguments from the Locust request event, expected keys:
+            - name : str
+                Endpoint name or route.
+            - request_type : str
+                HTTP method (GET, POST, etc.).
+            - response_time : float
+                Duration of the request in milliseconds.
+            - exception : Optional[Exception]
+                Exception object if the request failed; None otherwise.
+        """
+        attributes = self.recorder_context()
+        attributes.update(
+            {
+                "endpoint": kwargs.get("name"),
+                "http_method": kwargs.get("request_type"),
+                "exception": bool(kwargs.get("exception")),
+            }
+        )
+
+        self.metrics.requests.request_duration.record(
+            kwargs.get("response_time"), attributes=attributes
+        )

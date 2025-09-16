@@ -163,6 +163,7 @@ class MasterLocustJsonTelemetryRecorder(
             if final
             else RequestMetric.CURRENT_STATS.value
         )
+
         self.log_telemetry(
             telemetry=telemetry,
             user_count=self.env.runner.user_count,

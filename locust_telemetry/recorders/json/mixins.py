@@ -48,6 +48,8 @@ class LocustJsonTelemetryCommonRecorderMixin:
             f"Recording telemetry: {telemetry.name}",
             extra={
                 "telemetry": {
+                    "telemetry_type": telemetry.type,
+                    "telemetry_name": telemetry.name,
                     **self.recorder_context(),
                     **kwargs,
                 }
