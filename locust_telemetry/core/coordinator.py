@@ -89,7 +89,7 @@ class TelemetryCoordinator:
 
         logger.debug("[TelemetryCoordinator] Initialized and hooks registered")
 
-    def _add_cli_arguments(self, parser: LocustArgumentParser):
+    def _add_cli_arguments(self, parser: LocustArgumentParser) -> None:
         """
         Register all the cli from different recorders
 
@@ -103,7 +103,7 @@ class TelemetryCoordinator:
         group = register_telemetry_cli_args(parser)
         self.recorder_plugin_manager.register_plugin_clis(group)
 
-    def _configure_logging(self, *args, **kwargs):
+    def _configure_logging(self, *args: Any, **kwargs: Any) -> None:
         """Register the logging configuration"""
         configure_logging()
 
@@ -123,12 +123,14 @@ class TelemetryCoordinator:
         **kwargs : Any
             Additional event system arguments (unused).
         """
-        if isinstance(environment.runner, WorkerRunner):
-            environment.runner.register_message(
-                "set_metadata",
-                lambda msg, **kw: set_test_metadata(environment, msg.data),
-            )
-            logger.info("[Worker] Metadata handler registered successfully")
+        if not isinstance(environment.runner, WorkerRunner):
+            return
+
+        environment.runner.register_message(
+            "set_metadata",
+            lambda msg, **kw: set_test_metadata(environment, msg.data),
+        )
+        logger.info("[Worker] Metadata handler registered successfully")
 
     def _setup_metadata(self, environment: Environment, **kwargs: Any) -> None:
         """
@@ -144,11 +146,9 @@ class TelemetryCoordinator:
         **kwargs : Any
             Additional event system arguments (unused).
         """
-        if isinstance(environment.runner, MasterRunner):
-            metadata = self.recorder_plugin_manager.register_plugin_metadata(
-                environment
-            )
-            logger.info(
-                "Sending test metadata to workers", extra={"metadata": metadata}
-            )
-            environment.runner.send_message("set_metadata", metadata)
+        if not isinstance(environment.runner, MasterRunner):
+            return
+
+        metadata = self.recorder_plugin_manager.register_plugin_metadata(environment)
+        logger.info("Sending test metadata to workers", extra={"metadata": metadata})
+        environment.runner.send_message("set_metadata", metadata)

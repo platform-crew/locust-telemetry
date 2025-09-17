@@ -1,3 +1,23 @@
+"""
+OpenTelemetry handlers for Locust.
+
+This module provides handler implementations for lifecycle events, system
+metrics, request metrics, and output in the context of OpenTelemetry.
+These handlers are used by the OTEL recorders for both master and worker
+nodes to collect and export telemetry data to an OTLP endpoint.
+
+Classes
+-------
+OtelLifecycleHandler
+    Handles Locust test lifecycle events for OTEL.
+OtelOutputHandler
+    Handles structured telemetry output and export for OTEL.
+OtelRequestHandler
+    Collects and exports request metrics for OTEL.
+OtelSystemMetricsHandler
+    Collects and exports system-level metrics (CPU, memory) for OTEL.
+"""
+
 import logging
 from typing import Any, Callable, Dict, List
 

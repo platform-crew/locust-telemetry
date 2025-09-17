@@ -1,3 +1,23 @@
+"""
+JSON telemetry handlers for Locust.
+
+This module provides handler implementations for lifecycle events, system
+metrics, request metrics, and structured JSON output. These handlers are
+used by the JSON telemetry recorders for both master and worker nodes.
+
+
+Classes
+-------
+JsonTelemetryLifecycleHandler
+    Handles Locust test lifecycle events for json recorder.
+JsonTelemetryOutputHandler
+    Handles structured telemetry output and logs them as json.
+JsonTelemetryRequestHandler
+    Collects and exports request metrics for requests.
+JsonTelemetrySystemMetricsHandler
+    Collects and exports system-level metrics (CPU, memory).
+"""
+
 import logging
 from typing import Any, Optional
 
