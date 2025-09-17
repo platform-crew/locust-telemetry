@@ -20,18 +20,16 @@ from typing import Any, Dict
 from locust.env import Environment
 
 from locust_telemetry import config
-from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
-from locust_telemetry.recorders.json.master import (
+from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
+from locust_telemetry.recorders.json.recorder import (
     MasterLocustJsonTelemetryRecorder,
-)
-from locust_telemetry.recorders.json.worker import (
     WorkerLocustJsonTelemetryRecorder,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class LocustJsonTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
+class LocustJsonTelemetryRecorderPlugin(BaseTelemetryRecorderPlugin):
     """
     Core telemetry recorder plugin for Locust.
 

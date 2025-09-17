@@ -17,7 +17,7 @@ from typing import Any, Dict, List
 from locust.env import Environment
 
 from locust_telemetry import config
-from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
+from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
 from locust_telemetry.metadata import set_test_metadata
 
 logger = logging.getLogger(__name__)
@@ -52,22 +52,22 @@ class TelemetryRecorderPluginManager:
         """
         if self._initialized:
             return
-        self._recorder_plugins: List[TelemetryRecorderPluginBase] = []
+        self._recorder_plugins: List[BaseTelemetryRecorderPlugin] = []
         self._initialized = True
 
     @property
-    def recorder_plugins(self) -> List[TelemetryRecorderPluginBase]:
+    def recorder_plugins(self) -> List[BaseTelemetryRecorderPlugin]:
         """
         Get the list of registered recorder plugins.
 
         Returns
         -------
-        List[TelemetryRecorderPluginBase]
+        List[BaseTelemetryRecorderPlugin]
             The currently registered recorder plugin instances.
         """
         return self._recorder_plugins
 
-    def register_recorder_plugin(self, plugin: TelemetryRecorderPluginBase) -> None:
+    def register_recorder_plugin(self, plugin: BaseTelemetryRecorderPlugin) -> None:
         """
         Register a telemetry recorder plugin for later loading.
 
@@ -75,7 +75,7 @@ class TelemetryRecorderPluginManager:
 
         Parameters
         ----------
-        plugin : TelemetryRecorderPluginBase
+        plugin : BaseTelemetryRecorderPlugin
             The recorder plugin instance to register.
         """
         if plugin not in self._recorder_plugins:

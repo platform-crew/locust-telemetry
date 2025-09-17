@@ -127,7 +127,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -135,10 +135,6 @@
       "title": "Total Requests",
       "transformations": [
         {
-          "filter": {
-            "id": "byRefId",
-            "options": "/^(?:A)$/"
-          },
           "id": "extractFields",
           "options": {
             "delimiter": ",",
@@ -209,7 +205,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -288,7 +284,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -364,7 +360,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -438,7 +434,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -520,7 +516,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.final.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -649,7 +645,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.current.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.current\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -800,7 +796,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.current.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.current\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -968,7 +964,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.current.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.current\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1092,7 +1088,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.current.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.current\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1121,7 +1117,7 @@
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
       },
-      "description": "Average Endpoint's Response Time",
+      "description": "Endpoint's Average Response Time",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1182,12 +1178,12 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.endpoint.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final.success\", testplan=~\"$testplan\", run_id=~\"$run_id\"}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Average Endpoint's Response Time",
+      "title": "Endpoint's Average Response Time",
       "transformations": [
         {
           "id": "extractFields",
@@ -1197,7 +1193,7 @@
             "jsonPaths": [
               {
                 "alias": "Path",
-                "path": "telemetry.request_path"
+                "path": "telemetry.name"
               },
               {
                 "alias": "RT",
@@ -1234,7 +1230,7 @@
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
       },
-      "description": "Average Endpoints Failures Per Sec",
+      "description": "Endpoint's Failures Per Second",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1294,12 +1290,12 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.endpoint.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final.success\", testplan=~\"$testplan\", run_id=~\"$run_id\"}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Average Endpoints Failures Per Sec",
+      "title": "Endpoint's FPS",
       "transformations": [
         {
           "id": "extractFields",
@@ -1309,7 +1305,7 @@
             "jsonPaths": [
               {
                 "alias": "Path",
-                "path": "telemetry.request_path"
+                "path": "telemetry.name"
               },
               {
                 "alias": "RT",
@@ -1322,6 +1318,7 @@
           }
         },
         {
+          "disabled": true,
           "id": "groupBy",
           "options": {
             "fields": {
@@ -1430,7 +1427,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.endpoint.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final.success\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1453,7 +1450,7 @@
               },
               {
                 "alias": "Path",
-                "path": "telemetry.request_path"
+                "path": "telemetry.name"
               },
               {
                 "alias": "Method",
@@ -1547,7 +1544,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.request.endpoint.errors\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final.errors\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1691,7 +1688,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"event.system.usage\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"metric.system.cpu\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1706,7 +1703,7 @@
             "jsonPaths": [
               {
                 "alias": "CPU",
-                "path": "telemetry.cpu_usage"
+                "path": "telemetry.value"
               },
               {
                 "alias": "Source",
@@ -1780,7 +1777,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-worker\", telemetry_name=\"event.system.usage\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-worker\", telemetry_name=\"metric.system.cpu\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1906,7 +1903,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"event.system.usage\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"metric.system.mem\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1921,7 +1918,7 @@
             "jsonPaths": [
               {
                 "alias": "Memory",
-                "path": "telemetry.memory_usage"
+                "path": "telemetry.value"
               },
               {
                 "alias": "Source",
@@ -2018,5 +2015,5 @@
   "timezone": "browser",
   "title": "Locust Requests Dashboard",
   "uid": "4a54c6e2-1519-4332-9bb5-fa79c0989ec8",
-  "version": 22
+  "version": 27
 }

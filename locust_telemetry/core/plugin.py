@@ -21,7 +21,7 @@ from locust.runners import MasterRunner, WorkerRunner
 logger = logging.getLogger(__name__)
 
 
-class TelemetryRecorderPluginBase(ABC):
+class BaseTelemetryRecorderPlugin(ABC):
     """
     Abstract base class for all telemetry recorder plugins.
 

@@ -138,7 +138,7 @@
               },
               {
                 "alias": "Endtime",
-                "path": "telemetry.endtime"
+                "path": "telemetry.end_time"
               },
               {
                 "alias": "Starttime",
@@ -230,5 +230,5 @@
   "timezone": "browser",
   "title": "Load Test Runs",
   "uid": "2a1a2a1b-5407-44dd-860f-1c9361750049",
-  "version": 9
+  "version": 13
 }

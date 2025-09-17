@@ -21,7 +21,7 @@ from typing import Callable, Dict
 from locust.runners import STATE_RUNNING, STATE_SPAWNING
 
 # Default interval for telemetry stats recording
-DEFAULT_STATS_RECORDER_INTERVAL: int = 2  # seconds
+DEFAULT_STATS_RECORDER_INTERVAL: int = 3  # seconds
 
 # Configuration cli group to add all the necessary args
 TELEMETRY_CLI_GROUP_NAME: str = "locust-telemetry"

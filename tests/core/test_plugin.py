@@ -3,10 +3,10 @@ from locust.argument_parser import LocustArgumentParser
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
 
-from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
+from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
 
 
-def test_add_arguments_default_noop(dummy_recorder_plugin: TelemetryRecorderPluginBase):
+def test_add_arguments_default_noop(dummy_recorder_plugin: BaseTelemetryRecorderPlugin):
     """Verify that the default add_arguments does nothing (no error raised)."""
     parser = LocustArgumentParser()
     dummy_recorder_plugin.add_cli_arguments(parser)
@@ -14,7 +14,7 @@ def test_add_arguments_default_noop(dummy_recorder_plugin: TelemetryRecorderPlug
 
 
 def test_register_master_telemetry_recorder_called_on_master_load(
-    mock_env: Environment, dummy_recorder_plugin: TelemetryRecorderPluginBase
+    mock_env: Environment, dummy_recorder_plugin: BaseTelemetryRecorderPlugin
 ):
     """Ensure load() calls master recorder when runner is MasterRunner."""
     mock_env.runner.__class__ = MasterRunner
@@ -24,7 +24,7 @@ def test_register_master_telemetry_recorder_called_on_master_load(
 
 
 def test_register_worker_telemetry_recorder_called_on_worker_load(
-    mock_env: Environment, dummy_recorder_plugin: TelemetryRecorderPluginBase
+    mock_env: Environment, dummy_recorder_plugin: BaseTelemetryRecorderPlugin
 ):
     """Ensure load() calls worker recorder when runner is WorkerRunner."""
     mock_env.runner.__class__ = WorkerRunner
@@ -34,7 +34,7 @@ def test_register_worker_telemetry_recorder_called_on_worker_load(
 
 
 def test_load_calls_correct_recorder_multiple_times(
-    mock_env: Environment, dummy_recorder_plugin: TelemetryRecorderPluginBase
+    mock_env: Environment, dummy_recorder_plugin: BaseTelemetryRecorderPlugin
 ):
     """Verify load dispatches correctly depending on runner type."""
     # Master
@@ -72,11 +72,11 @@ def test_load_calls_nothing_if_runner_is_unknown(mock_env, dummy_recorder_plugin
 
 def test_abstract_methods_raise_typeerror():
     """
-    Ensure instantiating TelemetryRecorderPluginBase without implementing
+    Ensure instantiating BaseTelemetryRecorderPlugin without implementing
     abstract methods fails
     """
     with pytest.raises(TypeError):
-        TelemetryRecorderPluginBase()
+        BaseTelemetryRecorderPlugin()
 
 
 def test_load_without_plugin_id(mock_env, dummy_recorder_plugin):

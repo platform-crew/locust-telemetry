@@ -7,14 +7,14 @@ from locust.env import Environment
 
 from locust_telemetry.core.coordinator import TelemetryCoordinator
 from locust_telemetry.core.manager import TelemetryRecorderPluginManager
-from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
+from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
 from locust_telemetry.core.recorder import TelemetryBaseRecorder
 from locust_telemetry.recorders.json.master import (
     MasterLocustJsonTelemetryRecorder,
 )
 
 
-class DummyTelemetryRecorderPlugin(TelemetryRecorderPluginBase):
+class DummyTelemetryRecorderPlugin(BaseTelemetryRecorderPlugin):
     """Simple telemetry recorder plugin for testing manager behavior."""
 
     RECORDER_PLUGIN_ID = "dummy"
@@ -79,7 +79,7 @@ def dummy_recorder_plugin_class() -> Type[DummyTelemetryRecorderPlugin]:
 
 
 @pytest.fixture
-def dummy_recorder_plugin() -> TelemetryRecorderPluginBase:
+def dummy_recorder_plugin() -> BaseTelemetryRecorderPlugin:
     """Return a fresh DummyTelemetryRecorderPlugin instance for testing."""
     return DummyTelemetryRecorderPlugin()
 
