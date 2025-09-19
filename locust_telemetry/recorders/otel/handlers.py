@@ -198,9 +198,16 @@ class OtelLifecycleHandler(BaseLifecycleHandler):
             kind=h.create_otel_counter,
         )
 
-        # Register request duration as histogram
+        # Register request success as histogram
         self.output.register_metric(
-            metric=TelemetryMetricsEnum.REQUEST,
+            metric=TelemetryMetricsEnum.REQUEST_SUCCESS,
+            unit="ms",
+            kind=h.create_otel_histogram,
+        )
+
+        # Register request error as histogram
+        self.output.register_metric(
+            metric=TelemetryMetricsEnum.REQUEST_ERROR,
             unit="ms",
             kind=h.create_otel_histogram,
         )
@@ -408,11 +415,20 @@ class OtelRequestHandler(BaseRequestHandler):
             Keyword arguments containing request metadata,
             such as response_time and exception flag.
         """
+        # This should not throw any error because locust should always send response
+        response = kwargs.get("response")
+        is_error = bool(kwargs.get("exception"))
+        metric = (
+            TelemetryMetricsEnum.REQUEST_ERROR
+            if is_error
+            else TelemetryMetricsEnum.REQUEST_SUCCESS
+        )
+
         self.output.record_metrics(
-            TelemetryMetricsEnum.REQUEST,
+            metric,
             kwargs.get("response_time"),
-            exception=bool(kwargs.get("exception")),
             endpoint=kwargs.get("name"),
+            status_code=response.status_code if response else 500,
         )
 
     def _user_count_callback(self, options=None) -> List[Observation]:

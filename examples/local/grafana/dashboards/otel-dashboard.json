@@ -40,11 +40,11 @@
         "type": "prometheus",
         "uid": "feycujmeqsp34b"
       },
-      "description": "Average Request Response Time",
+      "description": "Success Response Time",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-greens"
           },
           "custom": {
             "axisBorderShow": false,
@@ -85,10 +85,6 @@
             "steps": [
               {
                 "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           },
@@ -125,7 +121,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum by(source_id) (rate(locust_tl_request_metric_stats_milliseconds_sum{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])) / sum by(source_id) (rate(locust_tl_request_metric_stats_milliseconds_count{run_id=~\"$run_id\"}[$__rate_interval]))",
+          "expr": "sum by(source_id) (rate(locust_tl_request_metric_success_milliseconds_sum{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])) / sum by(source_id) (rate(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -135,7 +131,7 @@
           "useBackend": false
         }
       ],
-      "title": "Average Request Response Time",
+      "title": "Success Response Time",
       "type": "timeseries"
     },
     {
@@ -188,7 +184,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "max(sum(rate(locust_tl_request_metric_stats_milliseconds_count{exception=\"true\", run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
+          "expr": "max(sum(rate(locust_tl_request_metric_error_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -257,7 +253,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "max(sum(rate(locust_tl_request_metric_stats_milliseconds_count{exception=\"false\", run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
+          "expr": "max(sum(rate(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -281,11 +277,313 @@
         "type": "prometheus",
         "uid": "feycujmeqsp34b"
       },
-      "description": "Response Time Percentiles",
+      "description": "Failure Response Time",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "continuous-reds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 6,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "id": 25,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum by(source_id) (rate(locust_tl_request_metric_error_milliseconds_sum{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])) / sum by(source_id) (rate(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\"}[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "{{source_id}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Failure Response Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Virtual Users",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "semi-dark-blue"
+              }
+            ]
+          },
+          "unit": "#"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "id": 13,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "last_over_time(locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Virtual Users",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {}
+        }
+      ],
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Success Percentiles",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlPu",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 11,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 0,
+        "y": 10
+      },
+      "id": 26,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by(le) (rate(locust_tl_request_metric_success_milliseconds_bucket{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "50th Percentile",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by(le) (rate(locust_tl_request_metric_success_milliseconds_bucket{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "95th Percentile",
+          "range": true,
+          "refId": "B",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.99, sum by(le) (rate(locust_tl_request_metric_success_milliseconds_bucket{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "99th Percentile",
+          "range": true,
+          "refId": "C",
+          "useBackend": false
+        }
+      ],
+      "title": "Success Percentiles",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Failure Percentiles",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-YlRd"
           },
           "custom": {
             "axisBorderShow": false,
@@ -341,7 +639,7 @@
         "h": 10,
         "w": 8,
         "x": 16,
-        "y": 1
+        "y": 10
       },
       "id": 6,
       "options": {
@@ -366,7 +664,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "histogram_quantile(0.5, sum by(le) (rate(locust_tl_request_metric_stats_milliseconds_bucket{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.5, sum by(le) (rate(locust_tl_request_metric_error_milliseconds_bucket{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -382,7 +680,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by(le) (rate(locust_tl_request_metric_stats_milliseconds_bucket{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by(le) (rate(locust_tl_request_metric_error_milliseconds_bucket{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -399,7 +697,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "histogram_quantile(0.99, sum by(le) (rate(locust_tl_request_metric_stats_milliseconds_bucket{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.99, sum by(le) (rate(locust_tl_request_metric_error_milliseconds_bucket{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -410,7 +708,7 @@
           "useBackend": false
         }
       ],
-      "title": "Response Time Percentiles",
+      "title": "Failure Percentiles",
       "type": "timeseries"
     },
     {
@@ -418,41 +716,101 @@
         "type": "prometheus",
         "uid": "feycujmeqsp34b"
       },
-      "description": "Virtual Users",
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 7,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
           "mappings": [],
           "thresholds": {
-            "mode": "percentage",
+            "mode": "absolute",
             "steps": [
               {
-                "color": "semi-dark-blue"
+                "color": "green"
               }
             ]
           },
           "unit": "#"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RPS"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "r/s"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 5,
+        "h": 9,
         "w": 8,
         "x": 8,
-        "y": 6
+        "y": 11
       },
-      "id": 13,
+      "id": 22,
       "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
+        "legend": {
           "calcs": [],
-          "fields": "",
-          "values": true
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "12.0.0",
       "targets": [
@@ -462,25 +820,36 @@
             "uid": "feycujmeqsp34b"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "last_over_time(locust_tl_user_metric_stats_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])",
+          "editorMode": "code",
+          "expr": "locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "# Users",
           "range": true,
           "refId": "A",
           "useBackend": false
-        }
-      ],
-      "title": "Virtual Users",
-      "transformations": [
+        },
         {
-          "id": "reduce",
-          "options": {}
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum(rate(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "RPS",
+          "range": true,
+          "refId": "B",
+          "useBackend": false
         }
       ],
-      "type": "gauge"
+      "title": "Users vs RPS",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -568,7 +937,7 @@
         "h": 10,
         "w": 8,
         "x": 0,
-        "y": 10
+        "y": 20
       },
       "id": 18,
       "options": {
@@ -593,7 +962,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(rate(locust_tl_request_metric_stats_milliseconds_count{exception=\"false\"}[$__rate_interval]))",
+          "expr": "sum(rate(locust_tl_request_metric_success_milliseconds_count{}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -609,7 +978,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(rate(locust_tl_request_metric_stats_milliseconds_count{exception=\"true\"}[$__rate_interval]))",
+          "expr": "sum(rate(locust_tl_request_metric_error_milliseconds_count{}[$__rate_interval]))",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -628,7 +997,7 @@
         "type": "prometheus",
         "uid": "feycujmeqsp34b"
       },
-      "description": "Request Success (%)",
+      "description": "Rate of Success / Failure",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -705,10 +1074,10 @@
         ]
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 8,
         "x": 8,
-        "y": 11
+        "y": 20
       },
       "id": 21,
       "options": {
@@ -733,7 +1102,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "(sum(rate(locust_tl_request_metric_stats_milliseconds_count{exception=\"false\", run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))\n/\nsum(rate(locust_tl_request_metric_stats_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))) * 100",
+          "expr": "sum(rate(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])) * 100",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -748,7 +1117,7 @@
             "uid": "feycujmeqsp34b"
           },
           "editorMode": "code",
-          "expr": "(sum(rate(locust_tl_request_metric_stats_milliseconds_count{exception=\"true\", run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))\n/\nsum(rate(locust_tl_request_metric_stats_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))) * 100",
+          "expr": "sum(rate(locust_tl_request_metric_error_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])) * 100",
           "hide": false,
           "instant": false,
           "legendFormat": "Failure %",
@@ -756,7 +1125,7 @@
           "refId": "B"
         }
       ],
-      "title": "Request Success vs Failure (%)",
+      "title": "Rate of Success / Failure",
       "type": "timeseries"
     },
     {
@@ -764,7 +1133,7 @@
         "type": "prometheus",
         "uid": "feycujmeqsp34b"
       },
-      "description": "Request Success vs Failures",
+      "description": "# Success / Failures",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -842,10 +1211,10 @@
         ]
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 8,
         "x": 16,
-        "y": 11
+        "y": 20
       },
       "id": 19,
       "options": {
@@ -870,7 +1239,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(locust_tl_request_metric_stats_milliseconds_count{exception=\"false\", run_id=~\"$run_id\", testplan=~\"$testplan\"})",
+          "expr": "sum(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -885,7 +1254,7 @@
             "uid": "feycujmeqsp34b"
           },
           "editorMode": "code",
-          "expr": "sum(locust_tl_request_metric_stats_milliseconds_count{exception=\"true\", run_id=~\"$run_id\", testplan=~\"$testplan\"})",
+          "expr": "sum(locust_tl_request_metric_error_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"})",
           "hide": false,
           "instant": false,
           "legendFormat": "# Failures",
@@ -893,7 +1262,203 @@
           "refId": "B"
         }
       ],
-      "title": "Request Success vs Failures",
+      "title": "# Success / Failures",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Success By Endpoint",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 27,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "editorMode": "code",
+          "expr": "sum by (endpoint) (\n  rate(locust_tl_request_metric_success_milliseconds_sum[$__rate_interval])\n)",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Success By Endpoint",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Failure By Endpoint",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 27,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 30
+      },
+      "id": 24,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "editorMode": "code",
+          "expr": "sum by (endpoint) (\n  rate(locust_tl_request_metric_error_milliseconds_sum[$__rate_interval])\n)",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Failure By Endpoint",
       "type": "timeseries"
     },
     {
@@ -960,9 +1525,9 @@
       },
       "gridPos": {
         "h": 9,
-        "w": 8,
+        "w": 12,
         "x": 0,
-        "y": 20
+        "y": 41
       },
       "id": 20,
       "options": {
@@ -987,7 +1552,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "deriv(locust_tl_user_metric_stats_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])",
+          "expr": "deriv(locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1059,9 +1624,9 @@
       },
       "gridPos": {
         "h": 9,
-        "w": 8,
-        "x": 8,
-        "y": 20
+        "w": 12,
+        "x": 12,
+        "y": 41
       },
       "id": 7,
       "options": {
@@ -1085,8 +1650,8 @@
             "uid": "feycujmeqsp34b"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "locust_tl_user_metric_stats_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}",
+          "editorMode": "code",
+          "expr": "locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1100,250 +1665,12 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "feycujmeqsp34b"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "blue",
-            "mode": "fixed"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 7,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "#"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "RPS"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "super-light-orange",
-                  "mode": "fixed"
-                }
-              },
-              {
-                "id": "custom.axisPlacement",
-                "value": "right"
-              },
-              {
-                "id": "unit",
-                "value": "r/s"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 16,
-        "y": 20
-      },
-      "id": 22,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "feycujmeqsp34b"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "locust_tl_user_metric_stats_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "# Users",
-          "range": true,
-          "refId": "A",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "feycujmeqsp34b"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum(rate(locust_tl_request_metric_stats_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "RPS",
-          "range": true,
-          "refId": "B",
-          "useBackend": false
-        }
-      ],
-      "title": "Users vs RPS",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "feycujmeqsp34b"
-      },
-      "description": "Response Time By Endpoint",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 27,
-            "gradientMode": "hue",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 24,
-        "x": 0,
-        "y": 29
-      },
-      "id": 10,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "feycujmeqsp34b"
-          },
-          "editorMode": "code",
-          "expr": "sum by (endpoint) (\n  rate(locust_tl_request_metric_stats_milliseconds_sum[$__rate_interval])\n)\n/\nsum by (endpoint) (\n  rate(locust_tl_request_metric_stats_milliseconds_count[$__rate_interval])\n)",
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Avg Response Time By Endpoint",
-      "type": "timeseries"
-    },
-    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 50
       },
       "id": 17,
       "panels": [],
@@ -1408,10 +1735,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 11,
         "w": 8,
         "x": 0,
-        "y": 40
+        "y": 51
       },
       "id": 3,
       "options": {
@@ -1454,7 +1781,7 @@
         "type": "prometheus",
         "uid": "feycujmeqsp34b"
       },
-      "description": "Network Usage",
+      "description": "Max Memory Usage",
       "fieldConfig": {
         "defaults": {
           "mappings": [],
@@ -1462,7 +1789,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "super-light-blue"
+                "color": "super-light-green"
               }
             ]
           },
@@ -1471,12 +1798,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 7,
         "w": 4,
         "x": 8,
-        "y": 40
+        "y": 51
       },
-      "id": 15,
+      "id": 23,
       "options": {
         "minVizHeight": 75,
         "minVizWidth": 75,
@@ -1498,8 +1825,8 @@
             "uid": "feycujmeqsp34b"
           },
           "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum by (source_id) (last_over_time(locust_tl_system_metric_mem_bytes{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
+          "editorMode": "builder",
+          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_mem_bytes{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1509,7 +1836,7 @@
           "useBackend": false
         }
       ],
-      "title": "Network Usage",
+      "title": "Max Memory Usage",
       "transformations": [
         {
           "id": "reduce",
@@ -1548,10 +1875,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 7,
         "w": 4,
         "x": 12,
-        "y": 40
+        "y": 51
       },
       "id": 14,
       "options": {
@@ -1656,10 +1983,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 11,
         "w": 8,
         "x": 16,
-        "y": 40
+        "y": 51
       },
       "id": 4,
       "options": {
@@ -1696,6 +2023,75 @@
       ],
       "title": "Memory Usage",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Network Usage",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-blue"
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 58
+      },
+      "id": 15,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_network_bytes{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Network Usage",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {}
+        }
+      ],
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -1762,7 +2158,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 50
+        "y": 62
       },
       "id": 9,
       "options": {
@@ -1864,5 +2260,5 @@
   "timezone": "browser",
   "title": "Locust Requests Dashboard (stats-otel plugin)",
   "uid": "d89a9144-92a1-4a5c-a96f-65b31b6a1c09",
-  "version": 129
+  "version": 133
 }

@@ -283,7 +283,7 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
         """
         # Final requests stats
         self.output.record_metrics(
-            TelemetryMetricsEnum.REQUEST,
+            TelemetryMetricsEnum.REQUEST_STATS,
             stats_type=REQUEST_STATS_TYPE_FINAL,
             user_count=self.env.runner.user_count,
             **h.add_percentiles(self.env.stats.total.to_dict()),
@@ -297,7 +297,7 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
         for status, stats in final_stats_types.items():
             for _, stat in stats.items():
                 self.output.record_metrics(
-                    TelemetryMetricsEnum.REQUEST,
+                    TelemetryMetricsEnum.REQUEST_STATS,
                     status=status,
                     **h.add_percentiles(stat.to_dict()),
                 )
@@ -313,7 +313,7 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
             while True:
                 stats = h.add_percentiles(self.env.stats.total.to_dict())
                 self.output.record_metrics(
-                    TelemetryMetricsEnum.REQUEST,
+                    TelemetryMetricsEnum.REQUEST_STATS,
                     stats_type=REQUEST_STATS_TYPE_CURRENT,
                     user_count=self.env.runner.user_count,
                     **stats,

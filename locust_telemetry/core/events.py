@@ -17,6 +17,8 @@ class TelemetryMetricsEnum(Enum):
     MEMORY = "locust.tl.system.metric.mem"
     NETWORK = "locust.tl.system.metric.network"
 
-    REQUEST = "locust.tl.request.metric.stats"
+    REQUEST_STATS = "locust.tl.request.metric.stats"
+    REQUEST_SUCCESS = "locust.tl.request.metric.success"
+    REQUEST_ERROR = "locust.tl.request.metric.error"
 
-    USER = "locust.tl.user.metric.stats"
+    USER = "locust.tl.user.metric.count"
