@@ -18,8 +18,6 @@ TELEMETRY_CLI_GROUP_NAME: str
 import uuid
 from typing import Callable, Dict
 
-from locust.runners import STATE_RUNNING, STATE_SPAWNING
-
 # Default interval for telemetry stats recording
 DEFAULT_STATS_RECORDER_INTERVAL: int = 3  # seconds
 
@@ -37,5 +35,4 @@ TELEMETRY_OTEL_RECORDER_PLUGIN_ID = "stats-otel"
 
 TELEMETRY_OTEL_METRICS_METER = "locust_telemetry"
 
-
-LOCUST_RUNNING_STATES = (STATE_SPAWNING, STATE_RUNNING)
+DEFAULT_WORKER_REGION = "unknown"

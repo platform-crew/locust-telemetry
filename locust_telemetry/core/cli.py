@@ -12,6 +12,7 @@ from locust.argument_parser import LocustArgumentParser
 
 from locust_telemetry.config import (
     DEFAULT_STATS_RECORDER_INTERVAL,
+    DEFAULT_WORKER_REGION,
     TELEMETRY_CLI_GROUP_NAME,
     TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID,
     TELEMETRY_OTEL_RECORDER_PLUGIN_ID,
@@ -73,6 +74,15 @@ def register_telemetry_cli_args(parser: LocustArgumentParser):
         help="Interval (in seconds) for telemetry statistics recorder updates.",
         env_var="LOCUST_TELEMETRY_STATS_RECORDER_INTERVAL",
         default=DEFAULT_STATS_RECORDER_INTERVAL,
+    )
+
+    group.add_argument(
+        "--lt-worker-region",
+        type=int,
+        help="Worker deployed region. This can be used to identify the request "
+        "from different geographical location",
+        env_var="LOCUST_TELEMETRY_WORKER_REGION",
+        default=DEFAULT_WORKER_REGION,
     )
 
     return group
