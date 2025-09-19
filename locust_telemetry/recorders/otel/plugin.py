@@ -5,6 +5,12 @@ from locust.env import Environment
 
 from locust_telemetry import config
 from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
+from locust_telemetry.recorders.otel.handlers import (
+    OtelLifecycleHandler,
+    OtelOutputHandler,
+    OtelRequestHandler,
+    OtelSystemMetricsHandler,
+)
 from locust_telemetry.recorders.otel.recorder import (
     MasterLocustOtelRecorder,
     WorkerLocustOtelRecorder,
@@ -99,7 +105,13 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
         **kwargs : Any
             Additional keyword arguments passed from the plugin system.
         """
-        MasterLocustOtelRecorder(env=environment)
+        MasterLocustOtelRecorder(
+            env=environment,
+            output_handler_cls=OtelOutputHandler,
+            lifecycle_handler_cls=OtelLifecycleHandler,
+            system_handler_cls=OtelSystemMetricsHandler,
+            requests_handler_cls=OtelRequestHandler,
+        )
 
     def load_worker_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
@@ -114,4 +126,10 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
         **kwargs : Any
             Additional keyword arguments passed from the plugin system.
         """
-        WorkerLocustOtelRecorder(env=environment)
+        WorkerLocustOtelRecorder(
+            env=environment,
+            output_handler_cls=OtelOutputHandler,
+            lifecycle_handler_cls=OtelLifecycleHandler,
+            system_handler_cls=OtelSystemMetricsHandler,
+            requests_handler_cls=OtelRequestHandler,
+        )

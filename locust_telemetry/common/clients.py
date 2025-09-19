@@ -27,8 +27,6 @@ def configure_otel(environment: Any) -> Any:
             - lt_otel_exporter_otlp_insecure : bool
             - lt_stats_recorder_interval : int (seconds)
     """
-    logger.info("Configuring the otel metrics during locust init phase")
-
     # Create the OTLP exporter gRPC
     exporter = OTLPMetricExporter(
         endpoint=environment.parsed_options.lt_otel_exporter_otlp_endpoint,  # gRPC
@@ -47,4 +45,5 @@ def configure_otel(environment: Any) -> Any:
     provider = MeterProvider(metric_readers=[reader])
     metrics.set_meter_provider(provider)
     environment.otel_meter = metrics.get_meter(config.TELEMETRY_OTEL_METRICS_METER)
+    environment.otel_provider = provider
     return environment.otel_meter

@@ -16,40 +16,49 @@ WorkerLocustOtelRecorder
 """
 
 import logging
-
-from locust.env import Environment
+from typing import Any
 
 from locust_telemetry.common.clients import configure_otel
 from locust_telemetry.core.recorder import (
     MasterTelemetryRecorder,
     WorkerTelemetryRecorder,
 )
-from locust_telemetry.recorders.otel.handlers import (
-    OtelLifecycleHandler,
-    OtelOutputHandler,
-    OtelRequestHandler,
-    OtelSystemMetricsHandler,
-)
 
 logger = logging.getLogger(__name__)
 
 
-class BaseOtelRecorder:
-    """
-    Base class to initialize OpenTelemetry configuration.
+class LocustOtelRecorderMixin:
 
-    Ensures that the OTLP exporter, meter provider, and metric readers
-    are configured before any Locust telemetry handlers are registered.
+    def on_test_start(self, *args: Any, **kwargs: Any) -> None:
+        """
+        On test start configure otel and call the base
+        """
+        logger.info("[otel] Configuring otel on test start")
+        configure_otel(self.env)
+        super().on_test_start(*args, **kwargs)
 
-    This class should be inherited alongside MasterTelemetryRecorder
-    or WorkerTelemetryRecorder.
-    """
+    def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
+        """
+        Lifecycle hook for test stop.
+        De-registers metrics and shuts down the OpenTelemetry provider.
+        """
+        super().on_test_stop(*args, **kwargs)
+        provider = getattr(self.env, "otel_provider", None)
+        if not provider:
+            logger.warning("[otel] Otel metric provider never configured")
+            return
 
-    def __init__(self, env: Environment):
-        configure_otel(env)
+        try:
+            provider.shutdown()
+            logger.info("[otel] Otel provider shutdown successfully")
+        except Exception:
+            logger.exception("[otel] Otel provider failed to shutdown")
+            raise
+        finally:
+            del self.env.otel_provider
 
 
-class MasterLocustOtelRecorder(BaseOtelRecorder, MasterTelemetryRecorder):
+class MasterLocustOtelRecorder(LocustOtelRecorderMixin, MasterTelemetryRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for the Locust master node.
 
@@ -58,41 +67,12 @@ class MasterLocustOtelRecorder(BaseOtelRecorder, MasterTelemetryRecorder):
     handlers for system metrics, request metrics, lifecycle events,
     and output handling. Additionally, it initializes the OTLP exporter
     and meter provider via ``configure_otel``.
-
-    Parameters
-    ----------
-    env : locust.env.Environment
-        The Locust environment object, providing runtime configuration
-        and access to parsed options.
-
-    Attributes
-    ----------
-    env : locust.env.Environment
-        Reference to the Locust environment.
     """
 
-    def __init__(self, env: Environment):
-        """
-        Initialize the master recorder with OTEL handlers
-        and configure the OpenTelemetry exporter.
-
-        Parameters
-        ----------
-        env : locust.env.Environment
-            The Locust environment object.
-        """
-        BaseOtelRecorder.__init__(self, env)
-        MasterTelemetryRecorder.__init__(
-            self,
-            env,
-            output_handler_cls=OtelOutputHandler,
-            lifecycle_handler_cls=OtelLifecycleHandler,
-            system_handler_cls=OtelSystemMetricsHandler,
-            requests_handler_cls=OtelRequestHandler,
-        )
+    pass
 
 
-class WorkerLocustOtelRecorder(BaseOtelRecorder, WorkerTelemetryRecorder):
+class WorkerLocustOtelRecorder(LocustOtelRecorderMixin, WorkerTelemetryRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for Locust worker nodes.
 
@@ -101,38 +81,10 @@ class WorkerLocustOtelRecorder(BaseOtelRecorder, WorkerTelemetryRecorder):
     handlers for system metrics, request metrics, lifecycle events,
     and output handling. Additionally, it initializes the OTLP exporter
     and meter provider via ``configure_otel``.
-
-    Parameters
-    ----------
-    env : locust.env.Environment
-        The Locust environment object, providing runtime configuration
-        and access to parsed options.
-
-    Attributes
-    ----------
-    env : locust.env.Environment
-        Reference to the Locust environment.
     """
 
-    def __init__(self, env: Environment):
-        """
-        Initialize the worker recorder with OTEL handlers
-        and configure the OpenTelemetry exporter.
-
-        Parameters
-        ----------
-        env : locust.env.Environment
-            The Locust environment object.
-        """
-        BaseOtelRecorder.__init__(self, env)
-        WorkerTelemetryRecorder.__init__(
-            self,
-            env,
-            output_handler_cls=OtelOutputHandler,
-            lifecycle_handler_cls=OtelLifecycleHandler,
-            system_handler_cls=OtelSystemMetricsHandler,
-            requests_handler_cls=OtelRequestHandler,
-        )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.env.events.request.add_listener(self.on_request)
 
     def on_request(self, *args, **kwargs):

@@ -23,6 +23,7 @@ from typing import Any, Optional
 
 import gevent
 import psutil
+from locust.runners import WorkerRunner
 
 from locust_telemetry.common import helpers as h
 from locust_telemetry.core.events import TelemetryEventsEnum, TelemetryMetricsEnum
@@ -265,6 +266,10 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
         Spawns a background greenlet that logs aggregate request statistics
         at the configured interval.
         """
+        # Since this collects stats from master, there is no need to run in worker node
+        if isinstance(self.env.runner, WorkerRunner):
+            return
+
         self._request_metrics_gevent = gevent.spawn(self._stats_collector_loop)
 
     def stop(self) -> None:
@@ -274,6 +279,10 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
         Terminates the greenlet collecting request metrics. Logs a warning
         if the collection loop was never started.
         """
+        # Since this collects stats from master, there is no need to run in worker node
+        if isinstance(self.env.runner, WorkerRunner):
+            return
+
         if self._request_metrics_gevent is None:
             logger.warning("[json] Gevent loop never started")
             return

@@ -169,6 +169,7 @@ class WorkerTelemetryRecorder(BaseTelemetryRecorder):
         `self.lifecycle.on_test_start`.
         """
         self.system.start()
+        self.requests.start()
 
     def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -182,3 +183,4 @@ class WorkerTelemetryRecorder(BaseTelemetryRecorder):
         `self.lifecycle.on_test_stop`.
         """
         self.system.stop()
+        self.requests.stop()

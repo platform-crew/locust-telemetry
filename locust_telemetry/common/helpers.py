@@ -113,7 +113,7 @@ def now_ms():
 
 
 def create_otel_histogram(
-    meter: Meter, name: str, description: str, unit: str = "ms"
+    meter: Meter, name: str, description: str, unit: str = "ms", **kwargs
 ) -> Histogram:
     """
     Create an OpenTelemetry histogram for recording distributions of values.
@@ -143,6 +143,7 @@ def create_otel_observable_gauge(
     description: str,
     unit: str = "1",
     callbacks: Optional[List[Callable]] = None,
+    **kwargs,
 ) -> ObservableGauge:
     """
     Create an OpenTelemetry Observable Gauge.
@@ -177,10 +178,7 @@ def create_otel_observable_gauge(
 
 
 def create_otel_counter(
-    meter: Meter,
-    name: str,
-    description: str,
-    unit: str = "1",
+    meter: Meter, name: str, description: str, unit: str = "1", **kwargs
 ) -> Counter:
     """
     Create an OpenTelemetry Counter instrument.
@@ -198,6 +196,8 @@ def create_otel_counter(
         Human-readable description of the metric.
     unit : str, optional
         Unit of measurement (default is dimensionless "1").
+    callbacks : None
+        Counter doesn't accept callback. This has no effect.
 
     Returns
     -------
