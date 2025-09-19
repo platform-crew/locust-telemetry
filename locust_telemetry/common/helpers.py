@@ -1,9 +1,20 @@
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import psutil
-from opentelemetry.metrics import Histogram, Meter, ObservableGauge
+from opentelemetry.metrics import (
+    Counter,
+    Histogram,
+    Meter,
+    ObservableCounter,
+    ObservableGauge,
+    ObservableUpDownCounter,
+)
+
+InstrumentType = Union[
+    Counter, Histogram, ObservableGauge, ObservableCounter, ObservableUpDownCounter
+]
 
 
 def warmup_psutil(process: psutil.Process) -> None:
@@ -163,3 +174,114 @@ def create_otel_observable_gauge(
         unit=unit,
         callbacks=callbacks or [],
     )
+
+
+def create_otel_observable_counter(
+    meter: Meter,
+    name: str,
+    description: str,
+    unit: str = "1",
+    callbacks: Optional[List[Callable]] = None,
+) -> ObservableCounter:
+    """
+    Create an OpenTelemetry Observable Counter.
+
+    Observable counters capture cumulative values that only increase,
+    such as total number of requests executed.
+
+    Parameters
+    ----------
+    meter : Meter
+        OpenTelemetry Meter used to create the counter.
+    name : str
+        Name of the metric.
+    description : str
+        Human-readable description of the metric.
+    unit : str, optional
+        Unit of measurement (default is dimensionless "1").
+        Use meaningful units like "requests" if applicable.
+    callbacks : list[Callable], optional
+        List of callback functions to provide counter values.
+
+    Returns
+    -------
+    Any
+        Configured Observable Counter instrument.
+    """
+    return meter.create_observable_counter(
+        name=name,
+        description=description,
+        unit=unit,
+        callbacks=callbacks or [],
+    )
+
+
+def create_otel_observable_up_down_counter(
+    meter: Meter,
+    name: str,
+    description: str,
+    unit: str = "1",
+    callbacks: Optional[List[Callable]] = None,
+) -> ObservableUpDownCounter:
+    """
+    Create an OpenTelemetry Observable Up Down Counter.
+
+    Observable counters capture cumulative values that increase or decrease,
+    such as user count rps/ fps etc.
+
+    Parameters
+    ----------
+    meter : Meter
+        OpenTelemetry Meter used to create the counter.
+    name : str
+        Name of the metric.
+    description : str
+        Human-readable description of the metric.
+    unit : str, optional
+        Unit of measurement (default is dimensionless "1").
+        Use meaningful units like "requests" if applicable.
+    callbacks : list[Callable], optional
+        List of callback functions to provide counter values.
+
+    Returns
+    -------
+    Any
+        Configured Observable Counter instrument.
+    """
+    return meter.create_observable_up_down_counter(
+        name=name,
+        description=description,
+        unit=unit,
+        callbacks=callbacks or [],
+    )
+
+
+def create_otel_counter(
+    meter: Meter,
+    name: str,
+    description: str,
+    unit: str = "1",
+) -> Counter:
+    """
+    Create an OpenTelemetry Counter instrument.
+
+    A Counter is a cumulative metric that can only increase.
+    Suitable for counting events (e.g., test start/stop events).
+
+    Parameters
+    ----------
+    meter : Meter
+        OpenTelemetry Meter used to create the counter.
+    name : str
+        Name of the metric.
+    description : str
+        Human-readable description of the metric.
+    unit : str, optional
+        Unit of measurement (default is dimensionless "1").
+
+    Returns
+    -------
+    Counter
+        Configured Counter instrument.
+    """
+    return meter.create_counter(name=name, description=description, unit=unit)

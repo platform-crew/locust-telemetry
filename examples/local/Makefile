@@ -40,3 +40,7 @@ logs-worker: ## Follow locust worker logs
 
 locust-bash: ## Get inside locust master container
 	docker-compose exec locust_master bash
+
+clean: ## Clean loki and prometheus volumes
+	docker volume rm local_prometheus_data
+	docker volume rm local_loki_data

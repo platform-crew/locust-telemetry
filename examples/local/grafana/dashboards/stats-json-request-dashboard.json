@@ -60,7 +60,7 @@
       }
     ]
   },
-  "description": "Dashboard for locust core metrics",
+  "description": "Dashboard for locust core metrics for stats-json plugin",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -2013,7 +2013,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Locust Requests Dashboard",
+  "title": "Locust Requests Dashboard (stats-json plugin)",
   "uid": "4a54c6e2-1519-4332-9bb5-fa79c0989ec8",
-  "version": 27
+  "version": 29
 }

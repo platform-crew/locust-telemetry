@@ -9,13 +9,16 @@ nodes to collect and export telemetry data to an OTLP endpoint.
 Classes
 -------
 OtelLifecycleHandler
-    Handles Locust test lifecycle events for OTEL.
+    Registers and records lifecycle event metrics (e.g., test events,
+    request durations).
 OtelOutputHandler
-    Handles structured telemetry output and export for OTEL.
+    Central registry for metrics; manages creation, recording, and
+    cleanup of instruments.
 OtelRequestHandler
-    Collects and exports request metrics for OTEL.
+    Registers request-related metrics (count, errors, RPS/FPS) and records request
+     durations.
 OtelSystemMetricsHandler
-    Collects and exports system-level metrics (CPU, memory) for OTEL.
+    Registers and reports system-level metrics (CPU, memory, network I/O) via callbacks.
 """
 
 import logging
@@ -26,26 +29,19 @@ from locust.env import Environment
 from opentelemetry.metrics import Observation
 
 from locust_telemetry.common import helpers as h
-from locust_telemetry.core.events import TelemetryEvent, TelemetryMetric
+from locust_telemetry.core.events import TelemetryEventsEnum, TelemetryMetricsEnum
 from locust_telemetry.core.handlers import (
     BaseLifecycleHandler,
     BaseOutputHandler,
     BaseRequestHandler,
     BaseSystemMetricsHandler,
 )
-from locust_telemetry.recorders.otel.constants import OtelMetricDefinition
+from locust_telemetry.recorders.otel.constants import (
+    TELEMETRY_EVENTS_TO_OTEL_METRICS_MAP,
+    OtelMetricDefinitionEnum,
+)
 
 logger = logging.getLogger(__name__)
-
-
-class OtelLifecycleHandler(BaseLifecycleHandler):
-    """
-    OpenTelemetry lifecycle handler.
-
-    For OTel the default implementation in BaseLifecycleHandler is sufficient.
-    """
-
-    pass
 
 
 class OtelOutputHandler(BaseOutputHandler):
@@ -53,8 +49,7 @@ class OtelOutputHandler(BaseOutputHandler):
     OpenTelemetry output handler for recording lifecycle events
     and metrics.
 
-    Manages registration and cleanup of gauges, and uses histograms
-    to capture event timestamps and request durations.
+    Manages registration and cleanup of gauges, counters, and up-down counters.
     """
 
     def __init__(self, env: Environment):
@@ -69,26 +64,14 @@ class OtelOutputHandler(BaseOutputHandler):
         super().__init__(env)
         self.meter = self.env.otel_meter
 
-        # All the registered gauges
-        self._registered_gauges: Dict[str, List] = {}
+        # Registered metric instruments
+        self._instrument_registry: Dict[OtelMetricDefinitionEnum, h.InstrumentType] = {}
 
-        # Histograms for lifecycle events
-        self.test_event = h.create_otel_histogram(
-            self.meter,
-            OtelMetricDefinition.TEST_EVENTS.metric_name,
-            OtelMetricDefinition.TEST_EVENTS.metric_description,
-        )
-
-        # Request duration metrics
-        self.request_duration = h.create_otel_histogram(
-            self.meter,
-            OtelMetricDefinition.REQUEST_DURATION.metric_name,
-            OtelMetricDefinition.REQUEST_DURATION.metric_description,
-        )
-
-    def record_event(self, tl_type: TelemetryEvent, *args: Any, **kwargs: Any) -> None:
+    def record_event(
+        self, tl_type: TelemetryEventsEnum, *args: Any, **kwargs: Any
+    ) -> None:
         """
-        Record a lifecycle event as a histogram data point.
+        Record a lifecycle event as a counter data point.
 
         Parameters
         ----------
@@ -100,18 +83,16 @@ class OtelOutputHandler(BaseOutputHandler):
             Attributes to attach to the recorded metric.
         """
         context = self.get_run_context()
-        self.test_event.record(
-            h.now_ms(), attributes={"event": tl_type.value, **context, **kwargs}
-        )
+        instrument_type = TELEMETRY_EVENTS_TO_OTEL_METRICS_MAP.get(tl_type)
+        instrument = self._instrument_registry.get(instrument_type)
+        instrument.add(1, attributes={"event": tl_type.value, **context, **kwargs})
         logger.debug(f"[otel] Recorded event: {tl_type.value}")
 
     def record_metrics(
-        self, tl_type: TelemetryMetric, *args: Any, **kwargs: Any
+        self, tl_type: TelemetryMetricsEnum, *args: Any, **kwargs: Any
     ) -> None:
         """
-        Record metrics emitted by handlers. For OTel,
-        most metrics are captured by Observable Gauges,
-        while request duration is recorded explicitly.
+        Record request metrics such as duration.
 
         Parameters
         ----------
@@ -123,83 +104,119 @@ class OtelOutputHandler(BaseOutputHandler):
             Attributes to attach to the recorded metric.
         """
         context = self.get_run_context()
-
-        self.request_duration.record(
-            args[0] if args else 0,
+        instrument_type = TELEMETRY_EVENTS_TO_OTEL_METRICS_MAP.get(tl_type)
+        instrument = self._instrument_registry.get(instrument_type)
+        instrument.record(
+            args[0],
             attributes={"metrics": tl_type.value, **context, **kwargs},
         )
 
-    def register_gauge(
+    def register_metric(
         self,
-        namespace: str,
-        metric: OtelMetricDefinition,
+        metric: OtelMetricDefinitionEnum,
         unit: str,
-        callbacks: List[Callable],
+        kind: Callable,
+    ) -> Any:
+        """
+        Register an OpenTelemetry metric instrument.
+
+        Parameters
+        ----------
+        metric : OtelMetricDefinition
+            Metric definition (name + description).
+        unit : str
+            Unit of measurement (e.g., "By", "%", "requests").
+        kind : Callable
+            Metric constructor function (e.g., `h.create_otel_counter`,
+            `h.create_otel_histogram`)
+        """
+        instrument = kind(
+            self.meter, metric.metric_name, metric.metric_description, unit
+        )
+        self._instrument_registry[metric] = instrument
+        logger.info(f"[otel] Registered {kind} '{metric.metric_name}'.")
+        return instrument
+
+    def add_callbacks(
+        self, metric: OtelMetricDefinitionEnum, callbacks: List[Callable]
     ) -> None:
         """
-        Register an OpenTelemetry Observable Gauge.
+        Add callbacks to a registered metric instrument.
 
         Parameters
         ----------
-        namespace : str
-            Logical namespace under which the gauge is registered.
         metric : OtelMetricDefinition
-            Metric definition containing name and description.
-        unit : str
-            Measurement unit (e.g., "By", "%").
-        callbacks : List[Callable]
-            Callback(s) that return one or more Observations.
+            The metric to which callbacks will be attached.
+        callbacks : list[Callable]
+            Callback functions returning Observations.
         """
-        registered_gauges = self._registered_gauges.setdefault(namespace, [])
-        registered_gauges.append(
-            h.create_otel_observable_gauge(
-                self.meter,
-                metric.metric_name,
-                metric.metric_description,
-                unit,
-                callbacks=callbacks,
-            )
-        )
-        logger.info(
-            f"[otel] Registered gauge {metric.metric_name} in namespace '{namespace}'"
-        )
+        instrument = self._instrument_registry.get(metric)
+        if not instrument:
+            raise ValueError(f"Metric '{metric.metric_name}' is not registered yet.")
+        instrument._callbacks = callbacks
 
-    def clear_registered_gauges(self, namespace: str) -> None:
+    def remove_callbacks(self, metric: OtelMetricDefinitionEnum) -> None:
         """
-        Clear all registered Observable Gauges for a given namespace.
-
-        Ensures callbacks are removed to prevent
-        memory leaks and stale data collection.
+        Remove all callbacks from a registered metric instrument.
 
         Parameters
         ----------
-        namespace : str
-            Logical namespace whose gauges should be cleared.
+        metric : OtelMetricDefinition
+            The metric from which callbacks will be removed.
         """
-        registered_gauges = self._registered_gauges.get(namespace, [])
-        if not registered_gauges:
-            logger.warning(
-                f"[otel] No gauges found in namespace '{namespace}' to clear"
-            )
-            return
+        instrument = self._instrument_registry.get(metric)
+        if not instrument:
+            raise ValueError(f"Metric '{metric.metric_name}' is not registered yet.")
 
-        for g in registered_gauges:
-            g.callbacks.clear()
+        # ⚠️ Using _callbacks (private API) because OpenTelemetry SDK does not
+        # support unregistering callbacks officially.
+        instrument._callbacks = []
 
-        self._registered_gauges[namespace] = []
-        logger.info(f"[otel] Cleared gauges in namespace '{namespace}'")
+
+class OtelLifecycleHandler(BaseLifecycleHandler):
+    """
+    OpenTelemetry lifecycle handler.
+
+    For OTel the default implementation in BaseLifecycleHandler is sufficient.
+    """
+
+    def __init__(self, output: OtelOutputHandler, env: Environment):
+        super().__init__(output, env)
+        self.output: OtelOutputHandler = output
+        self._register_event_metrics()
+
+    def _register_event_metrics(self) -> None:
+        """
+        Register event metrics instrument with the output handler
+
+        Metrics:
+        - Test events metric
+        - Requests duration metric
+        """
+        # Test events as counters
+        self.output.register_metric(
+            metric=OtelMetricDefinitionEnum.TEST_EVENTS,
+            unit="1",
+            kind=h.create_otel_counter,
+        )
+
+        # Register request duration as histogram
+        self.output.register_metric(
+            metric=OtelMetricDefinitionEnum.REQUEST_DURATION,
+            unit="ms",
+            kind=h.create_otel_histogram,
+        )
 
 
 class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
     """
     OpenTelemetry handler for system-level metrics.
 
-    Collects CPU usage, memory usage, and network I/O using
-    psutil and reports them via OpenTelemetry Observable Gauges.
+    Collects CPU usage, memory usage, and network I/O using psutil
+    and reports them via Observable Gauges.
     """
 
     _process: psutil.Process = psutil.Process()
-    _gauge_namespace = "system"
 
     def __init__(self, output: OtelOutputHandler, env: Environment):
         """
@@ -208,91 +225,107 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
         Parameters
         ----------
         output : OtelOutputHandler
-            Reference to the output handler for recording attributes.
+            Reference to the output handler for recording metrics.
         env : Environment
-            Locust Environment instance containing the OpenTelemetry meter.
+            Locust Environment instance.
         """
         super().__init__(output, env)
-        self.output: OtelOutputHandler = output  # type narrowing
+        self.output: OtelOutputHandler = output
+
+        self._system_metrics_definition = (
+            (
+                OtelMetricDefinitionEnum.NETWORK_BYTES,
+                "By",
+                h.create_otel_observable_gauge,
+                [self._network_usage_callback],
+            ),
+            (
+                OtelMetricDefinitionEnum.MEMORY_USAGE,
+                "By",
+                h.create_otel_observable_gauge,
+                [self._memory_usage_callback],
+            ),
+            (
+                OtelMetricDefinitionEnum.CPU_USAGE,
+                "%",
+                h.create_otel_observable_gauge,
+                [self._cpu_usage_callback],
+            ),
+        )
+
+        self._register_system_metrics()
+
+    def _register_system_metrics(self) -> None:
+        """
+        Register system metric instruments (gauges).
+
+        Metrics:
+        - CPU usage
+        - Memory usage
+        - Network bytes sent/received
+        """
+        for metric, unit, kind, _ in self._system_metrics_definition:
+            self.output.register_metric(
+                metric=metric,
+                unit=unit,
+                kind=kind,
+            )
+        logger.info("[otel] Registered all the system metrics")
 
     def start(self) -> None:
         """
-        Start collecting system metrics.
-
-        Registers Observable Gauges for CPU, memory, and network usage.
+        Start collecting system metrics by adding callbacks.
         """
         h.warmup_psutil(self._process)
-
-        self.output.register_gauge(
-            namespace=self._gauge_namespace,
-            metric=OtelMetricDefinition.NETWORK_BYTES,
-            unit="By",
-            callbacks=[self._network_usage_callback],
-        )
-        self.output.register_gauge(
-            namespace=self._gauge_namespace,
-            metric=OtelMetricDefinition.MEMORY_USAGE,
-            unit="By",
-            callbacks=[self._memory_usage_callback],
-        )
-        self.output.register_gauge(
-            namespace=self._gauge_namespace,
-            metric=OtelMetricDefinition.CPU_USAGE,
-            unit="%",
-            callbacks=[self._cpu_usage_callback],
-        )
-        logger.info("[otel] Registered system metrics gauges")
+        for metric, _, _, callbacks in self._system_metrics_definition:
+            self.output.add_callbacks(metric=metric, callbacks=callbacks)
+        logger.info("[otel] Registered system metrics callbacks")
 
     def stop(self) -> None:
         """
-        Stop collecting system metrics.
-
-        Delegates cleanup of gauges to the output handler.
+        Stop collecting system metrics by removing callbacks.
         """
-        self.output.clear_registered_gauges(self._gauge_namespace)
-        logger.info("[otel] Unregistered system metrics gauges")
+        for metric, _, _, _ in self._system_metrics_definition:
+            self.output.remove_callbacks(metric)
+        logger.info("[otel] Unregistered system metrics callbacks")
 
-    def _network_usage_callback(self, options=None):
+    def _network_usage_callback(self, options=None) -> List[Observation]:
         """
-        Callback for reporting network I/O statistics.
+        Callback for network I/O statistics.
 
         Returns
         -------
         list[Observation]
-            Two OpenTelemetry Observations: bytes sent and bytes received,
-            each annotated with direction attributes.
+            Observations for bytes sent and received.
         """
-        logger.debug("[otel] Collecting network usage")
-        current_io = psutil.net_io_counters()
-        context = self.output.get_run_context()
+        io = psutil.net_io_counters()
+        ctx = self.output.get_run_context()
         return [
-            Observation(current_io.bytes_sent, {**context, "direction": "sent"}),
-            Observation(current_io.bytes_recv, {**context, "direction": "rec"}),
+            Observation(io.bytes_sent, {**ctx, "direction": "sent"}),
+            Observation(io.bytes_recv, {**ctx, "direction": "recv"}),
         ]
 
-    def _memory_usage_callback(self, options=None):
+    def _memory_usage_callback(self, options=None) -> List[Observation]:
         """
-        Callback for reporting process memory usage.
+        Callback for process memory usage.
 
         Returns
         -------
         list[Observation]
-            One OpenTelemetry Observation with current memory usage in MiB.
+            Observation for memory usage in MiB.
         """
-        logger.debug("[otel] Collecting memory usage")
         memory_mib = h.convert_bytes_to_mib(self._process.memory_info().rss)
         return [Observation(memory_mib, self.output.get_run_context())]
 
-    def _cpu_usage_callback(self, options=None):
+    def _cpu_usage_callback(self, options=None) -> List[Observation]:
         """
-        Callback for reporting CPU usage.
+        Callback for process CPU usage.
 
         Returns
         -------
         list[Observation]
-            One OpenTelemetry Observation with current CPU utilization percentage.
+            Observation for CPU utilization percentage.
         """
-        logger.debug("[otel] Collecting CPU usage")
         return [Observation(self._process.cpu_percent(), self.output.get_run_context())]
 
 
@@ -303,68 +336,91 @@ class OtelRequestHandler(BaseRequestHandler):
     Delegates recording of request duration to the output handler.
     """
 
-    _gauge_namespace: str = "request"
-
     def __init__(self, output: OtelOutputHandler, env: Environment):
         """
-        Initialize the system metrics handler.
+        Initialize the request metrics handler.
 
         Parameters
         ----------
         output : OtelOutputHandler
-            Reference to the output handler for recording attributes.
+            Reference to the output handler for recording metrics.
         env : Environment
-            Locust Environment instance containing the OpenTelemetry meter.
+            Locust Environment instance.
         """
         super().__init__(output, env)
         self.output: OtelOutputHandler = output
 
+        # Request metrics definition, handled by this handler
+        self._request_metrics_definition = (
+            (
+                OtelMetricDefinitionEnum.REQUEST_COUNT,  # Metric
+                "1",  # Unit
+                h.create_otel_observable_up_down_counter,  # Kind (creating func)
+                [self._request_count_callback],  # callbacks
+            ),
+            (
+                OtelMetricDefinitionEnum.ERROR_COUNT,
+                "1",
+                h.create_otel_observable_up_down_counter,
+                [self._error_count_callback],
+            ),
+            (
+                OtelMetricDefinitionEnum.USER_COUNT,
+                "1",
+                h.create_otel_observable_up_down_counter,
+                [self._user_count_callback],
+            ),
+            (
+                OtelMetricDefinitionEnum.RPS,
+                "1/s",
+                h.create_otel_observable_gauge,
+                [self._rps_callback],
+            ),
+            (
+                OtelMetricDefinitionEnum.FPS,
+                "1/s",
+                h.create_otel_observable_gauge,
+                [self._fps_callback],
+            ),
+        )
+
+        self._register_request_metrics()
+
+    def _register_request_metrics(self) -> None:
+        """
+        Register request-related metric instruments.
+
+        Metrics:
+        - Request count
+        - Error count
+        - Active user count
+        - RPS (gauge)
+        - FPS (gauge)
+        """
+        for metric, unit, kind, _ in self._request_metrics_definition:
+            self.output.register_metric(
+                metric=metric,
+                unit=unit,
+                kind=kind,
+            )
+        logger.info("[otel] Registered all the request metrics")
+
     def start(self) -> None:
         """
-        Start collecting requests metrics.
-
-        Registers Observable Gauges for all the requests related metrics.
+        Start collecting request metrics by adding callbacks.
         """
-        self.output.register_gauge(
-            namespace=self._gauge_namespace,
-            metric=OtelMetricDefinition.REQUEST_COUNT,
-            unit="1",
-            callbacks=[self._request_count_callback],
-        )
-        self.output.register_gauge(
-            namespace=self._gauge_namespace,
-            metric=OtelMetricDefinition.ERROR_COUNT,
-            unit="1",
-            callbacks=[self._error_count_callback],
-        )
-        self.output.register_gauge(
-            namespace=self._gauge_namespace,
-            metric=OtelMetricDefinition.USER_COUNT,
-            unit="1",
-            callbacks=[self._user_count_callback],
-        )
-        self.output.register_gauge(
-            namespace=self._gauge_namespace,
-            metric=OtelMetricDefinition.RPS,
-            unit="1/s",
-            callbacks=[self._rps_callback],
-        )
-        self.output.register_gauge(
-            namespace=self._gauge_namespace,
-            metric=OtelMetricDefinition.FPS,
-            unit="1/s",
-            callbacks=[self._fps_callback],
-        )
-        logger.info("[otel] Registered request metrics gauges")
+        for metric, _, _, callbacks in self._request_metrics_definition:
+            self.output.add_callbacks(metric=metric, callbacks=callbacks)
+
+        logger.info("[otel] Registered request metrics callbacks")
 
     def stop(self) -> None:
         """
-        Stop collecting requests metrics.
-
-        Delegates cleanup of gauges to the output handler.
+        Stop collecting request metrics by removing callbacks.
         """
-        self.output.clear_registered_gauges(self._gauge_namespace)
-        logger.info("[otel] Unregistered request metrics gauges")
+        for metric, _, _, _ in self._request_metrics_definition:
+            self.output.remove_callbacks(metric)
+        logger.info("[otel] Unregistered request metrics callbacks")
 
     def on_request(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -379,72 +435,77 @@ class OtelRequestHandler(BaseRequestHandler):
             such as response_time and exception flag.
         """
         self.output.record_metrics(
-            TelemetryMetric.REQUEST_DURATION,
+            TelemetryMetricsEnum.REQUEST,
             kwargs.get("response_time"),
             exception=bool(kwargs.get("exception")),
+            endpoint=kwargs.get("name"),
         )
 
-    def _request_count_callback(self, options=None):
+    def _request_count_callback(self, options=None) -> List[Observation]:
         """
         Observable callback for total number of requests executed.
 
         Returns
         -------
         list[Observation]
-            OpenTelemetry Observation containing the cumulative request count.
+            Observation containing the cumulative request count.
         """
-        logger.debug("[otel] Collecting request count")
-        stats = self.env.stats.total
-        return [Observation(stats.num_requests, self.output.get_run_context())]
+        return [
+            Observation(
+                self.env.stats.total.num_requests, self.output.get_run_context()
+            )
+        ]
 
-    def _error_count_callback(self, options=None):
+    def _error_count_callback(self, options=None) -> List[Observation]:
         """
         Observable callback for total number of failed requests.
 
         Returns
         -------
         list[Observation]
-            OpenTelemetry Observation containing the cumulative failure count.
+            Observation containing the cumulative failure count.
         """
-        logger.debug("[otel] Collecting request failure count")
-        stats = self.env.stats.total
-        return [Observation(stats.num_failures, self.output.get_run_context())]
+        return [
+            Observation(
+                self.env.stats.total.num_failures, self.output.get_run_context()
+            )
+        ]
 
-    def _user_count_callback(self, options=None):
+    def _user_count_callback(self, options=None) -> List[Observation]:
         """
         Observable callback for current active user count.
 
         Returns
         -------
         list[Observation]
-            OpenTelemetry Observation containing user count and associated attributes.
+            Observation containing user count.
         """
-        logger.debug("[otel] Collecting user count")
-        stats = self.env.stats.total
-        return [Observation(stats.user_count, self.output.get_run_context())]
+        return [Observation(self.env.runner.user_count, self.output.get_run_context())]
 
-    def _rps_callback(self, options=None):
+    def _rps_callback(self, options=None) -> List[Observation]:
         """
         Observable callback for requests per second (RPS).
 
         Returns
         -------
         list[Observation]
-            OpenTelemetry Observation containing the current RPS.
+            Observation containing the current RPS.
         """
-        logger.debug("[otel] Collecting RPS")
-        stats = self.env.stats.total
-        return [Observation(stats.num_reqs_per_sec, self.output.get_run_context())]
+        return [
+            Observation(self.env.stats.total.total_rps, self.output.get_run_context())
+        ]
 
-    def _fps_callback(self, options=None):
+    def _fps_callback(self, options=None) -> List[Observation]:
         """
         Observable callback for failures per second (FPS).
 
         Returns
         -------
         list[Observation]
-            OpenTelemetry Observation containing the current FPS.
+            Observation containing the current FPS.
         """
-        logger.debug("[otel] Collecting FPS")
-        stats = self.env.stats.total
-        return [Observation(stats.num_fail_per_sec, self.output.get_run_context())]
+        return [
+            Observation(
+                self.env.stats.total.total_fail_per_sec, self.output.get_run_context()
+            )
+        ]

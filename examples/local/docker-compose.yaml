@@ -4,6 +4,7 @@ volumes:
   postgres_data:
   grafana_data:
   loki_data:
+  prometheus_data:
 
 services:
   locust_master:
@@ -28,7 +29,7 @@ services:
       - LOCUST_SPAWN_RATE=2
       - LOCUST_RUN_TIME=20s
       - LOCUST_TESTPLAN_NAME=myappn
-      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-json
+      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-otel
       - LOCUST_OTEL_EXPORTER_OTLP_INSECURE=true
       - LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
   locust_worker1:
@@ -53,7 +54,7 @@ services:
       - LOCUST_SPAWN_RATE=2
       - LOCUST_RUN_TIME=20s
       - LOCUST_TESTPLAN_NAME=myapp
-      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-json
+      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-otel
       - LOCUST_OTEL_EXPORTER_OTLP_INSECURE=true
       - LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
   locust_worker2:
@@ -78,7 +79,7 @@ services:
       - LOCUST_SPAWN_RATE=2
       - LOCUST_RUN_TIME=20s
       - LOCUST_TESTPLAN_NAME=myapp
-      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-json
+      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-otel
       - LOCUST_OTEL_EXPORTER_OTLP_INSECURE=true
       - LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
   loki:
@@ -109,8 +110,20 @@ services:
       - "55681:55681"  # OTLP HTTP
       - "8889:8889"    # Prometheus scrape endpoint
     volumes:
-      - ./otel/config.yaml:/etc/config.yaml
+      - ./otel_collector/config.yaml:/etc/config.yaml
     command: [ "--config", "/etc/config.yaml" ]
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    command: --config.file=/etc/prometheus/config.yaml
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/config.yaml:/etc/prometheus/config.yaml
+      - prometheus_data:/prometheus
+    depends_on:
+      - otel_collector
 
   grafana:
     image: grafana/grafana:12.0.0

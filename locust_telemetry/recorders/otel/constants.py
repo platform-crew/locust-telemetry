@@ -1,18 +1,12 @@
 from collections import namedtuple
 from enum import Enum
 
-#: Named tuple for OpenTelemetry metric definitions.
-#:
-#: Attributes
-#: ----------
-#: name : str
-#:     The OpenTelemetry metric name (fully qualified).
-#: description : str
-#:     Human-readable description of what the metric represents.
+from locust_telemetry.core.events import TelemetryEventsEnum, TelemetryMetricsEnum
+
 MetricInfo = namedtuple("MetricInfo", ["name", "description"])
 
 
-class OtelMetricDefinition(Enum):
+class OtelMetricDefinitionEnum(Enum):
     """
     Enumeration of all OpenTelemetry metric definitions used
     in the Locust Telemetry integration.
@@ -108,3 +102,12 @@ class OtelMetricDefinition(Enum):
             The description associated with the metric definition.
         """
         return self.value.description
+
+
+TELEMETRY_EVENTS_TO_OTEL_METRICS_MAP = {
+    TelemetryEventsEnum.TEST_START: OtelMetricDefinitionEnum.TEST_EVENTS,
+    TelemetryEventsEnum.TEST_STOP: OtelMetricDefinitionEnum.TEST_EVENTS,
+    TelemetryEventsEnum.SPAWNING_COMPLETE: OtelMetricDefinitionEnum.TEST_EVENTS,
+    TelemetryEventsEnum.CPU_WARNING: OtelMetricDefinitionEnum.TEST_EVENTS,
+    TelemetryMetricsEnum.REQUEST: OtelMetricDefinitionEnum.REQUEST_DURATION,
+}

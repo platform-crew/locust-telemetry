@@ -27,7 +27,7 @@ from typing import Any, Dict
 from locust.env import Environment
 from locust.runners import MasterRunner
 
-from locust_telemetry.core.events import TelemetryEvent, TelemetryMetric
+from locust_telemetry.core.events import TelemetryEventsEnum, TelemetryMetricsEnum
 
 
 class BaseOutputHandler(ABC):
@@ -73,7 +73,9 @@ class BaseOutputHandler(ABC):
         }
 
     @abstractmethod
-    def record_event(self, tl_type: TelemetryEvent, *args: Any, **kwargs: Any) -> None:
+    def record_event(
+        self, tl_type: TelemetryEventsEnum, *args: Any, **kwargs: Any
+    ) -> None:
         """
         Record a telemetry event.
 
@@ -90,7 +92,7 @@ class BaseOutputHandler(ABC):
 
     @abstractmethod
     def record_metrics(
-        self, tl_type: TelemetryMetric, *args: Any, **kwargs: Any
+        self, tl_type: TelemetryMetricsEnum, *args: Any, **kwargs: Any
     ) -> None:
         """
         Record a telemetry metric.
@@ -128,28 +130,26 @@ class BaseLifecycleHandler:
     def on_test_start(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when a Locust test starts."""
         self.output.record_event(
-            TelemetryEvent.TEST_START,
+            TelemetryEventsEnum.TEST_START,
             *args,
-            text=f"Testplan: {self.env.parsed_options.testplan}. Starting the tests.",
             **kwargs,
         )
 
     def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when a Locust test stops."""
         self.output.record_event(
-            TelemetryEvent.TEST_STOP,
+            TelemetryEventsEnum.TEST_STOP,
             *args,
-            text=f"Testplan: {self.env.parsed_options.testplan}. Stopping the tests.",
             **kwargs,
         )
 
     def on_spawning_complete(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when all users have been spawned."""
-        self.output.record_event(TelemetryEvent.SPAWNING_COMPLETE, *args, **kwargs)
+        self.output.record_event(TelemetryEventsEnum.SPAWNING_COMPLETE, *args, **kwargs)
 
     def on_cpu_warning(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when Locust raises a CPU usage warning."""
-        self.output.record_event(TelemetryEvent.CPU_WARNING, *args, **kwargs)
+        self.output.record_event(TelemetryEventsEnum.CPU_WARNING, *args, **kwargs)
 
 
 class BaseRequestHandler(ABC):

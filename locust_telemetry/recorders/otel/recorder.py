@@ -34,7 +34,22 @@ from locust_telemetry.recorders.otel.handlers import (
 logger = logging.getLogger(__name__)
 
 
-class MasterLocustOtelRecorder(MasterTelemetryRecorder):
+class BaseOtelRecorder:
+    """
+    Base class to initialize OpenTelemetry configuration.
+
+    Ensures that the OTLP exporter, meter provider, and metric readers
+    are configured before any Locust telemetry handlers are registered.
+
+    This class should be inherited alongside MasterTelemetryRecorder
+    or WorkerTelemetryRecorder.
+    """
+
+    def __init__(self, env: Environment):
+        configure_otel(env)
+
+
+class MasterLocustOtelRecorder(BaseOtelRecorder, MasterTelemetryRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for the Locust master node.
 
@@ -66,17 +81,18 @@ class MasterLocustOtelRecorder(MasterTelemetryRecorder):
         env : locust.env.Environment
             The Locust environment object.
         """
-        super().__init__(
+        BaseOtelRecorder.__init__(self, env)
+        MasterTelemetryRecorder.__init__(
+            self,
             env,
             output_handler_cls=OtelOutputHandler,
             lifecycle_handler_cls=OtelLifecycleHandler,
             system_handler_cls=OtelSystemMetricsHandler,
             requests_handler_cls=OtelRequestHandler,
         )
-        configure_otel(self.env)
 
 
-class WorkerLocustOtelRecorder(WorkerTelemetryRecorder):
+class WorkerLocustOtelRecorder(BaseOtelRecorder, WorkerTelemetryRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for Locust worker nodes.
 
@@ -108,11 +124,17 @@ class WorkerLocustOtelRecorder(WorkerTelemetryRecorder):
         env : locust.env.Environment
             The Locust environment object.
         """
-        super().__init__(
+        BaseOtelRecorder.__init__(self, env)
+        WorkerTelemetryRecorder.__init__(
+            self,
             env,
             output_handler_cls=OtelOutputHandler,
             lifecycle_handler_cls=OtelLifecycleHandler,
             system_handler_cls=OtelSystemMetricsHandler,
             requests_handler_cls=OtelRequestHandler,
         )
-        configure_otel(self.env)
+        self.env.events.request.add_listener(self.on_request)
+
+    def on_request(self, *args, **kwargs):
+        """On request, record it as a histogram"""
+        self.requests.on_request(*args, **kwargs)

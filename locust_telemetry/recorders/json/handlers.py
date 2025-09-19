@@ -25,14 +25,20 @@ import gevent
 import psutil
 
 from locust_telemetry.common import helpers as h
-from locust_telemetry.core.events import TelemetryEvent, TelemetryMetric
+from locust_telemetry.core.events import TelemetryEventsEnum, TelemetryMetricsEnum
 from locust_telemetry.core.handlers import (
     BaseLifecycleHandler,
     BaseOutputHandler,
     BaseRequestHandler,
     BaseSystemMetricsHandler,
 )
-from locust_telemetry.recorders.json.constants import TEST_STOP_BUFFER_FOR_GRAPHS
+from locust_telemetry.recorders.json.constants import (
+    REQUEST_STATS_TYPE_CURRENT,
+    REQUEST_STATS_TYPE_FINAL,
+    REQUEST_STATUS_ERROR,
+    REQUEST_STATUS_SUCCESS,
+    TEST_STOP_BUFFER_FOR_GRAPHS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +83,7 @@ class JsonTelemetryLifecycleHandler(BaseLifecycleHandler):
         )
 
         self.output.record_event(
-            TelemetryEvent.TEST_STOP, *args, end_time=end_time, **kwargs
+            TelemetryEventsEnum.TEST_STOP, *args, end_time=end_time, **kwargs
         )
         logger.info("[json] Recorded test stop event with adjusted end time.")
 
@@ -118,7 +124,9 @@ class JsonTelemetryOutputHandler(BaseOutputHandler):
             },
         )
 
-    def record_event(self, tl_type: TelemetryEvent, *args: Any, **kwargs: Any) -> None:
+    def record_event(
+        self, tl_type: TelemetryEventsEnum, *args: Any, **kwargs: Any
+    ) -> None:
         """
         Record a telemetry event in JSON format.
 
@@ -134,7 +142,7 @@ class JsonTelemetryOutputHandler(BaseOutputHandler):
         self.log_telemetry("event", tl_type.value, **kwargs)
 
     def record_metrics(
-        self, tl_type: TelemetryMetric, *args: Any, **kwargs: Any
+        self, tl_type: TelemetryMetricsEnum, *args: Any, **kwargs: Any
     ) -> None:
         """
         Record a telemetry metric in JSON format.
@@ -207,10 +215,10 @@ class JsonTelemetrySystemMetricsHandler(BaseSystemMetricsHandler):
                 # Convert bytes to MiB
                 memory_usage = h.convert_bytes_to_mib(self._process.memory_info().rss)
                 self.output.record_metrics(
-                    TelemetryMetric.CPU_USAGE, value=cpu_usage, unit="percent"
+                    TelemetryMetricsEnum.CPU, value=cpu_usage, unit="percent"
                 )
                 self.output.record_metrics(
-                    TelemetryMetric.MEMORY_USAGE, value=memory_usage, unit="MiB"
+                    TelemetryMetricsEnum.MEMORY, value=memory_usage, unit="MiB"
                 )
                 gevent.sleep(self.env.parsed_options.lt_stats_recorder_interval)
         except gevent.GreenletExit:
@@ -275,20 +283,23 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
         """
         # Final requests stats
         self.output.record_metrics(
-            TelemetryMetric.FINAL_REQUEST_STATS,
+            TelemetryMetricsEnum.REQUEST,
+            stats_type=REQUEST_STATS_TYPE_FINAL,
             user_count=self.env.runner.user_count,
             **h.add_percentiles(self.env.stats.total.to_dict()),
         )
 
         # Final request success and error stats by endpoint.
         final_stats_types = {
-            TelemetryMetric.FINAL_REQUEST_ERROR_STATS: self.env.stats.errors,
-            TelemetryMetric.FINAL_REQUEST_SUCCESS_STATS: self.env.stats.entries,
+            REQUEST_STATUS_ERROR: self.env.stats.errors,
+            REQUEST_STATUS_SUCCESS: self.env.stats.entries,
         }
-        for stats_type, stats in final_stats_types.items():
+        for status, stats in final_stats_types.items():
             for _, stat in stats.items():
                 self.output.record_metrics(
-                    stats_type, **h.add_percentiles(stat.to_dict())
+                    TelemetryMetricsEnum.REQUEST,
+                    status=status,
+                    **h.add_percentiles(stat.to_dict()),
                 )
 
     def _stats_collector_loop(self) -> None:
@@ -302,7 +313,8 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
             while True:
                 stats = h.add_percentiles(self.env.stats.total.to_dict())
                 self.output.record_metrics(
-                    TelemetryMetric.CURRENT_REQUEST_STATS,
+                    TelemetryMetricsEnum.REQUEST,
+                    stats_type=REQUEST_STATS_TYPE_CURRENT,
                     user_count=self.env.runner.user_count,
                     **stats,
                 )

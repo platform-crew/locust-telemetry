@@ -1,20 +1,18 @@
 from enum import Enum
 
 
-class TelemetryEvent(Enum):
+class TelemetryEventsEnum(Enum):
 
-    TEST_START = "event.test.start"
-    TEST_STOP = "event.test.stop"
-    SPAWNING_COMPLETE = "event.spawn.complete"
-    CPU_WARNING = "event.cpu.warning"
+    TEST_START = "tl.locust.event.test.start"
+    TEST_STOP = "tl.locust.event.test.stop"
+    SPAWNING_COMPLETE = "tl.locust.event.spawn.complete"
+    CPU_WARNING = "tl.locust.event.cpu.warning"
 
 
-class TelemetryMetric(Enum):
+class TelemetryMetricsEnum(Enum):
 
-    CPU_USAGE = "metric.system.cpu"
-    MEMORY_USAGE = "metric.system.mem"
-    CURRENT_REQUEST_STATS = "metric.requests.stats.current"
-    REQUEST_DURATION = "metric.requests.stats.duration"
-    FINAL_REQUEST_STATS = "metric.requests.stats.final"
-    FINAL_REQUEST_SUCCESS_STATS = "metric.requests.stats.final.success"
-    FINAL_REQUEST_ERROR_STATS = "metric.requests.stats.final.errors"
+    CPU = "tl.system.metric.cpu"
+    MEMORY = "tl.system.metric.mem"
+    NETWORK = "tl.system.metric.network"
+
+    REQUEST = "tl.request.metric.stats"
