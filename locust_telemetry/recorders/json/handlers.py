@@ -211,6 +211,7 @@ class JsonTelemetrySystemMetricsHandler(BaseSystemMetricsHandler):
         """
         try:
             while True:
+                io = psutil.net_io_counters()
                 cpu_usage = self._process.cpu_percent()
                 # Convert bytes to MiB
                 memory_usage = h.convert_bytes_to_mib(self._process.memory_info().rss)
@@ -219,6 +220,18 @@ class JsonTelemetrySystemMetricsHandler(BaseSystemMetricsHandler):
                 )
                 self.output.record_metrics(
                     TelemetryMetricsEnum.MEMORY, value=memory_usage, unit="MiB"
+                )
+                self.output.record_metrics(
+                    TelemetryMetricsEnum.NETWORK,
+                    value=io.bytes_sent,
+                    unit="MiB",
+                    direction="sent",
+                )
+                self.output.record_metrics(
+                    TelemetryMetricsEnum.NETWORK,
+                    value=io.bytes_recv,
+                    unit="MiB",
+                    direction="recv",
                 )
                 gevent.sleep(self.env.parsed_options.lt_stats_recorder_interval)
         except gevent.GreenletExit:

@@ -19,7 +19,7 @@
           "uid": "P8E80F9AEF21F6940"
         },
         "enable": true,
-        "expr": "{container=\"locust-master\", telemetry_name=\"event.test.start\"}",
+        "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.locust.event.test.start\"}",
         "hide": true,
         "iconColor": "dark-blue",
         "name": "Test Start",
@@ -34,7 +34,7 @@
           "uid": "P8E80F9AEF21F6940"
         },
         "enable": true,
-        "expr": "{container=\"locust-master\", telemetry_name=\"event.test.stop\"}",
+        "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.locust.event.test.stop\"}",
         "hide": true,
         "iconColor": "dark-blue",
         "name": "Test Stop",
@@ -64,7 +64,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 7,
   "links": [],
   "panels": [
     {
@@ -96,7 +96,8 @@
                 "color": "blue"
               }
             ]
-          }
+          },
+          "unit": "#"
         },
         "overrides": []
       },
@@ -127,7 +128,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type=\"final\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -205,7 +206,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type=\"final\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -253,7 +254,8 @@
                 "value": 0
               }
             ]
-          }
+          },
+          "unit": "#"
         },
         "overrides": []
       },
@@ -284,7 +286,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type=\"final\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -360,7 +362,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type=\"final\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -434,7 +436,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type=\"final\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -516,7 +518,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type=\"final\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -545,7 +547,7 @@
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
       },
-      "description": "Number of requests",
+      "description": "Requests vs Failures",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -645,12 +647,12 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.current\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type = \"current\"",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Total Requests / Failures",
+      "title": "Requests vs Failures",
       "transformations": [
         {
           "filter": {
@@ -796,7 +798,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.current\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type = \"current\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -964,7 +966,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.current\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type = \"current\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -1088,7 +1090,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.current\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_stats_type = \"current\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -1178,7 +1180,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final.success\", testplan=~\"$testplan\", run_id=~\"$run_id\"}",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"} | json | telemetry_status = \"success\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -1290,7 +1292,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final.success\", testplan=~\"$testplan\", run_id=~\"$run_id\"}",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_status = \"success\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -1427,7 +1429,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final.success\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_status = \"success\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -1544,7 +1546,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-master\", telemetry_name=\"metric.requests.stats.final.errors\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.request.metric.stats\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_status = \"error\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -1660,7 +1662,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 13,
+        "h": 9,
         "w": 10,
         "x": 0,
         "y": 59
@@ -1688,7 +1690,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"metric.system.cpu\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"locust.tl.system.metric.cpu\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1749,7 +1751,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 13,
+        "h": 9,
         "w": 4,
         "x": 10,
         "y": 59
@@ -1777,7 +1779,7 @@
         {
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"locust-worker\", telemetry_name=\"metric.system.cpu\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=\"locust-worker\", telemetry_name=\"locust.tl.system.metric.cpu\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1870,12 +1872,12 @@
               }
             ]
           },
-          "unit": "percent"
+          "unit": "bytes"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 13,
+        "h": 9,
         "w": 10,
         "x": 14,
         "y": 59
@@ -1903,7 +1905,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"metric.system.mem\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
+          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"locust.tl.system.metric.mem\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json",
           "queryType": "range",
           "refId": "A"
         }
@@ -1923,6 +1925,260 @@
               {
                 "alias": "Source",
                 "path": "telemetry.source_id"
+              }
+            ],
+            "keepTime": true,
+            "replace": true,
+            "source": "Line"
+          }
+        },
+        {
+          "id": "prepareTimeSeries",
+          "options": {
+            "format": "multi"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Network Bytes Received",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 68
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"locust.tl.system.metric.network\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_direction = \"recv\"",
+          "legendFormat": "",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Network Bytes Received",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Source",
+                "path": "telemetry.source_id"
+              },
+              {
+                "alias": "Network",
+                "path": "telemetry.value"
+              }
+            ],
+            "keepTime": true,
+            "replace": true,
+            "source": "Line"
+          }
+        },
+        {
+          "id": "prepareTimeSeries",
+          "options": {
+            "format": "multi"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "Network Bytes Sent",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 68
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=~\"locust-master|locust-worker\", telemetry_name=\"locust.tl.system.metric.network\", testplan=~\"$testplan\", run_id=~\"$run_id\"}\n| json | telemetry_direction = \"sent\"",
+          "legendFormat": "",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Network Bytes Sent",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Source",
+                "path": "telemetry.source_id"
+              },
+              {
+                "alias": "Network",
+                "path": "telemetry.value"
               }
             ],
             "keepTime": true,
@@ -2015,5 +2271,5 @@
   "timezone": "browser",
   "title": "Locust Requests Dashboard (stats-json plugin)",
   "uid": "4a54c6e2-1519-4332-9bb5-fa79c0989ec8",
-  "version": 29
+  "version": 4
 }
