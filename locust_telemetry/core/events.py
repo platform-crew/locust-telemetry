@@ -3,16 +3,20 @@ from enum import Enum
 
 class TelemetryEventsEnum(Enum):
 
-    TEST_START = "tl.locust.event.test.start"
-    TEST_STOP = "tl.locust.event.test.stop"
-    SPAWNING_COMPLETE = "tl.locust.event.spawn.complete"
-    CPU_WARNING = "tl.locust.event.cpu.warning"
+    TEST = "locust.tl.locust.event.test"  # All test events
+
+    TEST_START = "locust.tl.locust.event.test.start"
+    TEST_STOP = "locust.tl.locust.event.test.stop"
+    SPAWNING_COMPLETE = "locust.tl.locust.event.spawn.complete"
+    CPU_WARNING = "locust.tl.locust.event.cpu.warning"
 
 
 class TelemetryMetricsEnum(Enum):
 
-    CPU = "tl.system.metric.cpu"
-    MEMORY = "tl.system.metric.mem"
-    NETWORK = "tl.system.metric.network"
+    CPU = "locust.tl.system.metric.cpu"
+    MEMORY = "locust.tl.system.metric.mem"
+    NETWORK = "locust.tl.system.metric.network"
 
-    REQUEST = "tl.request.metric.stats"
+    REQUEST = "locust.tl.request.metric.stats"
+
+    USER = "locust.tl.user.metric.stats"
