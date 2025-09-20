@@ -44,51 +44,6 @@ from locust_telemetry.recorders.json.constants import (
 logger = logging.getLogger(__name__)
 
 
-class JsonTelemetryLifecycleHandler(BaseLifecycleHandler):
-    """
-    Lifecycle handler for JSON telemetry.
-
-    This class inherits from `LifecycleHandlerBase` and handles
-    Locust test lifecycle events. For JSON telemetry, lifecycle events
-    are forwarded to the output handler for structured logging.
-
-    Custom behavior:
-    - On test stop, adjusts the stop timestamp to account for a
-      buffer used in JSON graphs, and emits a `SPAWNING_COMPLETE` event.
-
-    Attributes
-    ----------
-    output : OutputHandlerBase
-        Output handler responsible for recording telemetry events.
-    env : Environment
-        The Locust environment instance.
-    """
-
-    def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
-        """
-        Handle the `test_stop` event for JSON telemetry.
-
-        Adjusts the test stop time by `TEST_STOP_BUFFER_FOR_GRAPHS` seconds
-        to allow for post-test graph updates, then forwards the event
-        to the output handler.
-
-        Parameters
-        ----------
-        *args : Any
-            Positional arguments passed by Locust.
-        **kwargs : Any
-            Additional keyword arguments passed by Locust.
-        """
-        end_time = h.get_utc_time_with_buffer(
-            seconds_buffer=TEST_STOP_BUFFER_FOR_GRAPHS
-        )
-
-        self.output.record_event(
-            TelemetryEventsEnum.TEST_STOP, *args, end_time=end_time, **kwargs
-        )
-        logger.info("[json] Recorded test stop event with adjusted end time.")
-
-
 class JsonTelemetryOutputHandler(BaseOutputHandler):
     """
     Output handler for JSON-based telemetry logging.
@@ -113,7 +68,7 @@ class JsonTelemetryOutputHandler(BaseOutputHandler):
         **kwargs : dict
             Additional event/metrics metadata.
         """
-        payload = {**self.get_run_context(), **kwargs}
+        payload = {**self.get_context(active=True), **kwargs}
         logger.info(
             f"Recording telemetry {event_type}: {event_name}",
             extra={
@@ -158,6 +113,51 @@ class JsonTelemetryOutputHandler(BaseOutputHandler):
             Metric-specific attributes such as `value` and `unit`.
         """
         self.log_telemetry("metrics", tl_type.value, **kwargs)
+
+
+class JsonTelemetryLifecycleHandler(BaseLifecycleHandler):
+    """
+    Lifecycle handler for JSON telemetry.
+
+    This class inherits from `LifecycleHandlerBase` and handles
+    Locust test lifecycle events. For JSON telemetry, lifecycle events
+    are forwarded to the output handler for structured logging.
+
+    Custom behavior:
+    - On test stop, adjusts the stop timestamp to account for a
+      buffer used in JSON graphs, and emits a `SPAWNING_COMPLETE` event.
+
+    Attributes
+    ----------
+    output : OutputHandlerBase
+        Output handler responsible for recording telemetry events.
+    env : Environment
+        The Locust environment instance.
+    """
+
+    def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
+        """
+        Handle the `test_stop` event for JSON telemetry.
+
+        Adjusts the test stop time by `TEST_STOP_BUFFER_FOR_GRAPHS` seconds
+        to allow for post-test graph updates, then forwards the event
+        to the output handler.
+
+        Parameters
+        ----------
+        *args : Any
+            Positional arguments passed by Locust.
+        **kwargs : Any
+            Additional keyword arguments passed by Locust.
+        """
+        end_time = h.get_utc_time_with_buffer(
+            seconds_buffer=TEST_STOP_BUFFER_FOR_GRAPHS
+        )
+
+        self.output.record_event(
+            TelemetryEventsEnum.TEST_STOP, *args, end_time=end_time, **kwargs
+        )
+        logger.info("[json] Recorded test stop event with adjusted end time.")
 
 
 class JsonTelemetrySystemMetricsHandler(BaseSystemMetricsHandler):

@@ -3,36 +3,59 @@ This module defines default settings and references for Locust telemetry recorde
 
 Constants
 ---------
-DEFAULT_RECORDER_INTERVAL : int
-    Default interval in seconds for recording stats is 2 seconds. But can be set through
-    environment variable LOCUST_TELEMETRY_RECORDER_INTERVAL
+DEFAULT_STATS_RECORDER_INTERVAL : int
+    Default interval in seconds for recording telemetry stats. The default is `3`
+    seconds but may be overridden by configuration or environment variables.
 
-DEFAULT_ENVIRONMENT_METADATA : Dict[str, Callable]
-    Dictionary of environment metadata functions. For example, 'run_id' returns
-    the current UTC timestamp in ISO format. This is for internal use only.
+DEFAULT_ENVIRONMENT_METADATA : dict[str, Callable]
+    Dictionary of environment metadata providers. Each key is a metadata field name,
+    and each value is a callable that produces the metadata value. For example,
+    `'run_id'` returns a short UUID string.
 
-TELEMETRY_CLI_GROUP_NAME: str
-    Configuration cli group to add all the necessary args to locust-telemetry
+TELEMETRY_CLI_GROUP_NAME : str
+    Name of the CLI argument group for telemetry-related options.
+
+TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID : str
+    Plugin identifier for the JSON stats recorder.
+
+TELEMETRY_OTEL_RECORDER_PLUGIN_ID : str
+    Plugin identifier for the OpenTelemetry stats recorder.
+
+TELEMETRY_OTEL_METRICS_METER : str
+    Default name of the OpenTelemetry metrics meter.
+
+TELEMETRY_SERVICE_NAME : str
+    Default name of the telemetry service.
+
+OTEL_EXPORTER_TIMEOUT : int
+    Timeout in seconds for OpenTelemetry metric exporter requests.
 """
 
 import uuid
 from typing import Callable, Dict
 
-# Default interval for telemetry stats recording
-DEFAULT_STATS_RECORDER_INTERVAL: int = 3  # seconds
+#: Default interval (in seconds) for telemetry stats recording.
+DEFAULT_STATS_RECORDER_INTERVAL: int = 3
 
-# Configuration cli group to add all the necessary args
+#: Configuration CLI group to add all the necessary arguments.
 TELEMETRY_CLI_GROUP_NAME: str = "locust-telemetry"
 
-# Environment metadata which can be access by environment.<metadata>
-DEFAULT_ENVIRONMENT_METADATA: Dict[str, Callable] = {
+#: Environment metadata providers, accessed as `environment.<metadata>`.
+DEFAULT_ENVIRONMENT_METADATA: Dict[str, Callable[[], str]] = {
     "run_id": lambda: str(uuid.uuid4())[:8]  # first 8 characters of UUID
 }
 
-# Recorder plugins
-TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID = "stats-json"
-TELEMETRY_OTEL_RECORDER_PLUGIN_ID = "stats-otel"
+#: Plugin identifier for the JSON stats recorder.
+TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID: str = "stats-json"
 
-TELEMETRY_OTEL_METRICS_METER = "locust_telemetry"
+#: Plugin identifier for the OpenTelemetry stats recorder.
+TELEMETRY_OTEL_RECORDER_PLUGIN_ID: str = "stats-otel"
 
+#: Default OpenTelemetry metrics meter name.
+TELEMETRY_OTEL_METRICS_METER: str = "locust_telemetry"
+
+#: Default service name used in OpenTelemetry resources.
 TELEMETRY_SERVICE_NAME: str = "locust_telemetry"
+
+#: Timeout (in seconds) for OpenTelemetry metric exporter requests.
+OTEL_EXPORTER_TIMEOUT: int = 10

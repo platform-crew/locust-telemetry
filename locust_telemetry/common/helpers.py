@@ -1,3 +1,4 @@
+import logging
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -17,6 +18,8 @@ from opentelemetry.metrics import (
 InstrumentType = Union[
     Counter, Histogram, ObservableGauge, ObservableCounter, ObservableUpDownCounter
 ]
+
+logger = logging.getLogger(__name__)
 
 
 def warmup_psutil(process: psutil.Process) -> None:

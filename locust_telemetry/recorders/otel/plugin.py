@@ -5,12 +5,14 @@ from locust.env import Environment
 
 from locust_telemetry import config
 from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
+from locust_telemetry.recorders.otel.exceptions import OtelConfigurationError
 from locust_telemetry.recorders.otel.handlers import (
     OtelLifecycleHandler,
     OtelOutputHandler,
     OtelRequestHandler,
     OtelSystemMetricsHandler,
 )
+from locust_telemetry.recorders.otel.otel import configure_otel
 from locust_telemetry.recorders.otel.recorder import (
     MasterLocustOtelRecorder,
     WorkerLocustOtelRecorder,
@@ -23,51 +25,55 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
     """
     OpenTelemetry Recorder Plugin for Locust.
 
-    Responsibilities
-    ----------------
-    - Register CLI arguments for configuring OpenTelemetry exporters.
-    - Instantiate appropriate OTel recorders for master and worker nodes.
-    - Provide integration with Locust's telemetry plugin framework.
+    This plugin integrates Locust with OpenTelemetry (OTel), enabling the export
+    of metrics and lifecycle events to an OTLP endpoint. It provides recorder
+    implementations for both master and worker nodes.
+
+    Features
+    --------
+    - Registers CLI arguments for OTLP exporter configuration.
+    - Instantiates master and worker OTel recorders.
+    - Supports trace context injection into requests for downstream correlation.
 
     Notes
     -----
-    - On the master node, :class:`MasterLocustOtelRecorder` is loaded.
-    - On worker nodes, :class:`WorkerLocustOtelRecorder` is loaded.
-    - Exporter configuration is controlled via CLI arguments or environment variables.
+    - Master node uses :class:`MasterLocustOtelRecorder`.
+    - Worker nodes use :class:`WorkerLocustOtelRecorder`.
+    - Exporter configuration can be provided via CLI or environment variables.
     """
 
-    #: Unique plugin identifier for OpenTelemetry recorder
+    #: Unique plugin identifier for the OpenTelemetry recorder
     RECORDER_PLUGIN_ID = config.TELEMETRY_OTEL_RECORDER_PLUGIN_ID
 
-    def add_test_metadata(self) -> Dict:
+    def add_test_metadata(self) -> Dict[str, Any]:
         """
-        Add test-level metadata to be attached to metrics and traces.
+        Provide test-level metadata to attach to OTel metrics and traces.
 
         Returns
         -------
-        Dict
-            Key-value pairs of metadata. Empty by default.
+        Dict[str, Any]
+            Key-value metadata pairs. Defaults to an empty dictionary.
         """
         return {}
 
     def add_cli_arguments(self, group: Any) -> None:
         """
-        Define CLI arguments for configuring the OpenTelemetry exporter.
+        Register CLI arguments for configuring the OpenTelemetry OTLP exporter.
 
         Parameters
         ----------
         group : argparse._ArgumentGroup
-            The CLI argument group where plugin-specific arguments will be added.
+            CLI argument group for plugin-specific arguments.
 
         Notes
         -----
-        Supports both CLI flags and environment variable overrides.
+        Arguments support environment variable overrides.
         """
         group.add_argument(
             "--lt-otel-exporter-otlp-endpoint",
             type=str,
             help=(
-                "OpenTelemetry OTLP exporter endpoint for Locust metrics "
+                "OTLP exporter endpoint for Locust metrics "
                 "(e.g., http://otel-collector:4317)"
             ),
             env_var="LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT",
@@ -76,7 +82,7 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
         group.add_argument(
             "--lt-otel-exporter-otlp-insecure",
             type=bool,
-            help="Use insecure (non-TLS) connection to the OpenTelemetry OTLP endpoint",
+            help="Use insecure (non-TLS) connection to the OTLP endpoint.",
             env_var="LOCUST_OTEL_EXPORTER_OTLP_INSECURE",
             default=False,
         )
@@ -84,9 +90,9 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
             "--lt-otel-trace-injection-by-header",
             type=bool,
             help=(
-                "Enable OpenTelemetry trace propagation via HTTP headers. "
-                "Use this option if no OTLP exporter is available, so trace context "
-                "is still injected into Locust requests for downstream correlation."
+                "Enable trace propagation via HTTP headers. "
+                "Use when no OTLP exporter is available, so trace context is "
+                "still injected into Locust requests for correlation."
             ),
             env_var="LOCUST_OTEL_TRACE_INJECTION_BY_HEADER",
             default=True,
@@ -96,14 +102,14 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
-        Load and initialize the OpenTelemetry recorder for the Locust master node.
+        Initialize and load the OTel recorder for the master node.
 
         Parameters
         ----------
         environment : Environment
-            The Locust runtime environment.
+            Locust runtime environment.
         **kwargs : Any
-            Additional keyword arguments passed from the plugin system.
+            Additional plugin arguments.
         """
         MasterLocustOtelRecorder(
             env=environment,
@@ -112,19 +118,20 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
             system_handler_cls=OtelSystemMetricsHandler,
             requests_handler_cls=OtelRequestHandler,
         )
+        logger.debug("[otel] Master OTel recorder initialized.")
 
     def load_worker_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
     ) -> None:
         """
-        Load and initialize the OpenTelemetry recorder for Locust worker nodes.
+        Initialize and load the OTel recorder for worker nodes.
 
         Parameters
         ----------
         environment : Environment
-            The Locust runtime environment.
+            Locust runtime environment.
         **kwargs : Any
-            Additional keyword arguments passed from the plugin system.
+            Additional plugin arguments.
         """
         WorkerLocustOtelRecorder(
             env=environment,
@@ -133,3 +140,24 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
             system_handler_cls=OtelSystemMetricsHandler,
             requests_handler_cls=OtelRequestHandler,
         )
+        logger.debug("[otel] Worker OTel recorder initialized.")
+
+    def load(self, environment: Environment, **kwargs: Any) -> None:
+        """
+        Configure OTel and load the plugin into Locust.
+
+        Parameters
+        ----------
+        environment : Environment
+            Locust runtime environment.
+        **kwargs : Any
+            Additional plugin arguments.
+        """
+        try:
+            configure_otel(environment)
+        except Exception as e:
+            raise OtelConfigurationError(
+                "[otel] Something went wrong while configuring otel"
+            ) from e
+        logger.info("[otel] OpenTelemetry configuration loaded successfully.")
+        super().load(environment, **kwargs)

@@ -1,7 +1,24 @@
 {
   "annotations": {
     "list": [
-
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
     ]
   },
   "description": "Locust Requests Dashboard (stats-otel plugin)",
@@ -411,7 +428,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(last_over_time(locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
+          "expr": "max(last_over_time(locust_tl_user_metric_count_ratio{}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -808,7 +825,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}",
+          "expr": "max(locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -823,7 +840,7 @@
             "uid": "feycujmeqsp34b"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "sum(rate(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1089,7 +1106,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(rate(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])) * 100",
+          "expr": "sum(rate(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1104,7 +1121,7 @@
             "uid": "feycujmeqsp34b"
           },
           "editorMode": "code",
-          "expr": "sum(rate(locust_tl_request_metric_error_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])) * 100",
+          "expr": "sum(rate(locust_tl_request_metric_error_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
           "hide": false,
           "instant": false,
           "legendFormat": "Failure %",
@@ -1226,7 +1243,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"})",
+          "expr": "sum(\n  increase(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])\n)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1241,10 +1258,10 @@
             "uid": "feycujmeqsp34b"
           },
           "editorMode": "code",
-          "expr": "sum(locust_tl_request_metric_error_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"})",
+          "expr": "sum(\n  increase(locust_tl_request_metric_error_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])\n)",
           "hide": false,
           "instant": false,
-          "legendFormat": "# Failures",
+          "legendFormat": "# Failures ",
           "range": true,
           "refId": "B"
         }
@@ -1342,7 +1359,7 @@
           "editorMode": "code",
           "expr": "sum by (endpoint) (\n  rate(locust_tl_request_metric_success_milliseconds_sum[$__rate_interval])\n)",
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "{{endpoint}}",
           "range": true,
           "refId": "A"
         }
@@ -1438,9 +1455,9 @@
             "uid": "feycujmeqsp34b"
           },
           "editorMode": "code",
-          "expr": "sum by (endpoint) (\n  rate(locust_tl_request_metric_error_milliseconds_sum[$__rate_interval])\n)",
+          "expr": "sum by (endpoint)(\n  rate(locust_tl_request_metric_error_milliseconds_sum[$__rate_interval])\n)",
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "{{endpoint}} - {{run_id}}",
           "range": true,
           "refId": "A"
         }
@@ -1539,7 +1556,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "deriv(locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])",
+          "expr": "sum(deriv(locust_tl_user_metric_count_ratio{}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1638,11 +1655,11 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"}",
+          "expr": "max(locust_tl_user_metric_count_ratio{})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "User Count",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -1750,7 +1767,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by (source_id) (locust_tl_system_metric_cpu_percent{run_id=~\"$run_id\", testplan=~\"$testplan\"})",
+          "expr": "sum by (source_id) (locust_tl_system_metric_cpu_percent{})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1812,8 +1829,8 @@
             "uid": "feycujmeqsp34b"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_mem_bytes{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
+          "editorMode": "code",
+          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_mem_bytes{}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1890,7 +1907,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by (source_id) (last_over_time(locust_tl_system_metric_cpu_percent{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
+          "expr": "sum by (source_id) (last_over_time(locust_tl_system_metric_cpu_percent{}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -1998,7 +2015,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by (source_id) (locust_tl_system_metric_mem_bytes{run_id=~\"$run_id\", testplan=~\"$testplan\"})",
+          "expr": "sum by (source_id) (locust_tl_system_metric_mem_bytes{})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -2061,7 +2078,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_network_bytes{direction=\"sent\", run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
+          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_network_bytes{direction=\"sent\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -2130,7 +2147,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_network_bytes{direction=\"recv\", run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
+          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_network_bytes{direction=\"recv\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -2239,7 +2256,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by (source_id) (locust_tl_system_metric_network_bytes{run_id=~\"$run_id\", testplan=~\"$testplan\", direction=\"sent\"})",
+          "expr": "sum by (source_id) (locust_tl_system_metric_network_bytes{direction=\"sent\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -2342,7 +2359,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by (source_id) (locust_tl_system_metric_network_bytes{run_id=~\"$run_id\", testplan=~\"$testplan\", direction=\"recv\"})",
+          "expr": "sum by (source_id) (locust_tl_system_metric_network_bytes{direction=\"recv\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -2419,5 +2436,5 @@
   "timezone": "browser",
   "title": "Locust Requests Dashboard (stats-otel plugin)",
   "uid": "d89a9144-92a1-4a5c-a96f-65b31b6a1c09",
-  "version": 144
+  "version": 164
 }

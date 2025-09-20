@@ -9,20 +9,21 @@ nodes to collect and export telemetry data to an OTLP endpoint.
 Classes
 -------
 OtelLifecycleHandler
-    Registers and records lifecycle event metrics (e.g., test events,
-    request durations).
+    Registers and records lifecycle event metrics (e.g., test start/stop,
+    user counts).
 OtelOutputHandler
-    Central registry for metrics; manages creation, recording, and
-    cleanup of instruments.
+    Central registry for OTEL instruments; manages recording of events
+    and request metrics.
 OtelRequestHandler
-    Registers request-related metrics (count, errors, RPS/FPS) and records request
-     durations.
+    Registers request-related metrics (success/error histograms) and
+    records request durations.
 OtelSystemMetricsHandler
-    Registers and reports system-level metrics (CPU, memory, network I/O) via callbacks.
+    Registers and reports system-level metrics (CPU, memory, network I/O)
+    via observable callbacks.
 """
 
 import logging
-from typing import Any, Callable, Dict, List
+from typing import Any, List
 
 import psutil
 from locust.env import Environment
@@ -36,16 +37,17 @@ from locust_telemetry.core.handlers import (
     BaseRequestHandler,
     BaseSystemMetricsHandler,
 )
+from locust_telemetry.recorders.otel.exceptions import OtelMetricNotRegisteredError
 
 logger = logging.getLogger(__name__)
 
 
 class OtelOutputHandler(BaseOutputHandler):
     """
-    OpenTelemetry output handler for recording lifecycle events
-    and metrics.
+    OpenTelemetry output handler.
 
-    Manages registration and cleanup of gauges, counters, and up-down counters.
+    Responsible for recording lifecycle events and metrics using registered
+    OTEL instruments.
     """
 
     def __init__(self, env: Environment):
@@ -55,15 +57,10 @@ class OtelOutputHandler(BaseOutputHandler):
         Parameters
         ----------
         env : Environment
-            Locust Environment instance containing the OpenTelemetry meter.
+            Locust Environment instance containing the OpenTelemetry meter
+            and instrument registry.
         """
         super().__init__(env)
-        self.meter = self.env.otel_meter
-
-        # Registered metric instruments
-        self._instrument_registry: Dict[
-            TelemetryEventsEnum | TelemetryMetricsEnum, h.InstrumentType
-        ] = {}
 
     def record_event(
         self, tl_type: TelemetryEventsEnum, *args: Any, **kwargs: Any
@@ -73,151 +70,95 @@ class OtelOutputHandler(BaseOutputHandler):
 
         Parameters
         ----------
-        tl_type : TelemetryEvent
-            The lifecycle event being recorded.
+        tl_type : TelemetryEventsEnum
+            The lifecycle event being recorded (e.g., test.start, test.stop).
         *args : Any
             Additional unused arguments.
         **kwargs : Any
             Attributes to attach to the recorded metric.
         """
-        context = self.get_run_context()
-        instrument = self._instrument_registry.get(TelemetryEventsEnum.TEST)
+        context = self.get_context(active=True)
+        instrument = self.env.otel_registry.get(TelemetryEventsEnum.TEST)
+
+        if not instrument:
+            logger.error("[otel] Event metric not registered: %s", tl_type.value)
+            raise OtelMetricNotRegisteredError(
+                f"Metric not registered: {tl_type.value}"
+            )
+
         instrument.add(1, attributes={"event": tl_type.value, **context, **kwargs})
-        logger.debug(f"[otel] Recorded event: {tl_type.value}")
+        logger.debug("[otel] Recorded event: %s", tl_type.value)
 
     def record_metrics(
         self, tl_type: TelemetryMetricsEnum, *args: Any, **kwargs: Any
     ) -> None:
         """
-        Record request metrics such as duration.
+        Record request or custom metrics.
 
         Parameters
         ----------
-        tl_type : TelemetryMetric
-            The metric being recorded.
+        tl_type : TelemetryMetricsEnum
+            The metric being recorded (e.g., request_success).
         *args : Any
-            Additional metric values (e.g., response time).
+            Positional arguments containing metric values (e.g., response time).
         **kwargs : Any
             Attributes to attach to the recorded metric.
         """
-        context = self.get_run_context()
-        instrument = self._instrument_registry.get(tl_type)
+        context = self.get_context(active=True)
+        instrument = self.env.otel_registry.get(tl_type)
+
+        if not instrument:
+            logger.error("[otel] Metric not registered: %s", tl_type.value)
+            raise OtelMetricNotRegisteredError(
+                f"Metric not registered: {tl_type.value}"
+            )
+
         instrument.record(
             args[0],
-            attributes={"metrics": tl_type.value, **context, **kwargs},
+            attributes={"metric": tl_type.value, **context, **kwargs},
         )
-
-    def register_metric(
-        self,
-        metric: TelemetryMetricsEnum | TelemetryEventsEnum,
-        unit: str,
-        kind: Callable,
-    ) -> Any:
-        """
-        Register an OpenTelemetry metric instrument.
-
-        Parameters
-        ----------
-        metric : OtelMetricDefinition
-            Metric definition (name + description).
-        unit : str
-            Unit of measurement (e.g., "By", "%", "requests").
-        kind : Callable
-            Metric constructor function (e.g., `h.create_otel_counter`,
-            `h.create_otel_histogram`)
-        """
-        instrument = kind(self.meter, metric.value, metric.value, unit)
-        self._instrument_registry[metric] = instrument
-        logger.info(f"[otel] Registered {metric.value}: {kind.__name__} .")
-        return instrument
-
-    def add_callbacks(
-        self,
-        metric: TelemetryMetricsEnum | TelemetryEventsEnum,
-        callbacks: List[Callable],
-    ) -> None:
-        """
-        Add callbacks to a registered metric instrument.
-
-        Parameters
-        ----------
-        metric : OtelMetricDefinition
-            The metric to which callbacks will be attached.
-        callbacks : list[Callable]
-            Callback functions returning Observations.
-        """
-        instrument = self._instrument_registry.get(metric)
-        if not instrument:
-            raise ValueError(f"Metric '{metric.value}' is not registered yet.")
-        instrument._callbacks = callbacks
-
-    def remove_callbacks(
-        self, metric: TelemetryMetricsEnum | TelemetryEventsEnum
-    ) -> None:
-        """
-        Remove all callbacks from a registered metric instrument.
-
-        Parameters
-        ----------
-        metric : OtelMetricDefinition
-            The metric from which callbacks will be removed.
-        """
-        instrument = self._instrument_registry.get(metric)
-        if not instrument:
-            raise ValueError(f"Metric '{metric.value}' is not registered yet.")
-
-        # ⚠️ Using _callbacks (private API) because OpenTelemetry SDK does not
-        # support unregistering callbacks officially.
-        instrument._callbacks = []
 
 
 class OtelLifecycleHandler(BaseLifecycleHandler):
     """
     OpenTelemetry lifecycle handler.
 
-    For OTel the default implementation in BaseLifecycleHandler is sufficient.
+    Extends the base lifecycle handler to register OTEL instruments for
+    test events and user counts.
     """
 
     def __init__(self, output: OtelOutputHandler, env: Environment):
         super().__init__(output, env)
         self.output: OtelOutputHandler = output
+        self.register_instruments()
 
-        self._lifecycle_metrics = (
-            # Test events as counters
-            (TelemetryEventsEnum.TEST, "1", h.create_otel_counter, None),
-            # User spawning events
-            (
-                TelemetryMetricsEnum.USER,
-                "1",
-                h.create_otel_observable_gauge,
-                [self._user_count_callback],
-            ),
+    def register_instruments(self) -> None:
+        """
+        Register lifecycle instruments.
+
+        Notes
+        -----
+        Instruments begin collecting data immediately upon registration.
+        """
+        self.env.otel_registry.extend(
+            [
+                # Test lifecycle events as counters
+                (
+                    TelemetryEventsEnum.TEST,
+                    "1",
+                    h.create_otel_counter,
+                    None,
+                ),
+                # Active user count as an observable gauge
+                (
+                    TelemetryMetricsEnum.USER,
+                    "1",
+                    h.create_otel_observable_gauge,
+                    [self._user_count_callback],
+                ),
+            ]
         )
-        self._register_event_metrics()
-
-    def _register_event_metrics(self) -> None:
-        """
-        Register event metrics instrument with the output handler
-
-        Metrics:
-        - Test events metric
-        - Requests duration metric
-        """
-        for metric, unit, kind, callbacks in self._lifecycle_metrics:
-            self.output.register_metric(metric, unit, kind)
-        logger.info("[otel] Registered all the lifecycle metrics")
-
-    def on_test_start(self, *args: Any, **kwargs: Any) -> None:
-        super().on_test_start(*args, **kwargs)
-        for metric, _, _, callbacks in self._lifecycle_metrics:
-            self.output.add_callbacks(metric=metric, callbacks=callbacks)
-        logger.info("[otel] Add lifecycle events callbacks")
-
-    def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
-        for metric, _, _, callbacks in self._lifecycle_metrics:
-            self.output.remove_callbacks(metric)
-        super().on_test_stop(*args, **kwargs)
-        logger.info("[otel] Removed lifecycle events callbacks")
+        logger.info("[otel] Registered lifecycle metrics successfully.")
 
     def _user_count_callback(self, options=None) -> List[Observation]:
         """
@@ -226,17 +167,17 @@ class OtelLifecycleHandler(BaseLifecycleHandler):
         Returns
         -------
         list[Observation]
-            Observation containing user count.
+            Single observation containing the active user count.
         """
-        return [Observation(self.env.runner.user_count, self.output.get_run_context())]
+        return [Observation(self.env.runner.user_count, self.output.get_context())]
 
 
 class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
     """
     OpenTelemetry handler for system-level metrics.
 
-    Collects CPU usage, memory usage, and network I/O using psutil
-    and reports them via Observable Gauges.
+    Collects CPU usage, memory usage, and network I/O using psutil and
+    reports them via Observable Gauges.
     """
 
     _process: psutil.Process = psutil.Process()
@@ -254,59 +195,50 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
         """
         super().__init__(output, env)
         self.output: OtelOutputHandler = output
+        self.register_instruments()
 
-        self._system_metrics_definition = (
-            (
-                TelemetryMetricsEnum.NETWORK,
-                "By",
-                h.create_otel_observable_gauge,
-                [self._network_usage_callback],
-            ),
-            (
-                TelemetryMetricsEnum.MEMORY,
-                "By",
-                h.create_otel_observable_gauge,
-                [self._memory_usage_callback],
-            ),
-            (
-                TelemetryMetricsEnum.CPU,
-                "%",
-                h.create_otel_observable_gauge,
-                [self._cpu_usage_callback],
-            ),
+    def register_instruments(self) -> None:
+        """
+        Register system metrics instruments.
+
+        Notes
+        -----
+        psutil is "warmed up" to avoid the first-call zero-value issue.
+        """
+        h.warmup_psutil(self._process)
+        self.env.otel_registry.extend(
+            [
+                (
+                    TelemetryMetricsEnum.NETWORK,
+                    "By",
+                    h.create_otel_observable_gauge,
+                    [self._network_usage_callback],
+                ),
+                (
+                    TelemetryMetricsEnum.MEMORY,
+                    "By",
+                    h.create_otel_observable_gauge,
+                    [self._memory_usage_callback],
+                ),
+                (
+                    TelemetryMetricsEnum.CPU,
+                    "%",
+                    h.create_otel_observable_gauge,
+                    [self._cpu_usage_callback],
+                ),
+            ]
         )
-
-        self._register_system_metrics()
-
-    def _register_system_metrics(self) -> None:
-        """
-        Register system metric instruments (gauges).
-
-        Metrics:
-        - CPU usage
-        - Memory usage
-        - Network bytes sent/received
-        """
-        for metric, unit, kind, _ in self._system_metrics_definition:
-            self.output.register_metric(metric, unit, kind)
-        logger.info("[otel] Registered all the system metrics")
+        logger.info("[otel] Registered system metrics successfully.")
 
     def start(self) -> None:
         """
-        Start collecting system metrics by adding callbacks.
+        Start system metrics collection (no-op, provided for interface compliance).
         """
-        h.warmup_psutil(self._process)
-        for metric, _, _, callbacks in self._system_metrics_definition:
-            self.output.add_callbacks(metric=metric, callbacks=callbacks)
-        logger.info("[otel] Added system metrics callbacks")
 
     def stop(self) -> None:
         """
-        Stop collecting system metrics by removing callbacks.
+        Stop system metrics collection (no-op, provided for interface compliance).
         """
-        for metric, _, _, _ in self._system_metrics_definition:
-            self.output.remove_callbacks(metric)
-        logger.info("[otel] Removed system metrics callbacks")
 
     def _network_usage_callback(self, options=None) -> List[Observation]:
         """
@@ -318,7 +250,7 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
             Observations for bytes sent and received.
         """
         io = psutil.net_io_counters()
-        ctx = self.output.get_run_context()
+        ctx = self.output.get_context()
         return [
             Observation(io.bytes_sent, {**ctx, "direction": "sent"}),
             Observation(io.bytes_recv, {**ctx, "direction": "recv"}),
@@ -334,7 +266,7 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
             Observation for memory usage in MiB.
         """
         memory_mib = h.convert_bytes_to_mib(self._process.memory_info().rss)
-        return [Observation(memory_mib, self.output.get_run_context())]
+        return [Observation(memory_mib, self.output.get_context())]
 
     def _cpu_usage_callback(self, options=None) -> List[Observation]:
         """
@@ -345,14 +277,15 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
         list[Observation]
             Observation for CPU utilization percentage.
         """
-        return [Observation(self._process.cpu_percent(), self.output.get_run_context())]
+        return [Observation(self._process.cpu_percent(), self.output.get_context())]
 
 
 class OtelRequestHandler(BaseRequestHandler):
     """
     OpenTelemetry handler for request-level metrics.
 
-    Delegates recording of request duration to the output handler.
+    Registers histograms for request success and failure durations,
+    and records metrics for each request event.
     """
 
     def __init__(self, output: OtelOutputHandler, env: Environment):
@@ -368,41 +301,43 @@ class OtelRequestHandler(BaseRequestHandler):
         """
         super().__init__(output, env)
         self.output: OtelOutputHandler = output
+        self.register_instruments()
 
-        # Request metrics definition, handled by this handler
-        self._request_metrics_definition = (
-            (
-                TelemetryMetricsEnum.REQUEST_SUCCESS,
-                "ms",
-                h.create_otel_histogram,
-                None,
-            ),
-            (
-                TelemetryMetricsEnum.REQUEST_ERROR,
-                "ms",
-                h.create_otel_histogram,
-                None,
-            ),
+    def register_instruments(self) -> None:
+        """
+        Register request metrics instruments.
+
+        Notes
+        -----
+        Instruments begin collecting data immediately upon registration.
+        """
+        self.env.otel_registry.extend(
+            [
+                (
+                    TelemetryMetricsEnum.REQUEST_SUCCESS,
+                    "ms",
+                    h.create_otel_histogram,
+                    None,
+                ),
+                (
+                    TelemetryMetricsEnum.REQUEST_ERROR,
+                    "ms",
+                    h.create_otel_histogram,
+                    None,
+                ),
+            ]
         )
-        self._register_request_metrics()
-
-    def _register_request_metrics(self) -> None:
-        """
-        Register request-related metric instruments.
-
-        Metrics:
-        - Request success
-        - Request failures
-        """
-        for metric, unit, kind, _ in self._request_metrics_definition:
-            self.output.register_metric(metric, unit, kind)
-        logger.info("[otel] Registered all the request metrics")
+        logger.info("[otel] Registered request metrics successfully.")
 
     def start(self) -> None:
-        pass
+        """
+        Start request metrics collection (no-op, provided for interface compliance).
+        """
 
     def stop(self) -> None:
-        pass
+        """
+        Stop request metrics collection (no-op, provided for interface compliance).
+        """
 
     def on_request(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -414,9 +349,8 @@ class OtelRequestHandler(BaseRequestHandler):
             Additional unused arguments.
         **kwargs : Any
             Keyword arguments containing request metadata,
-            such as response_time and exception flag.
+            such as response_time, name, and exception.
         """
-        # This should not throw any error because locust should always send response
         response = kwargs.get("response")
         is_error = bool(kwargs.get("exception"))
         metric = (

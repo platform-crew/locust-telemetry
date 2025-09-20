@@ -51,22 +51,33 @@ class BaseOutputHandler(ABC):
     def __init__(self, env: Environment):
         self.env = env
 
-    def get_run_context(self) -> Dict:
+    def get_context(self, active: bool = False) -> Dict:
         """
         Retrieve common run-level context for telemetry records.
+
+         Parameters
+        ----------
+        active : bool
+            If active, it returns run_id and testplan in the context
 
         Returns
         -------
         dict
-            Dictionary with run metadata including ``run_id``, ``testplan``,
+            Dictionary with runners context
             and runner identity (master or worker).
         """
-        return {
-            "run_id": self.env.telemetry_meta.run_id,
-            "testplan": self.env.parsed_options.testplan,
+        context = {
             "source": self.env.runner.__class__.__name__,
             "source_id": h.get_source_id(self.env),
         }
+        if active:
+            context.update(
+                {
+                    "run_id": self.env.telemetry_meta.run_id,
+                    "testplan": self.env.parsed_options.testplan,
+                }
+            )
+        return context
 
     @abstractmethod
     def record_event(

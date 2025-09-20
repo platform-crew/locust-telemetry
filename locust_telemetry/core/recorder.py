@@ -1,3 +1,4 @@
+import logging
 import os
 import socket
 from abc import ABC
@@ -11,6 +12,8 @@ from locust_telemetry.core.handlers import (
     BaseRequestHandler,
     BaseSystemMetricsHandler,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class BaseTelemetryRecorder(ABC):

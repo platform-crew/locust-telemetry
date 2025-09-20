@@ -17,9 +17,6 @@ WorkerLocustOtelRecorder
 
 import logging
 
-from locust.env import Environment
-
-from locust_telemetry.common.clients import configure_otel
 from locust_telemetry.core.recorder import (
     MasterTelemetryRecorder,
     WorkerTelemetryRecorder,
@@ -28,53 +25,74 @@ from locust_telemetry.core.recorder import (
 logger = logging.getLogger(__name__)
 
 
-class BaseOtelRecorder:
-    """
-    Base class to initialize OpenTelemetry configuration.
-
-    Ensures that the OTLP exporter, meter provider, and metric readers
-    are configured before any Locust telemetry handlers are registered.
-
-    This class should be inherited alongside MasterTelemetryRecorder
-    or WorkerTelemetryRecorder.
-    """
-
-    def __init__(self, env: Environment):
-        configure_otel(env)
-
-
-class MasterLocustOtelRecorder(BaseOtelRecorder, MasterTelemetryRecorder):
+class MasterLocustOtelRecorder(MasterTelemetryRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for the Locust master node.
 
-    This class extends the base ``MasterTelemetryRecorder`` to add
+    This class extends the base :class:`MasterTelemetryRecorder` to add
     OpenTelemetry metric collection and export. It sets up OTEL-specific
     handlers for system metrics, request metrics, lifecycle events,
     and output handling. Additionally, it initializes the OTLP exporter
-    and meter provider via ``configure_otel``.
+    and meter provider via :func:`configure_otel`.
+
+    Notes
+    -----
+    Currently, this class does not override any methods, but it exists
+    as a specialization hook for future master-specific behavior.
     """
 
-    def __init__(self, *args, **kwargs):
-        BaseOtelRecorder.__init__(self, env=kwargs.get("env"))
-        MasterTelemetryRecorder.__init__(self, *args, **kwargs)
+    pass
 
 
-class WorkerLocustOtelRecorder(BaseOtelRecorder, WorkerTelemetryRecorder):
+class WorkerLocustOtelRecorder(WorkerTelemetryRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for Locust worker nodes.
 
-    This class extends the base ``WorkerTelemetryRecorder`` to add
+    This class extends the base :class:`WorkerTelemetryRecorder` to add
     OpenTelemetry metric collection and export. It sets up OTEL-specific
     handlers for system metrics, request metrics, lifecycle events,
     and output handling. Additionally, it initializes the OTLP exporter
-    and meter provider via ``configure_otel``.
+    and meter provider via :func:`configure_otel`.
+
+    Attributes
+    ----------
+    env : locust.env.Environment
+        The Locust environment instance, including references to events.
+
+    Methods
+    -------
+    on_request(*args, **kwargs)
+        Event listener that records requests as histogram observations.
     """
 
     def __init__(self, *args, **kwargs):
-        BaseOtelRecorder.__init__(self, env=kwargs.get("env"))
-        WorkerTelemetryRecorder.__init__(self, *args, **kwargs)
+        """
+        Initialize the worker recorder and attach request listeners.
+
+        Parameters
+        ----------
+        *args : Any
+            Positional arguments passed to the base class initializer.
+        **kwargs : Any
+            Keyword arguments passed to the base class initializer.
+        """
+        super().__init__(*args, **kwargs)
         self.env.events.request.add_listener(self.on_request)
 
     def on_request(self, *args, **kwargs):
-        """On request, record it as a histogram"""
+        """
+        Handle a request event from Locust and record it as a histogram.
+
+        This method is registered as an event listener on
+        :attr:`env.events.request`.
+
+        Parameters
+        ----------
+        *args : Any
+            Positional arguments forwarded from the Locust request event.
+        **kwargs : Any
+            Keyword arguments forwarded from the Locust request event,
+            typically including ``name``, ``response_time``, and
+            ``exception`` fields.
+        """
         self.requests.on_request(*args, **kwargs)
