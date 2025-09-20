@@ -16,7 +16,8 @@ WorkerLocustOtelRecorder
 """
 
 import logging
-from typing import Any
+
+from locust.env import Environment
 
 from locust_telemetry.common.clients import configure_otel
 from locust_telemetry.core.recorder import (
@@ -27,38 +28,22 @@ from locust_telemetry.core.recorder import (
 logger = logging.getLogger(__name__)
 
 
-class LocustOtelRecorderMixin:
+class BaseOtelRecorder:
+    """
+    Base class to initialize OpenTelemetry configuration.
 
-    def on_test_start(self, *args: Any, **kwargs: Any) -> None:
-        """
-        On test start configure otel and call the base
-        """
-        logger.info("[otel] Configuring otel on test start")
-        configure_otel(self.env)
-        super().on_test_start(*args, **kwargs)
+    Ensures that the OTLP exporter, meter provider, and metric readers
+    are configured before any Locust telemetry handlers are registered.
 
-    def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
-        """
-        Lifecycle hook for test stop.
-        De-registers metrics and shuts down the OpenTelemetry provider.
-        """
-        super().on_test_stop(*args, **kwargs)
-        provider = getattr(self.env, "otel_provider", None)
-        if not provider:
-            logger.warning("[otel] Otel metric provider never configured")
-            return
+    This class should be inherited alongside MasterTelemetryRecorder
+    or WorkerTelemetryRecorder.
+    """
 
-        try:
-            provider.shutdown()
-            logger.info("[otel] Otel provider shutdown successfully")
-        except Exception:
-            logger.exception("[otel] Otel provider failed to shutdown")
-            raise
-        finally:
-            del self.env.otel_provider
+    def __init__(self, env: Environment):
+        configure_otel(env)
 
 
-class MasterLocustOtelRecorder(LocustOtelRecorderMixin, MasterTelemetryRecorder):
+class MasterLocustOtelRecorder(BaseOtelRecorder, MasterTelemetryRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for the Locust master node.
 
@@ -69,10 +54,12 @@ class MasterLocustOtelRecorder(LocustOtelRecorderMixin, MasterTelemetryRecorder)
     and meter provider via ``configure_otel``.
     """
 
-    pass
+    def __init__(self, *args, **kwargs):
+        BaseOtelRecorder.__init__(self, env=kwargs.get("env"))
+        MasterTelemetryRecorder.__init__(self, *args, **kwargs)
 
 
-class WorkerLocustOtelRecorder(LocustOtelRecorderMixin, WorkerTelemetryRecorder):
+class WorkerLocustOtelRecorder(BaseOtelRecorder, WorkerTelemetryRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for Locust worker nodes.
 
@@ -84,7 +71,8 @@ class WorkerLocustOtelRecorder(LocustOtelRecorderMixin, WorkerTelemetryRecorder)
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        BaseOtelRecorder.__init__(self, env=kwargs.get("env"))
+        WorkerTelemetryRecorder.__init__(self, *args, **kwargs)
         self.env.events.request.add_listener(self.on_request)
 
     def on_request(self, *args, **kwargs):

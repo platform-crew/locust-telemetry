@@ -34,3 +34,5 @@ TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID = "stats-json"
 TELEMETRY_OTEL_RECORDER_PLUGIN_ID = "stats-otel"
 
 TELEMETRY_OTEL_METRICS_METER = "locust_telemetry"
+
+TELEMETRY_SERVICE_NAME: str = "locust_telemetry"

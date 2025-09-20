@@ -15,17 +15,9 @@ WorkerLocustJsonTelemetryRecorder
 
 import logging
 
-from locust.env import Environment
-
 from locust_telemetry.core.recorder import (
     MasterTelemetryRecorder,
     WorkerTelemetryRecorder,
-)
-from locust_telemetry.recorders.json.handlers import (
-    JsonTelemetryLifecycleHandler,
-    JsonTelemetryOutputHandler,
-    JsonTelemetryRequestHandler,
-    JsonTelemetrySystemMetricsHandler,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,35 +30,9 @@ class MasterLocustJsonTelemetryRecorder(MasterTelemetryRecorder):
     This class extends the base ``MasterTelemetryRecorder`` to provide
     JSON-based telemetry export. It sets up JSON-specific handlers for
     system metrics, request metrics, lifecycle events, and output handling.
-
-    Parameters
-    ----------
-    env : locust.env.Environment
-        The Locust environment object, providing runtime configuration
-        and access to parsed options.
-
-    Attributes
-    ----------
-    env : locust.env.Environment
-        Reference to the Locust environment.
     """
 
-    def __init__(self, env: Environment):
-        """
-        Initialize the master recorder with JSON telemetry handlers.
-
-        Parameters
-        ----------
-        env : locust.env.Environment
-            The Locust environment object.
-        """
-        super().__init__(
-            env,
-            output_handler_cls=JsonTelemetryOutputHandler,
-            lifecycle_handler_cls=JsonTelemetryLifecycleHandler,
-            system_handler_cls=JsonTelemetrySystemMetricsHandler,
-            requests_handler_cls=JsonTelemetryRequestHandler,
-        )
+    pass
 
 
 class WorkerLocustJsonTelemetryRecorder(WorkerTelemetryRecorder):
@@ -76,32 +42,6 @@ class WorkerLocustJsonTelemetryRecorder(WorkerTelemetryRecorder):
     This class extends the base ``WorkerTelemetryRecorder`` to provide
     JSON-based telemetry export. It sets up JSON-specific handlers for
     system metrics, request metrics, lifecycle events, and output handling.
-
-    Parameters
-    ----------
-    env : locust.env.Environment
-        The Locust environment object, providing runtime configuration
-        and access to parsed options.
-
-    Attributes
-    ----------
-    env : locust.env.Environment
-        Reference to the Locust environment.
     """
 
-    def __init__(self, env: Environment):
-        """
-        Initialize the worker recorder with JSON telemetry handlers.
-
-        Parameters
-        ----------
-        env : locust.env.Environment
-            The Locust environment object.
-        """
-        super().__init__(
-            env,
-            output_handler_cls=JsonTelemetryOutputHandler,
-            lifecycle_handler_cls=JsonTelemetryLifecycleHandler,
-            system_handler_cls=JsonTelemetrySystemMetricsHandler,
-            requests_handler_cls=JsonTelemetryRequestHandler,
-        )
+    pass

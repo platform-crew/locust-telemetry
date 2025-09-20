@@ -3,6 +3,8 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import psutil
+from locust.env import Environment
+from locust.runners import MasterRunner
 from opentelemetry.metrics import (
     Counter,
     Histogram,
@@ -196,8 +198,6 @@ def create_otel_counter(
         Human-readable description of the metric.
     unit : str, optional
         Unit of measurement (default is dimensionless "1").
-    callbacks : None
-        Counter doesn't accept callback. This has no effect.
 
     Returns
     -------
@@ -205,3 +205,11 @@ def create_otel_counter(
         Configured Counter instrument.
     """
     return meter.create_counter(name=name, description=description, unit=unit)
+
+
+def get_source_id(env: Environment) -> str:
+    return (
+        "master"
+        if isinstance(env.runner, MasterRunner)
+        else f"worker-{env.runner.worker_index}"
+    )

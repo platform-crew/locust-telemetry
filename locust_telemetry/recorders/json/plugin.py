@@ -21,6 +21,12 @@ from locust.env import Environment
 
 from locust_telemetry import config
 from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
+from locust_telemetry.recorders.json.handlers import (
+    JsonTelemetryLifecycleHandler,
+    JsonTelemetryOutputHandler,
+    JsonTelemetryRequestHandler,
+    JsonTelemetrySystemMetricsHandler,
+)
 from locust_telemetry.recorders.json.recorder import (
     MasterLocustJsonTelemetryRecorder,
     WorkerLocustJsonTelemetryRecorder,
@@ -73,7 +79,13 @@ class LocustJsonTelemetryRecorderPlugin(BaseTelemetryRecorderPlugin):
         **kwargs : Any
             Additional context passed by the TelemetryCoordinator.
         """
-        MasterLocustJsonTelemetryRecorder(env=environment)
+        MasterLocustJsonTelemetryRecorder(
+            env=environment,
+            output_handler_cls=JsonTelemetryOutputHandler,
+            lifecycle_handler_cls=JsonTelemetryLifecycleHandler,
+            system_handler_cls=JsonTelemetrySystemMetricsHandler,
+            requests_handler_cls=JsonTelemetryRequestHandler,
+        )
 
     def load_worker_telemetry_recorders(
         self, environment: Environment, **kwargs: Any
@@ -88,4 +100,10 @@ class LocustJsonTelemetryRecorderPlugin(BaseTelemetryRecorderPlugin):
         **kwargs : Any
             Additional context passed by the TelemetryCoordinator.
         """
-        WorkerLocustJsonTelemetryRecorder(env=environment)
+        WorkerLocustJsonTelemetryRecorder(
+            env=environment,
+            output_handler_cls=JsonTelemetryOutputHandler,
+            lifecycle_handler_cls=JsonTelemetryLifecycleHandler,
+            system_handler_cls=JsonTelemetrySystemMetricsHandler,
+            requests_handler_cls=JsonTelemetryRequestHandler,
+        )

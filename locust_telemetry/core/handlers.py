@@ -25,8 +25,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict
 
 from locust.env import Environment
-from locust.runners import MasterRunner
 
+from locust_telemetry.common import helpers as h
 from locust_telemetry.core.events import TelemetryEventsEnum, TelemetryMetricsEnum
 
 
@@ -65,11 +65,7 @@ class BaseOutputHandler(ABC):
             "run_id": self.env.telemetry_meta.run_id,
             "testplan": self.env.parsed_options.testplan,
             "source": self.env.runner.__class__.__name__,
-            "source_id": (
-                "master"
-                if isinstance(self.env.runner, MasterRunner)
-                else f"worker-{self.env.runner.worker_index}"
-            ),
+            "source_id": h.get_source_id(self.env),
         }
 
     @abstractmethod

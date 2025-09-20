@@ -5,8 +5,10 @@ from opentelemetry import metrics
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.sdk.resources import Resource
 
 from locust_telemetry import config
+from locust_telemetry.common import helpers as h
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,15 @@ def configure_otel(environment: Any) -> Any:
             - lt_otel_exporter_otlp_insecure : bool
             - lt_stats_recorder_interval : int (seconds)
     """
+
+    # Create service
+    resource = Resource.create(
+        {
+            "service.name": config.TELEMETRY_SERVICE_NAME,
+            "service.instance.id": h.get_source_id(environment),
+        }
+    )
+
     # Create the OTLP exporter gRPC
     exporter = OTLPMetricExporter(
         endpoint=environment.parsed_options.lt_otel_exporter_otlp_endpoint,  # gRPC
@@ -42,8 +53,7 @@ def configure_otel(environment: Any) -> Any:
     )
 
     # Set up the meter provider with the reader
-    provider = MeterProvider(metric_readers=[reader])
+    provider = MeterProvider(resource=resource, metric_readers=[reader])
     metrics.set_meter_provider(provider)
     environment.otel_meter = metrics.get_meter(config.TELEMETRY_OTEL_METRICS_METER)
-    environment.otel_provider = provider
     return environment.otel_meter
