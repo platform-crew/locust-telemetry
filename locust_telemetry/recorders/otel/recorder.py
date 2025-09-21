@@ -41,8 +41,6 @@ class MasterLocustOtelRecorder(MasterTelemetryRecorder):
     as a specialization hook for future master-specific behavior.
     """
 
-    pass
-
 
 class WorkerLocustOtelRecorder(WorkerTelemetryRecorder):
     """

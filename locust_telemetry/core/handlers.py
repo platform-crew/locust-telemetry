@@ -136,27 +136,23 @@ class BaseLifecycleHandler:
 
     def on_test_start(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when a Locust test starts."""
-        self.output.record_event(
-            TelemetryEventsEnum.TEST_START,
-            *args,
-            **kwargs,
-        )
+        self.output.record_event(TelemetryEventsEnum.TEST_START)
 
     def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when a Locust test stops."""
-        self.output.record_event(
-            TelemetryEventsEnum.TEST_STOP,
-            *args,
-            **kwargs,
-        )
+        self.output.record_event(TelemetryEventsEnum.TEST_STOP)
 
     def on_spawning_complete(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when all users have been spawned."""
-        self.output.record_event(TelemetryEventsEnum.SPAWNING_COMPLETE, *args, **kwargs)
+        self.output.record_event(
+            TelemetryEventsEnum.SPAWNING_COMPLETE, user_count=kwargs.get("user_count")
+        )
 
     def on_cpu_warning(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when Locust raises a CPU usage warning."""
-        self.output.record_event(TelemetryEventsEnum.CPU_WARNING, *args, **kwargs)
+        self.output.record_event(
+            TelemetryEventsEnum.CPU_WARNING, cpu_usage=kwargs.get("cpu_usage")
+        )
 
 
 class BaseRequestHandler(ABC):

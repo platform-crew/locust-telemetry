@@ -825,7 +825,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "max(locust_tl_user_metric_count_ratio{run_id=~\"$run_id\", testplan=~\"$testplan\"})",
+          "expr": "max(locust_tl_user_metric_count_ratio{})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -966,7 +966,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(rate(locust_tl_request_metric_success_milliseconds_count{}[$__rate_interval]))",
+          "expr": "sum(rate(locust_tl_request_metric_success_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -982,7 +982,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(rate(locust_tl_request_metric_error_milliseconds_count{}[$__rate_interval]))",
+          "expr": "sum(rate(locust_tl_request_metric_error_milliseconds_count{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -1357,7 +1357,7 @@
             "uid": "feycujmeqsp34b"
           },
           "editorMode": "code",
-          "expr": "sum by (endpoint) (\n  rate(locust_tl_request_metric_success_milliseconds_sum[$__rate_interval])\n)",
+          "expr": "sum by (endpoint) (\n  rate(locust_tl_request_metric_success_milliseconds_sum{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])\n)",
           "instant": false,
           "legendFormat": "{{endpoint}}",
           "range": true,
@@ -1455,7 +1455,7 @@
             "uid": "feycujmeqsp34b"
           },
           "editorMode": "code",
-          "expr": "sum by (endpoint)(\n  rate(locust_tl_request_metric_error_milliseconds_sum[$__rate_interval])\n)",
+          "expr": "sum by (endpoint)(\n  rate(locust_tl_request_metric_error_milliseconds_sum{run_id=~\"$run_id\", testplan=~\"$testplan\"}[$__rate_interval])\n)",
           "instant": false,
           "legendFormat": "{{endpoint}} - {{run_id}}",
           "range": true,
@@ -1739,7 +1739,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 14,
+        "h": 12,
         "w": 8,
         "x": 0,
         "y": 51
@@ -1785,6 +1785,312 @@
         "type": "prometheus",
         "uid": "feycujmeqsp34b"
       },
+      "description": "Total Tests",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 51
+      },
+      "id": 32,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "editorMode": "code",
+          "expr": "count(locust_tl_event_test_events_total{event=\"locust.tl.event.test.start\"})",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Total Tests",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Memory Usage of master and worker nodes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 8,
+        "x": 16,
+        "y": 51
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum by (source_id) (locust_tl_system_metric_mem_bytes{})",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "{{source_id}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Memory Usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Active Load Tests",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 55
+      },
+      "id": 29,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "editorMode": "code",
+          "expr": "sum(locust_tl_event_test_events_total{event=\"locust.tl.event.test.start\"}) - sum(locust_tl_event_test_events_total{event=\"locust.tl.event.test.stop\"})",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Active Load Tests",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Total CPU Warnings ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-orange"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 55
+      },
+      "id": 30,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "editorMode": "code",
+          "expr": "count(locust_tl_event_test_events_total{event=\"locust.tl.event.cpu.warning\"})",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Total CPU Warnings ",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
       "description": "Max Memory Usage",
       "fieldConfig": {
         "defaults": {
@@ -1805,7 +2111,7 @@
         "h": 7,
         "w": 4,
         "x": 8,
-        "y": 51
+        "y": 59
       },
       "id": 23,
       "options": {
@@ -1882,7 +2188,7 @@
         "h": 7,
         "w": 4,
         "x": 12,
-        "y": 51
+        "y": 59
       },
       "id": 14,
       "options": {
@@ -1918,246 +2224,6 @@
         }
       ],
       "title": "Max CPU Usage",
-      "transformations": [
-        {
-          "id": "reduce",
-          "options": {}
-        }
-      ],
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "feycujmeqsp34b"
-      },
-      "description": "Memory Usage of master and worker nodes",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 14,
-        "w": 8,
-        "x": 16,
-        "y": 51
-      },
-      "id": 4,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "feycujmeqsp34b"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum by (source_id) (locust_tl_system_metric_mem_bytes{})",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "{{source_id}}",
-          "range": true,
-          "refId": "A",
-          "useBackend": false
-        }
-      ],
-      "title": "Memory Usage",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "feycujmeqsp34b"
-      },
-      "description": "Network Usage",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "super-light-blue"
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 4,
-        "x": 8,
-        "y": 58
-      },
-      "id": 15,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [],
-          "fields": "",
-          "values": true
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "feycujmeqsp34b"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_network_bytes{direction=\"sent\"}[$__rate_interval]))",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A",
-          "useBackend": false
-        }
-      ],
-      "title": "Network Usage - Sent",
-      "transformations": [
-        {
-          "id": "reduce",
-          "options": {}
-        }
-      ],
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "feycujmeqsp34b"
-      },
-      "description": "Network Usage - Received",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "super-light-purple"
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 4,
-        "x": 12,
-        "y": 58
-      },
-      "id": 27,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [],
-          "fields": "",
-          "values": true
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "12.0.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "feycujmeqsp34b"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_network_bytes{direction=\"recv\"}[$__rate_interval]))",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A",
-          "useBackend": false
-        }
-      ],
-      "title": "Network Usage - Received",
       "transformations": [
         {
           "id": "reduce",
@@ -2229,9 +2295,9 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 12,
+        "w": 8,
         "x": 0,
-        "y": 65
+        "y": 63
       },
       "id": 9,
       "options": {
@@ -2332,9 +2398,9 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 12,
-        "x": 12,
-        "y": 65
+        "w": 8,
+        "x": 16,
+        "y": 63
       },
       "id": 28,
       "options": {
@@ -2371,6 +2437,144 @@
       ],
       "title": "Network Bytes Received",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Network Usage",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-blue"
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 8,
+        "y": 66
+      },
+      "id": 15,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_network_bytes{direction=\"sent\"}[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Network Usage - Sent",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {}
+        }
+      ],
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "feycujmeqsp34b"
+      },
+      "description": "Network Usage - Received",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-purple"
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 12,
+        "y": 66
+      },
+      "id": 27,
+      "options": {
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto"
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "feycujmeqsp34b"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum by(source_id) (last_over_time(locust_tl_system_metric_network_bytes{direction=\"recv\"}[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Network Usage - Received",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {}
+        }
+      ],
+      "type": "gauge"
     }
   ],
   "preload": false,
@@ -2387,7 +2591,7 @@
           "type": "prometheus",
           "uid": "feycujmeqsp34b"
         },
-        "definition": "label_values(locust_tl_locust_event_test_total,run_id)",
+        "definition": "label_values(locust_tl_event_test_events_total,run_id)",
         "description": "Test Run ID",
         "includeAll": true,
         "label": "Run Id",
@@ -2395,7 +2599,7 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(locust_tl_locust_event_test_total,run_id)",
+          "query": "label_values(locust_tl_event_test_events_total,run_id)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
@@ -2404,14 +2608,14 @@
       },
       {
         "current": {
-          "text": "myappn",
-          "value": "myappn"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "feycujmeqsp34b"
         },
-        "definition": "label_values(locust_tl_locust_event_test_total,testplan)",
+        "definition": "label_values(locust_tl_event_test_events_total,testplan)",
         "description": "Test Plan",
         "includeAll": true,
         "label": "Test Plan",
@@ -2419,7 +2623,7 @@
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(locust_tl_locust_event_test_total,testplan)",
+          "query": "label_values(locust_tl_event_test_events_total,testplan)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
@@ -2429,12 +2633,12 @@
     ]
   },
   "time": {
-    "from": "2025-09-19T08:05:50.513Z",
-    "to": "2025-09-19T08:07:20.390Z"
+    "from": "now-3h",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Locust Requests Dashboard (stats-otel plugin)",
   "uid": "d89a9144-92a1-4a5c-a96f-65b31b6a1c09",
-  "version": 164
+  "version": 183
 }

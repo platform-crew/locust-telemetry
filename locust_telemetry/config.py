@@ -7,6 +7,10 @@ DEFAULT_STATS_RECORDER_INTERVAL : int
     Default interval in seconds for recording telemetry stats. The default is `3`
     seconds but may be overridden by configuration or environment variables.
 
+DEFAULT_TELEMETRY_LOG_LEVEL: str
+    Log level for locus_telemetry, please note for stats-json to work, log level
+    should be minimum info, because stats-json uses logs to parse statistics.
+
 DEFAULT_ENVIRONMENT_METADATA : dict[str, Callable]
     Dictionary of environment metadata providers. Each key is a metadata field name,
     and each value is a callable that produces the metadata value. For example,
@@ -37,13 +41,17 @@ from typing import Callable, Dict
 #: Default interval (in seconds) for telemetry stats recording.
 DEFAULT_STATS_RECORDER_INTERVAL: int = 3
 
-#: Configuration CLI group to add all the necessary arguments.
-TELEMETRY_CLI_GROUP_NAME: str = "locust-telemetry"
+# Log level for locus_telemetry, please note for stats-json to work
+# log level should be minimum info, because stats-json uses logs to parse statistics.
+DEFAULT_TELEMETRY_LOG_LEVEL: str = "info"
 
 #: Environment metadata providers, accessed as `environment.<metadata>`.
 DEFAULT_ENVIRONMENT_METADATA: Dict[str, Callable[[], str]] = {
     "run_id": lambda: str(uuid.uuid4())[:8]  # first 8 characters of UUID
 }
+
+#: Configuration CLI group to add all the necessary arguments.
+TELEMETRY_CLI_GROUP_NAME: str = "locust-telemetry"
 
 #: Plugin identifier for the JSON stats recorder.
 TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID: str = "stats-json"

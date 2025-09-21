@@ -103,9 +103,19 @@ class TelemetryCoordinator:
         group = register_telemetry_cli_args(parser)
         self.recorder_plugin_manager.register_plugin_clis(group)
 
-    def _configure_logging(self, *args: Any, **kwargs: Any) -> None:
-        """Register the logging configuration"""
-        configure_logging()
+    def _configure_logging(self, environment: Environment, **kwargs: Any) -> None:
+        """
+        Register the logging configuration
+
+         Parameters
+        ----------
+        environment : Environment
+            The Locust environment instance.
+        **kwargs : Any
+            Additional event system arguments (unused).
+        """
+        log_level = environment.parsed_options.lt_log_level
+        configure_logging(log_level)
 
     def _register_metadata_handler(
         self, environment: Environment, **kwargs: Any

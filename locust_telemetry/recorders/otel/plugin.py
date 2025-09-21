@@ -155,9 +155,9 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
         """
         try:
             configure_otel(environment)
+            logger.info("[otel] OpenTelemetry configuration loaded successfully.")
         except Exception as e:
             raise OtelConfigurationError(
                 "[otel] Something went wrong while configuring otel"
             ) from e
-        logger.info("[otel] OpenTelemetry configuration loaded successfully.")
         super().load(environment, **kwargs)

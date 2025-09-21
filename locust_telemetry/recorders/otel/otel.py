@@ -1,6 +1,5 @@
 import logging
-from dataclasses import dataclass
-from typing import Any, Callable, List, Optional
+from typing import Any, List
 
 from opentelemetry import metrics
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
@@ -14,31 +13,6 @@ from locust_telemetry.core.events import TelemetryEventsEnum, TelemetryMetricsEn
 from locust_telemetry.recorders.otel.exceptions import OtelMetricAlreadyRegisteredError
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True)
-class InstrumentSpec:
-    """
-    Specification for creating an OpenTelemetry metric instrument.
-
-    Attributes
-    ----------
-    metric : TelemetryEventsEnum | TelemetryMetricsEnum
-        The metric identifier, typically an enum representing a telemetry
-        event or metric.
-    unit : str
-        The unit of measurement (e.g., "ms", "bytes", "1").
-    factory : Callable
-        A factory function responsible for creating the instrument.
-        Expected signature matches OpenTelemetry meter instrument constructors.
-    callbacks : Optional[List[Callable]]
-        Optional list of callback functions for observable instruments.
-    """
-
-    metric: TelemetryEventsEnum | TelemetryMetricsEnum
-    unit: str
-    factory: Callable
-    callbacks: Optional[List[Callable]] = None
 
 
 class InstrumentRegistry:
@@ -63,7 +37,7 @@ class InstrumentRegistry:
         ] = {}
         self.meter = meter
 
-    def extend(self, items: List[InstrumentSpec]) -> None:
+    def extend(self, items: List[h.InstrumentSpec]) -> None:
         """
         Register multiple metric instruments in the registry.
 
@@ -94,7 +68,7 @@ class InstrumentRegistry:
                 logger.debug(f"[otel] Registered metric: {spec.metric.value}")
             except Exception:
                 logger.exception(
-                    f"[otel] Failed to register metric: {spec.metric.value}"
+                    f"[otel] Failed to create instrument: {spec.metric.value}"
                 )
 
     def get(self, key: TelemetryEventsEnum | TelemetryMetricsEnum) -> h.InstrumentType:

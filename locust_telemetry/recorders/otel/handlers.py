@@ -3,7 +3,7 @@ OpenTelemetry handlers for Locust.
 
 This module provides handler implementations for lifecycle events, system
 metrics, request metrics, and output in the context of OpenTelemetry.
-These handlers are used by the OTEL recorders for both master and worker
+These handlers are used by OTEL recorders for both master and worker
 nodes to collect and export telemetry data to an OTLP endpoint.
 
 Classes
@@ -66,7 +66,7 @@ class OtelOutputHandler(BaseOutputHandler):
         self, tl_type: TelemetryEventsEnum, *args: Any, **kwargs: Any
     ) -> None:
         """
-        Record a lifecycle event as a counter data point.
+        Record a lifecycle event as a counter with event type as attribute.
 
         Parameters
         ----------
@@ -79,11 +79,12 @@ class OtelOutputHandler(BaseOutputHandler):
         """
         context = self.get_context(active=True)
         instrument = self.env.otel_registry.get(TelemetryEventsEnum.TEST)
-
         if not instrument:
-            logger.error("[otel] Event metric not registered: %s", tl_type.value)
+            logger.error(
+                "[otel] Event metric not registered: %s", TelemetryEventsEnum.TEST.value
+            )
             raise OtelMetricNotRegisteredError(
-                f"Metric not registered: {tl_type.value}"
+                f"Metric not registered: {TelemetryEventsEnum.TEST.value}"
             )
 
         instrument.add(1, attributes={"event": tl_type.value, **context, **kwargs})
@@ -114,8 +115,7 @@ class OtelOutputHandler(BaseOutputHandler):
             )
 
         instrument.record(
-            args[0],
-            attributes={"metric": tl_type.value, **context, **kwargs},
+            args[0], attributes={"metric": tl_type.value, **context, **kwargs}
         )
 
 
@@ -128,6 +128,16 @@ class OtelLifecycleHandler(BaseLifecycleHandler):
     """
 
     def __init__(self, output: OtelOutputHandler, env: Environment):
+        """
+        Initialize the lifecycle handler and register instruments.
+
+        Parameters
+        ----------
+        output : OtelOutputHandler
+            The OTEL output handler for recording metrics.
+        env : Environment
+            Locust Environment instance.
+        """
         super().__init__(output, env)
         self.output: OtelOutputHandler = output
         self.register_instruments()
@@ -140,24 +150,20 @@ class OtelLifecycleHandler(BaseLifecycleHandler):
         -----
         Instruments begin collecting data immediately upon registration.
         """
-        self.env.otel_registry.extend(
-            [
-                # Test lifecycle events as counters
-                (
-                    TelemetryEventsEnum.TEST,
-                    "1",
-                    h.create_otel_counter,
-                    None,
-                ),
-                # Active user count as an observable gauge
-                (
-                    TelemetryMetricsEnum.USER,
-                    "1",
-                    h.create_otel_observable_gauge,
-                    [self._user_count_callback],
-                ),
-            ]
-        )
+        specs = [
+            h.InstrumentSpec(
+                metric=TelemetryEventsEnum.TEST,
+                unit="1",
+                factory=h.create_otel_counter,
+            ),
+            h.InstrumentSpec(
+                metric=TelemetryMetricsEnum.USER,
+                unit="1",
+                factory=h.create_otel_observable_gauge,
+                callbacks=[self._user_count_callback],
+            ),
+        ]
+        self.env.otel_registry.extend(specs)
         logger.info("[otel] Registered lifecycle metrics successfully.")
 
     def _user_count_callback(self, options=None) -> List[Observation]:
@@ -206,39 +212,28 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
         psutil is "warmed up" to avoid the first-call zero-value issue.
         """
         h.warmup_psutil(self._process)
-        self.env.otel_registry.extend(
-            [
-                (
-                    TelemetryMetricsEnum.NETWORK,
-                    "By",
-                    h.create_otel_observable_gauge,
-                    [self._network_usage_callback],
-                ),
-                (
-                    TelemetryMetricsEnum.MEMORY,
-                    "By",
-                    h.create_otel_observable_gauge,
-                    [self._memory_usage_callback],
-                ),
-                (
-                    TelemetryMetricsEnum.CPU,
-                    "%",
-                    h.create_otel_observable_gauge,
-                    [self._cpu_usage_callback],
-                ),
-            ]
-        )
+        specs = [
+            h.InstrumentSpec(
+                metric=TelemetryMetricsEnum.NETWORK,
+                unit="By",
+                factory=h.create_otel_observable_gauge,
+                callbacks=[self._network_usage_callback],
+            ),
+            h.InstrumentSpec(
+                metric=TelemetryMetricsEnum.MEMORY,
+                unit="By",
+                factory=h.create_otel_observable_gauge,
+                callbacks=[self._memory_usage_callback],
+            ),
+            h.InstrumentSpec(
+                metric=TelemetryMetricsEnum.CPU,
+                unit="%",
+                factory=h.create_otel_observable_gauge,
+                callbacks=[self._cpu_usage_callback],
+            ),
+        ]
+        self.env.otel_registry.extend(specs)
         logger.info("[otel] Registered system metrics successfully.")
-
-    def start(self) -> None:
-        """
-        Start system metrics collection (no-op, provided for interface compliance).
-        """
-
-    def stop(self) -> None:
-        """
-        Stop system metrics collection (no-op, provided for interface compliance).
-        """
 
     def _network_usage_callback(self, options=None) -> List[Observation]:
         """
@@ -279,6 +274,16 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
         """
         return [Observation(self._process.cpu_percent(), self.output.get_context())]
 
+    def start(self) -> None:
+        """
+        Start request metrics collection (no-op, provided for interface compliance).
+        """
+
+    def stop(self) -> None:
+        """
+        Stop request metrics collection (no-op, provided for interface compliance).
+        """
+
 
 class OtelRequestHandler(BaseRequestHandler):
     """
@@ -311,33 +316,20 @@ class OtelRequestHandler(BaseRequestHandler):
         -----
         Instruments begin collecting data immediately upon registration.
         """
-        self.env.otel_registry.extend(
-            [
-                (
-                    TelemetryMetricsEnum.REQUEST_SUCCESS,
-                    "ms",
-                    h.create_otel_histogram,
-                    None,
-                ),
-                (
-                    TelemetryMetricsEnum.REQUEST_ERROR,
-                    "ms",
-                    h.create_otel_histogram,
-                    None,
-                ),
-            ]
-        )
+        specs = [
+            h.InstrumentSpec(
+                metric=TelemetryMetricsEnum.REQUEST_SUCCESS,
+                unit="ms",
+                factory=h.create_otel_histogram,
+            ),
+            h.InstrumentSpec(
+                metric=TelemetryMetricsEnum.REQUEST_ERROR,
+                unit="ms",
+                factory=h.create_otel_histogram,
+            ),
+        ]
+        self.env.otel_registry.extend(specs)
         logger.info("[otel] Registered request metrics successfully.")
-
-    def start(self) -> None:
-        """
-        Start request metrics collection (no-op, provided for interface compliance).
-        """
-
-    def stop(self) -> None:
-        """
-        Stop request metrics collection (no-op, provided for interface compliance).
-        """
 
     def on_request(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -365,3 +357,13 @@ class OtelRequestHandler(BaseRequestHandler):
             endpoint=kwargs.get("name"),
             status_code=response.status_code if response else 500,
         )
+
+    def start(self) -> None:
+        """
+        Start request metrics collection (no-op, provided for interface compliance).
+        """
+
+    def stop(self) -> None:
+        """
+        Stop request metrics collection (no-op, provided for interface compliance).
+        """

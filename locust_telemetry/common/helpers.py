@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import logging
 import time
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -15,11 +18,37 @@ from opentelemetry.metrics import (
     ObservableUpDownCounter,
 )
 
+logger = logging.getLogger(__name__)
+
+
 InstrumentType = Union[
     Counter, Histogram, ObservableGauge, ObservableCounter, ObservableUpDownCounter
 ]
 
-logger = logging.getLogger(__name__)
+
+@dataclass(frozen=True)
+class InstrumentSpec:
+    """
+    Specification for creating an OpenTelemetry metric instrument.
+
+    Attributes
+    ----------
+    metric : TelemetryEventsEnum | TelemetryMetricsEnum
+        The metric identifier, typically an enum representing a telemetry
+        event or metric.
+    unit : str
+        The unit of measurement (e.g., "ms", "bytes", "1").
+    factory : Callable
+        A factory function responsible for creating the instrument.
+        Expected signature matches OpenTelemetry meter instrument constructors.
+    callbacks : Optional[List[Callable]]
+        Optional list of callback functions for observable instruments.
+    """
+
+    metric: "TelemetryEventsEnum | TelemetryMetricsEnum"  # noqa: F821
+    unit: str
+    factory: Callable
+    callbacks: Optional[List[Callable]] = None
 
 
 def warmup_psutil(process: psutil.Process) -> None:
@@ -211,6 +240,21 @@ def create_otel_counter(
 
 
 def get_source_id(env: Environment) -> str:
+    """
+    Get source if of the current runner. If its master then it returns as 'master'
+    and for workers - it will return as 'worker-<index>'
+
+    Parameters
+    ----------
+    env : Environment
+        Locust environment
+
+    Returns
+    -------
+    str
+        If its master then it returns as 'master' and for workers -
+        it will return as 'worker-<index>'
+    """
     return (
         "master"
         if isinstance(env.runner, MasterRunner)

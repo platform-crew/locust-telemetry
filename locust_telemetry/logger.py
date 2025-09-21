@@ -59,49 +59,45 @@ class RFC3339JsonFormatter(JsonFormatter):
 # Logging Configuration
 # -------------------------------
 
-LOG_LEVEL = "INFO"
 
-LOGGING_CONFIG = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "json": {
-            "()": RFC3339JsonFormatter,
-            "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
-            "rename_fields": {"asctime": "time", "levelname": "level"},
-            "json_indent": None,
-        }
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "json",
-            "level": LOG_LEVEL,
-        },
-        "null": {
-            "class": "logging.NullHandler",
-            "level": LOG_LEVEL,
-        },
-    },
-    "root": {
-        "handlers": ["null"],
-        "level": "WARNING",
-    },
-    "loggers": {
-        "locust_telemetry": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
-    },
-}
-
-
-def configure_logging():
+def configure_logging(level: str = "INFO"):
     """
     Apply the logging configuration to the Python logging system.
 
-    Sets up JSON logging for `locust_telemetry` and disables output
-    from the root logger.
+    Parameters
+    ----------
+    level : str
+        Log level for the telemetry logger (e.g. "DEBUG", "INFO", "WARNING").
     """
-    logging.config.dictConfig(LOGGING_CONFIG)
+    config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "json": {
+                "()": RFC3339JsonFormatter,
+                "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
+                "rename_fields": {"asctime": "time", "levelname": "level"},
+                "json_indent": None,
+            }
+        },
+        "handlers": {
+            "telemetry_console": {
+                "class": "logging.StreamHandler",
+                "formatter": "json",
+                "level": level.upper(),
+            },
+            "null": {
+                "class": "logging.NullHandler",
+                "level": level.upper(),
+            },
+        },
+        "loggers": {
+            "locust_telemetry": {
+                "handlers": ["telemetry_console"],
+                "level": level.upper(),
+                "propagate": False,
+            },
+        },
+    }
+
+    logging.config.dictConfig(config)

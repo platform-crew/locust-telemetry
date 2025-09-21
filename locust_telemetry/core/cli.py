@@ -12,6 +12,7 @@ from locust.argument_parser import LocustArgumentParser
 
 from locust_telemetry.config import (
     DEFAULT_STATS_RECORDER_INTERVAL,
+    DEFAULT_TELEMETRY_LOG_LEVEL,
     TELEMETRY_CLI_GROUP_NAME,
     TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID,
     TELEMETRY_OTEL_RECORDER_PLUGIN_ID,
@@ -73,6 +74,16 @@ def register_telemetry_cli_args(parser: LocustArgumentParser):
         help="Interval (in seconds) for telemetry statistics recorder updates.",
         env_var="LOCUST_TELEMETRY_STATS_RECORDER_INTERVAL",
         default=DEFAULT_STATS_RECORDER_INTERVAL,
+    )
+
+    group.add_argument(
+        "--lt-log-level",
+        type=str,
+        help="Log level for locus_telemetry, please note for stats-json to work, "
+        "log level should be minimum info, because stats-json uses logs to "
+        "parse statistics.",
+        env_var="LOCUST_TELEMETRY_LOG_LEVEL",
+        default=DEFAULT_TELEMETRY_LOG_LEVEL,
     )
 
     return group
