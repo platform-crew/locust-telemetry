@@ -18,10 +18,12 @@ from typing import Any, Dict
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
 
+from locust_telemetry.core.exceptions import RecorderPluginError
+
 logger = logging.getLogger(__name__)
 
 
-class BaseTelemetryRecorderPlugin(ABC):
+class BaseRecorderPlugin(ABC):
     """
     Abstract base class for all telemetry recorder plugins.
 
@@ -58,9 +60,7 @@ class BaseTelemetryRecorderPlugin(ABC):
         """
 
     @abstractmethod
-    def load_master_telemetry_recorders(
-        self, environment: Environment, **kwargs: Any
-    ) -> None:
+    def load_master_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """
         Register telemetry recorders that should run on the master process.
 
@@ -75,9 +75,7 @@ class BaseTelemetryRecorderPlugin(ABC):
         """
 
     @abstractmethod
-    def load_worker_telemetry_recorders(
-        self, environment: Environment, **kwargs: Any
-    ) -> None:
+    def load_worker_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """
         Register telemetry recorders that should run on each worker process.
 
@@ -95,7 +93,7 @@ class BaseTelemetryRecorderPlugin(ABC):
         """
         Entry point for recorder plugin initialization.
 
-        Automatically invoked by ``TelemetryRecorderPluginManager`` during
+        Automatically invoked by ``RecorderPluginManager`` during
         Locust's init phase. Dispatches to the correct recorder registration
         method depending on runner type.
 
@@ -107,7 +105,9 @@ class BaseTelemetryRecorderPlugin(ABC):
             Additional context passed by the coordinator or event system.
         """
         if self.RECORDER_PLUGIN_ID is None:
-            raise RuntimeError("Recorder plugin not configured appropriately.")
+            raise RecorderPluginError(
+                "Recorder plugin should have RECORDER_PLUGIN_ID attribute."
+            )
 
         if isinstance(environment.runner, MasterRunner):
             self.load_master_telemetry_recorders(environment, **kwargs)

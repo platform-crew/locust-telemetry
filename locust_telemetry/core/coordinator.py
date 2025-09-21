@@ -5,7 +5,7 @@ Responsibilities
 ----------------
 - Setup and propagate test metadata between master and workers.
 - Register worker message handlers to receive metadata from master.
-- Load telemetry recorders via ``TelemetryRecorderPluginManager``.
+- Load telemetry recorders via ``RecorderPluginManager``.
 - Ensure singleton initialization (one Coordinator per process).
 """
 
@@ -20,7 +20,7 @@ from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
 
 from locust_telemetry.core.cli import register_telemetry_cli_args
-from locust_telemetry.core.manager import TelemetryRecorderPluginManager
+from locust_telemetry.core.manager import RecorderPluginManager
 from locust_telemetry.logger import configure_logging
 from locust_telemetry.metadata import set_test_metadata
 
@@ -35,7 +35,7 @@ class TelemetryCoordinator:
     ----------------
     - Setup and propagate test metadata between master and workers.
     - Register worker message handlers to receive metadata from master.
-    - Load telemetry recorders via ``TelemetryRecorderPluginManager``.
+    - Load telemetry recorders via ``RecorderPluginManager``.
     - Ensure singleton initialization (one coordinator per process).
     """
 
@@ -48,17 +48,17 @@ class TelemetryCoordinator:
             logger.debug("[TelemetryCoordinator] Creating singleton instance")
         return cls._instance
 
-    def __init__(self, recorder_plugin_manager: TelemetryRecorderPluginManager):
+    def __init__(self, recorder_plugin_manager: RecorderPluginManager):
         """
         Initialize the coordinator with a recorder manager.
 
         Parameters
         ----------
-        recorder_plugin_manager : TelemetryRecorderPluginManager
+        recorder_plugin_manager : RecorderPluginManager
             Manager responsible for registering and loading telemetry recorders.
         """
         self.recorder_plugin_manager = (
-            recorder_plugin_manager or TelemetryRecorderPluginManager()
+            recorder_plugin_manager or RecorderPluginManager()
         )
 
     def initialize(self) -> None:

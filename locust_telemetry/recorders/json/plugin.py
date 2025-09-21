@@ -2,7 +2,7 @@
 Locust Telemetry Recorder Plugin
 --------------------------------
 
-This module defines the `LocustJsonTelemetryRecorderPlugin`, which integrates
+This module defines the `LocustJsonRecorderPlugin`, which integrates
 telemetry recording into Locust runs. It initializes master and
 worker telemetry recorders to capture lifecycle events, request
 statistics, and worker system metrics.
@@ -11,7 +11,7 @@ Responsibilities
 ----------------
 - Register CLI arguments for telemetry configuration.
 - Register master and worker telemetry recorders.
-- Initialize telemetry via TelemetryRecorderPluginManager.
+- Initialize telemetry via RecorderPluginManager.
 """
 
 import logging
@@ -20,7 +20,7 @@ from typing import Any, Dict
 from locust.env import Environment
 
 from locust_telemetry import config
-from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
+from locust_telemetry.core.plugin import BaseRecorderPlugin
 from locust_telemetry.recorders.json.handlers import (
     JsonTelemetryLifecycleHandler,
     JsonTelemetryOutputHandler,
@@ -28,14 +28,14 @@ from locust_telemetry.recorders.json.handlers import (
     JsonTelemetrySystemMetricsHandler,
 )
 from locust_telemetry.recorders.json.recorder import (
-    MasterLocustJsonTelemetryRecorder,
-    WorkerLocustJsonTelemetryRecorder,
+    LocustJsonMasterNodeRecorder,
+    LocustJsonWorkerNodeRecorder,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class LocustJsonTelemetryRecorderPlugin(BaseTelemetryRecorderPlugin):
+class LocustJsonRecorderPlugin(BaseRecorderPlugin):
     """
     Core telemetry recorder plugin for Locust.
 
@@ -66,9 +66,7 @@ class LocustJsonTelemetryRecorderPlugin(BaseTelemetryRecorderPlugin):
         """
         pass
 
-    def load_master_telemetry_recorders(
-        self, environment: Environment, **kwargs: Any
-    ) -> None:
+    def load_master_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """
         Register the master-side telemetry recorder(s).
 
@@ -79,7 +77,7 @@ class LocustJsonTelemetryRecorderPlugin(BaseTelemetryRecorderPlugin):
         **kwargs : Any
             Additional context passed by the TelemetryCoordinator.
         """
-        MasterLocustJsonTelemetryRecorder(
+        LocustJsonMasterNodeRecorder(
             env=environment,
             output_handler_cls=JsonTelemetryOutputHandler,
             lifecycle_handler_cls=JsonTelemetryLifecycleHandler,
@@ -87,9 +85,7 @@ class LocustJsonTelemetryRecorderPlugin(BaseTelemetryRecorderPlugin):
             requests_handler_cls=JsonTelemetryRequestHandler,
         )
 
-    def load_worker_telemetry_recorders(
-        self, environment: Environment, **kwargs: Any
-    ) -> None:
+    def load_worker_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """
         Register the worker-side telemetry recorder(s).
 
@@ -100,7 +96,7 @@ class LocustJsonTelemetryRecorderPlugin(BaseTelemetryRecorderPlugin):
         **kwargs : Any
             Additional context passed by the TelemetryCoordinator.
         """
-        WorkerLocustJsonTelemetryRecorder(
+        LocustJsonWorkerNodeRecorder(
             env=environment,
             output_handler_cls=JsonTelemetryOutputHandler,
             lifecycle_handler_cls=JsonTelemetryLifecycleHandler,

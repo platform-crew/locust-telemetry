@@ -4,8 +4,7 @@ from typing import Any, Dict
 from locust.env import Environment
 
 from locust_telemetry import config
-from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
-from locust_telemetry.recorders.otel.exceptions import OtelConfigurationError
+from locust_telemetry.core.plugin import BaseRecorderPlugin
 from locust_telemetry.recorders.otel.handlers import (
     OtelLifecycleHandler,
     OtelOutputHandler,
@@ -14,14 +13,14 @@ from locust_telemetry.recorders.otel.handlers import (
 )
 from locust_telemetry.recorders.otel.otel import configure_otel
 from locust_telemetry.recorders.otel.recorder import (
-    MasterLocustOtelRecorder,
-    WorkerLocustOtelRecorder,
+    LocustOtelMasterNodeRecorder,
+    LocustOtelWorkerNodeRecorder,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
+class LocustOtelRecorderPlugin(BaseRecorderPlugin):
     """
     OpenTelemetry Recorder Plugin for Locust.
 
@@ -37,8 +36,8 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
 
     Notes
     -----
-    - Master node uses :class:`MasterLocustOtelRecorder`.
-    - Worker nodes use :class:`WorkerLocustOtelRecorder`.
+    - Master node uses :class:`LocustOtelMasterNodeRecorder`.
+    - Worker nodes use :class:`LocustOtelWorkerNodeRecorder`.
     - Exporter configuration can be provided via CLI or environment variables.
     """
 
@@ -98,9 +97,7 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
             default=True,
         )
 
-    def load_master_telemetry_recorders(
-        self, environment: Environment, **kwargs: Any
-    ) -> None:
+    def load_master_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """
         Initialize and load the OTel recorder for the master node.
 
@@ -111,7 +108,7 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
         **kwargs : Any
             Additional plugin arguments.
         """
-        MasterLocustOtelRecorder(
+        LocustOtelMasterNodeRecorder(
             env=environment,
             output_handler_cls=OtelOutputHandler,
             lifecycle_handler_cls=OtelLifecycleHandler,
@@ -120,9 +117,7 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
         )
         logger.debug("[otel] Master OTel recorder initialized.")
 
-    def load_worker_telemetry_recorders(
-        self, environment: Environment, **kwargs: Any
-    ) -> None:
+    def load_worker_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """
         Initialize and load the OTel recorder for worker nodes.
 
@@ -133,7 +128,7 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
         **kwargs : Any
             Additional plugin arguments.
         """
-        WorkerLocustOtelRecorder(
+        LocustOtelWorkerNodeRecorder(
             env=environment,
             output_handler_cls=OtelOutputHandler,
             lifecycle_handler_cls=OtelLifecycleHandler,
@@ -153,11 +148,6 @@ class LocustOtelRecorderPlugin(BaseTelemetryRecorderPlugin):
         **kwargs : Any
             Additional plugin arguments.
         """
-        try:
-            configure_otel(environment)
-            logger.info("[otel] OpenTelemetry configuration loaded successfully.")
-        except Exception as e:
-            raise OtelConfigurationError(
-                "[otel] Something went wrong while configuring otel"
-            ) from e
+        configure_otel(environment)
+        logger.info("[otel] OpenTelemetry configuration loaded successfully.")
         super().load(environment, **kwargs)

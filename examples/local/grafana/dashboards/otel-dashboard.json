@@ -1470,7 +1470,7 @@
         "type": "prometheus",
         "uid": "feycujmeqsp34b"
       },
-      "description": "User Ramp Rate",
+      "description": "Virtual User Ramp Rate",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1566,7 +1566,7 @@
           "useBackend": false
         }
       ],
-      "title": "User Ramp Rate",
+      "title": "Virtual User Ramp Rate",
       "type": "timeseries"
     },
     {
@@ -1574,7 +1574,7 @@
         "type": "prometheus",
         "uid": "feycujmeqsp34b"
       },
-      "description": "User Count",
+      "description": "Virtual User Count",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1665,7 +1665,7 @@
           "useBackend": false
         }
       ],
-      "title": "User Count",
+      "title": "Virtual User Count",
       "type": "timeseries"
     },
     {
@@ -2640,5 +2640,5 @@
   "timezone": "browser",
   "title": "Locust Requests Dashboard (stats-otel plugin)",
   "uid": "d89a9144-92a1-4a5c-a96f-65b31b6a1c09",
-  "version": 183
+  "version": 185
 }

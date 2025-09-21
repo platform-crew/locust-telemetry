@@ -95,7 +95,6 @@ class BaseOutputHandler(ABC):
         kwargs : dict
             Additional event metadata.
         """
-        raise NotImplementedError
 
     @abstractmethod
     def record_metrics(
@@ -113,7 +112,6 @@ class BaseOutputHandler(ABC):
         kwargs : dict
             Additional metric attributes.
         """
-        raise NotImplementedError
 
 
 class BaseLifecycleHandler:
@@ -136,23 +134,19 @@ class BaseLifecycleHandler:
 
     def on_test_start(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when a Locust test starts."""
-        self.output.record_event(TelemetryEventsEnum.TEST_START)
+        self.output.record_event(TelemetryEventsEnum.TEST_START, **kwargs)
 
     def on_test_stop(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when a Locust test stops."""
-        self.output.record_event(TelemetryEventsEnum.TEST_STOP)
+        self.output.record_event(TelemetryEventsEnum.TEST_STOP, **kwargs)
 
     def on_spawning_complete(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when all users have been spawned."""
-        self.output.record_event(
-            TelemetryEventsEnum.SPAWNING_COMPLETE, user_count=kwargs.get("user_count")
-        )
+        self.output.record_event(TelemetryEventsEnum.SPAWNING_COMPLETE, **kwargs)
 
     def on_cpu_warning(self, *args: Any, **kwargs: Any) -> None:
         """Invoked when Locust raises a CPU usage warning."""
-        self.output.record_event(
-            TelemetryEventsEnum.CPU_WARNING, cpu_usage=kwargs.get("cpu_usage")
-        )
+        self.output.record_event(TelemetryEventsEnum.CPU_WARNING, **kwargs)
 
 
 class BaseRequestHandler(ABC):
@@ -175,12 +169,10 @@ class BaseRequestHandler(ABC):
     @abstractmethod
     def start(self) -> None:
         """Start requests metrics collection (push loop or callback registration)."""
-        pass
 
     @abstractmethod
     def stop(self) -> None:
         """Stop requests metrics collection and clean up resources"""
-        pass
 
     @abstractmethod
     def on_request(self, *args: Any, **kwargs: Any) -> None:
@@ -194,7 +186,6 @@ class BaseRequestHandler(ABC):
         kwargs : dict
             Additional request metadata.
         """
-        raise NotImplementedError
 
 
 class BaseSystemMetricsHandler(ABC):
@@ -218,9 +209,7 @@ class BaseSystemMetricsHandler(ABC):
     @abstractmethod
     def start(self) -> None:
         """Start system metrics collection (push loop or callback registration)."""
-        raise NotImplementedError
 
     @abstractmethod
     def stop(self) -> None:
         """Stop system metrics collection and clean up resources."""
-        raise NotImplementedError

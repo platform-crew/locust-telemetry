@@ -270,7 +270,7 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
         if isinstance(self.env.runner, WorkerRunner):
             return
 
-        self._request_metrics_gevent = gevent.spawn(self._stats_collector_loop)
+        self._request_metrics_gevent = gevent.spawn(self._gevent_loop)
 
     def stop(self) -> None:
         """
@@ -290,9 +290,9 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
         self._request_metrics_gevent = None
 
         # Collect final stats
-        self._collect_final_stats()
+        self._flush_stats()
 
-    def _collect_final_stats(self):
+    def _flush_stats(self):
         """
         Collect and log the final request statistics at the end of a test.
 
@@ -324,7 +324,7 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
                     **h.add_percentiles(stat.to_dict()),
                 )
 
-    def _stats_collector_loop(self) -> None:
+    def _gevent_loop(self) -> None:
         """
         Background loop for periodic request metrics collection.
 
@@ -361,4 +361,3 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
         **kwargs : Any
             Keyword arguments from Locust request events.
         """
-        pass

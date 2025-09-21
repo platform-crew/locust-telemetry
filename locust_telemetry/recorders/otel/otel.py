@@ -1,6 +1,7 @@
 import logging
-from typing import Any, List
+from typing import Sequence
 
+from locust.env import Environment
 from opentelemetry import metrics
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
 from opentelemetry.sdk.metrics import MeterProvider
@@ -37,13 +38,13 @@ class InstrumentRegistry:
         ] = {}
         self.meter = meter
 
-    def extend(self, items: List[h.InstrumentSpec]) -> None:
+    def extend(self, items: Sequence[h.InstrumentSpec]) -> None:
         """
         Register multiple metric instruments in the registry.
 
         Parameters
         ----------
-        items : list[InstrumentSpec]
+        items : Sequence[InstrumentSpec]
             A list of instrument specifications to register.
 
         Raises
@@ -56,22 +57,19 @@ class InstrumentRegistry:
                 raise OtelMetricAlreadyRegisteredError(
                     f"[otel] Metric '{spec.metric.value}' already registered."
                 )
-            try:
-                instrument = spec.factory(
-                    meter=self.meter,
-                    name=spec.metric.value,
-                    description=spec.metric.value,
-                    unit=spec.unit,
-                    callbacks=spec.callbacks or [],
-                )
-                self._registry[spec.metric] = instrument
-                logger.debug(f"[otel] Registered metric: {spec.metric.value}")
-            except Exception:
-                logger.exception(
-                    f"[otel] Failed to create instrument: {spec.metric.value}"
-                )
+            instrument = spec.factory(
+                meter=self.meter,
+                name=spec.metric.value,
+                description=spec.metric.value,
+                unit=spec.unit,
+                callbacks=spec.callbacks or [],
+            )
+            self._registry[spec.metric] = instrument
+            logger.debug(f"[otel] Registered metric: {spec.metric.value}")
 
-    def get(self, key: TelemetryEventsEnum | TelemetryMetricsEnum) -> h.InstrumentType:
+    def get(
+        self, key: TelemetryEventsEnum | TelemetryMetricsEnum
+    ) -> h.InstrumentType | None:
         """
         Retrieve a registered instrument by its metric identifier.
 
@@ -88,7 +86,7 @@ class InstrumentRegistry:
         return self._registry.get(key)
 
 
-def configure_otel(environment: Any) -> Any:
+def configure_otel(environment: Environment) -> None:
     """
     Configure and initialize OpenTelemetry metrics for a Locust environment.
 
@@ -148,5 +146,3 @@ def configure_otel(environment: Any) -> Any:
         provider.get_meter(config.TELEMETRY_OTEL_METRICS_METER)
     )
     logger.info("[otel] OpenTelemetry metrics configured successfully")
-
-    return environment

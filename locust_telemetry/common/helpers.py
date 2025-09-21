@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -132,18 +131,6 @@ def add_percentiles(stats: Dict[str, Any]) -> Dict[str, Any]:
     stats["percentile_95"] = stats.pop("response_time_percentile_0.95", "")
     stats["percentile_99"] = stats.pop("response_time_percentile_0.99", "")
     return stats
-
-
-def now_ms():
-    """
-    Current wall-clock time in milliseconds.
-
-    Returns
-    -------
-    int
-        Unix timestamp in milliseconds.
-    """
-    return int(time.time() * 1000)
 
 
 def create_otel_histogram(

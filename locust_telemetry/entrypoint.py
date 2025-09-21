@@ -8,9 +8,9 @@ Entry point for initializing telemetry in a Locust test run.
 import logging
 
 from locust_telemetry.core.coordinator import TelemetryCoordinator
-from locust_telemetry.core.manager import TelemetryRecorderPluginManager
+from locust_telemetry.core.manager import RecorderPluginManager
 from locust_telemetry.recorders.json.plugin import (
-    LocustJsonTelemetryRecorderPlugin,
+    LocustJsonRecorderPlugin,
 )
 from locust_telemetry.recorders.otel.plugin import (
     LocustOtelRecorderPlugin,
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 CONFIGURED_RECORDER_PLUGINS = (
     # Locust stats recorder.
-    LocustJsonTelemetryRecorderPlugin,
+    LocustJsonRecorderPlugin,
     # Locust otel
     LocustOtelRecorderPlugin,
 )
@@ -33,7 +33,7 @@ def initialize(*args, **kwargs) -> None:
 
     For autodiscovery use only. Manual users should call `setup_telemetry()`.
     """
-    recorder_plugin_manager = TelemetryRecorderPluginManager()
+    recorder_plugin_manager = RecorderPluginManager()
     for plugin_cls in CONFIGURED_RECORDER_PLUGINS:
         recorder_plugin_manager.register_recorder_plugin(plugin_cls())
 

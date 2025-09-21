@@ -6,7 +6,7 @@ propagated to worker nodes, and attached to the Locust environment.
 Responsibilities
 ----------------
 - Attach metadata to the master and worker environment
-- TelemetryRecorderPluginManager collects and manages metadata from all the plugins
+- RecorderPluginManager collects and manages metadata from all the plugins
   set those on both worker and master envs.
 
 """

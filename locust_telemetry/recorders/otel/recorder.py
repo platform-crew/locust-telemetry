@@ -9,27 +9,27 @@ metrics, and output.
 
 Classes
 -------
-MasterLocustOtelRecorder
+LocustOtelMasterNodeRecorder
     Recorder for the Locust master node with OTEL metrics export.
-WorkerLocustOtelRecorder
+LocustOtelWorkerNodeRecorder
     Recorder for Locust worker nodes with OTEL metrics export.
 """
 
 import logging
 
 from locust_telemetry.core.recorder import (
-    MasterTelemetryRecorder,
-    WorkerTelemetryRecorder,
+    MasterNodeRecorder,
+    WorkerNodeRecorder,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class MasterLocustOtelRecorder(MasterTelemetryRecorder):
+class LocustOtelMasterNodeRecorder(MasterNodeRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for the Locust master node.
 
-    This class extends the base :class:`MasterTelemetryRecorder` to add
+    This class extends the base :class:`MasterNodeRecorder` to add
     OpenTelemetry metric collection and export. It sets up OTEL-specific
     handlers for system metrics, request metrics, lifecycle events,
     and output handling. Additionally, it initializes the OTLP exporter
@@ -42,11 +42,11 @@ class MasterLocustOtelRecorder(MasterTelemetryRecorder):
     """
 
 
-class WorkerLocustOtelRecorder(WorkerTelemetryRecorder):
+class LocustOtelWorkerNodeRecorder(WorkerNodeRecorder):
     """
     OpenTelemetry-enabled telemetry recorder for Locust worker nodes.
 
-    This class extends the base :class:`WorkerTelemetryRecorder` to add
+    This class extends the base :class:`WorkerNodeRecorder` to add
     OpenTelemetry metric collection and export. It sets up OTEL-specific
     handlers for system metrics, request metrics, lifecycle events,
     and output handling. Additionally, it initializes the OTLP exporter

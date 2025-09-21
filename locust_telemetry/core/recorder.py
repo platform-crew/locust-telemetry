@@ -2,7 +2,7 @@ import logging
 import os
 import socket
 from abc import ABC
-from typing import Any, Optional, Type
+from typing import Any, Type
 
 from locust.env import Environment
 
@@ -16,7 +16,7 @@ from locust_telemetry.core.handlers import (
 logger = logging.getLogger(__name__)
 
 
-class BaseTelemetryRecorder(ABC):
+class BaseRecorder(ABC):
     """
     Abstract base class for telemetry recorders.
 
@@ -46,14 +46,7 @@ class BaseTelemetryRecorder(ABC):
         self.system = system_handler_cls(self.output, env)
         self.requests = requests_handler_cls(self.output, env)
 
-    def on_cpu_warning(
-        self,
-        environment: Environment,
-        cpu_usage: float,
-        message: Optional[str] = None,
-        timestamp: Optional[float] = None,
-        **kwargs: Any,
-    ) -> None:
+    def on_cpu_warning(self, *args: Any, **kwargs: Any) -> None:
         """
         Handle a CPU usage warning raised by Locust.
 
@@ -61,18 +54,12 @@ class BaseTelemetryRecorder(ABC):
 
         Parameters
         ----------
-        environment : Environment
-            The Locust environment instance.
-        cpu_usage : float
-            Current CPU usage percentage.
-        message : Optional[str], optional
-            Additional message describing the warning.
-        timestamp : Optional[float], optional
-            UNIX timestamp when the warning occurred.
+        *args : Any
+            args from locust event
         **kwargs : Any
             Additional keyword arguments from the Locust event.
         """
-        self.lifecycle.on_cpu_warning(value=cpu_usage, unit="percent")
+        self.lifecycle.on_cpu_warning(value=kwargs.get("cpu_usage"), unit="percent")
 
     def on_test_start(self, *args: Any, **kwargs: Any) -> None:
         """
@@ -93,7 +80,7 @@ class BaseTelemetryRecorder(ABC):
         self.env.events.cpu_warning.remove_listener(self.on_cpu_warning)
 
 
-class MasterTelemetryRecorder(BaseTelemetryRecorder):
+class MasterNodeRecorder(BaseRecorder):
     """
     Telemetry recorder for the Locust master node.
 
@@ -117,7 +104,7 @@ class MasterTelemetryRecorder(BaseTelemetryRecorder):
         system metrics collection.
         """
         super().on_test_start(*args, **kwargs)
-        self.lifecycle.on_test_start(*args, **kwargs)
+        self.lifecycle.on_test_start()
         self.requests.start()
         self.system.start()
 
@@ -129,7 +116,7 @@ class MasterTelemetryRecorder(BaseTelemetryRecorder):
         the event to the lifecycle handler.
         """
         super().on_test_stop(*args, **kwargs)
-        self.lifecycle.on_test_stop(*args, **kwargs)
+        self.lifecycle.on_test_stop()
         self.requests.stop()
         self.system.stop()
 
@@ -145,7 +132,7 @@ class MasterTelemetryRecorder(BaseTelemetryRecorder):
         self.lifecycle.on_spawning_complete(user_count=user_count)
 
 
-class WorkerTelemetryRecorder(BaseTelemetryRecorder):
+class WorkerNodeRecorder(BaseRecorder):
     """
     Telemetry recorder for the Locust worker node.
 

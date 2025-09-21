@@ -23,7 +23,7 @@ OtelSystemMetricsHandler
 """
 
 import logging
-from typing import Any, List
+from typing import Any, List, Sequence
 
 import psutil
 from locust.env import Environment
@@ -78,13 +78,16 @@ class OtelOutputHandler(BaseOutputHandler):
             Attributes to attach to the recorded metric.
         """
         context = self.get_context(active=True)
-        instrument = self.env.otel_registry.get(TelemetryEventsEnum.TEST)
+        instrument: h.InstrumentType = self.env.otel_registry.get(
+            TelemetryEventsEnum.TEST
+        )
         if not instrument:
             logger.error(
                 "[otel] Event metric not registered: %s", TelemetryEventsEnum.TEST.value
             )
             raise OtelMetricNotRegisteredError(
-                f"Metric not registered: {TelemetryEventsEnum.TEST.value}"
+                f"{self.__class__.__name__}: Metric not "
+                f"registered: {TelemetryEventsEnum.TEST.value}"
             )
 
         instrument.add(1, attributes={"event": tl_type.value, **context, **kwargs})
@@ -106,12 +109,12 @@ class OtelOutputHandler(BaseOutputHandler):
             Attributes to attach to the recorded metric.
         """
         context = self.get_context(active=True)
-        instrument = self.env.otel_registry.get(tl_type)
+        instrument: h.InstrumentType = self.env.otel_registry.get(tl_type)
 
         if not instrument:
             logger.error("[otel] Metric not registered: %s", tl_type.value)
             raise OtelMetricNotRegisteredError(
-                f"Metric not registered: {tl_type.value}"
+                f"{self.__class__.__name__}: Metric not registered: {tl_type.value}"
             )
 
         instrument.record(
@@ -140,17 +143,12 @@ class OtelLifecycleHandler(BaseLifecycleHandler):
         """
         super().__init__(output, env)
         self.output: OtelOutputHandler = output
-        self.register_instruments()
+        self.env.otel_registry.extend(self.instruments)
 
-    def register_instruments(self) -> None:
-        """
-        Register lifecycle instruments.
-
-        Notes
-        -----
-        Instruments begin collecting data immediately upon registration.
-        """
-        specs = [
+    @property
+    def instruments(self) -> Sequence[h.InstrumentSpec]:
+        """All the instruments that is required by this handler"""
+        return (
             h.InstrumentSpec(
                 metric=TelemetryEventsEnum.TEST,
                 unit="1",
@@ -162,9 +160,7 @@ class OtelLifecycleHandler(BaseLifecycleHandler):
                 factory=h.create_otel_observable_gauge,
                 callbacks=[self._user_count_callback],
             ),
-        ]
-        self.env.otel_registry.extend(specs)
-        logger.info("[otel] Registered lifecycle metrics successfully.")
+        )
 
     def _user_count_callback(self, options=None) -> List[Observation]:
         """
@@ -172,7 +168,7 @@ class OtelLifecycleHandler(BaseLifecycleHandler):
 
         Returns
         -------
-        list[Observation]
+        List[Observation]
             Single observation containing the active user count.
         """
         return [Observation(self.env.runner.user_count, self.output.get_context())]
@@ -200,19 +196,14 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
             Locust Environment instance.
         """
         super().__init__(output, env)
-        self.output: OtelOutputHandler = output
-        self.register_instruments()
-
-    def register_instruments(self) -> None:
-        """
-        Register system metrics instruments.
-
-        Notes
-        -----
-        psutil is "warmed up" to avoid the first-call zero-value issue.
-        """
         h.warmup_psutil(self._process)
-        specs = [
+        self.output: OtelOutputHandler = output
+        self.env.otel_registry.extend(self.instruments)
+
+    @property
+    def instruments(self) -> Sequence[h.InstrumentSpec]:
+        """All the instruments that is required by this handler"""
+        return (
             h.InstrumentSpec(
                 metric=TelemetryMetricsEnum.NETWORK,
                 unit="By",
@@ -231,9 +222,7 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
                 factory=h.create_otel_observable_gauge,
                 callbacks=[self._cpu_usage_callback],
             ),
-        ]
-        self.env.otel_registry.extend(specs)
-        logger.info("[otel] Registered system metrics successfully.")
+        )
 
     def _network_usage_callback(self, options=None) -> List[Observation]:
         """
@@ -241,7 +230,7 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
 
         Returns
         -------
-        list[Observation]
+        List[Observation]
             Observations for bytes sent and received.
         """
         io = psutil.net_io_counters()
@@ -257,7 +246,7 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
 
         Returns
         -------
-        list[Observation]
+        List[Observation]
             Observation for memory usage in MiB.
         """
         memory_mib = h.convert_bytes_to_mib(self._process.memory_info().rss)
@@ -269,7 +258,7 @@ class OtelSystemMetricsHandler(BaseSystemMetricsHandler):
 
         Returns
         -------
-        list[Observation]
+        List[Observation]
             Observation for CPU utilization percentage.
         """
         return [Observation(self._process.cpu_percent(), self.output.get_context())]
@@ -306,17 +295,12 @@ class OtelRequestHandler(BaseRequestHandler):
         """
         super().__init__(output, env)
         self.output: OtelOutputHandler = output
-        self.register_instruments()
+        self.env.otel_registry.extend(self.instruments)
 
-    def register_instruments(self) -> None:
-        """
-        Register request metrics instruments.
-
-        Notes
-        -----
-        Instruments begin collecting data immediately upon registration.
-        """
-        specs = [
+    @property
+    def instruments(self) -> Sequence[h.InstrumentSpec]:
+        """All the instruments that is required by this handler"""
+        return (
             h.InstrumentSpec(
                 metric=TelemetryMetricsEnum.REQUEST_SUCCESS,
                 unit="ms",
@@ -327,9 +311,7 @@ class OtelRequestHandler(BaseRequestHandler):
                 unit="ms",
                 factory=h.create_otel_histogram,
             ),
-        ]
-        self.env.otel_registry.extend(specs)
-        logger.info("[otel] Registered request metrics successfully.")
+        )
 
     def on_request(self, *args: Any, **kwargs: Any) -> None:
         """

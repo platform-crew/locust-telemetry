@@ -17,13 +17,17 @@ from typing import Any, Dict, List
 from locust.env import Environment
 
 from locust_telemetry import config
-from locust_telemetry.core.plugin import BaseTelemetryRecorderPlugin
+from locust_telemetry.core.exceptions import (
+    RecorderPluginAlreadyRegistered,
+    RecorderPluginLoadError,
+)
+from locust_telemetry.core.plugin import BaseRecorderPlugin
 from locust_telemetry.metadata import set_test_metadata
 
 logger = logging.getLogger(__name__)
 
 
-class TelemetryRecorderPluginManager:
+class RecorderPluginManager:
     """
     Singleton class that manages telemetry recorder plugin registration and loading.
 
@@ -34,13 +38,13 @@ class TelemetryRecorderPluginManager:
     - Safely load recorder plugins when requested by the orchestrator.
     """
 
-    _instance: TelemetryRecorderPluginManager | None = None
+    _instance: RecorderPluginManager | None = None
     _initialized: bool = False
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            logger.debug("[TelemetryRecorderPluginManager] Creating singleton instance")
+            logger.debug("[RecorderPluginManager] Creating singleton instance")
         return cls._instance
 
     def __init__(self):
@@ -52,22 +56,22 @@ class TelemetryRecorderPluginManager:
         """
         if self._initialized:
             return
-        self._recorder_plugins: List[BaseTelemetryRecorderPlugin] = []
+        self._recorder_plugins: List[BaseRecorderPlugin] = []
         self._initialized = True
 
     @property
-    def recorder_plugins(self) -> List[BaseTelemetryRecorderPlugin]:
+    def recorder_plugins(self) -> List[BaseRecorderPlugin]:
         """
         Get the list of registered recorder plugins.
 
         Returns
         -------
-        List[BaseTelemetryRecorderPlugin]
+        List[BaseRecorderPlugin]
             The currently registered recorder plugin instances.
         """
         return self._recorder_plugins
 
-    def register_recorder_plugin(self, plugin: BaseTelemetryRecorderPlugin) -> None:
+    def register_recorder_plugin(self, plugin: BaseRecorderPlugin) -> None:
         """
         Register a telemetry recorder plugin for later loading.
 
@@ -75,20 +79,20 @@ class TelemetryRecorderPluginManager:
 
         Parameters
         ----------
-        plugin : BaseTelemetryRecorderPlugin
+        plugin : BaseRecorderPlugin
             The recorder plugin instance to register.
         """
-        if plugin not in self._recorder_plugins:
-            self._recorder_plugins.append(plugin)
-            logger.debug(
-                f"[TelemetryRecorderPluginManager] Recorder plugin registered: "
+        if plugin in self._recorder_plugins:
+            raise RecorderPluginAlreadyRegistered(
+                f"[RecorderPluginManager] Recorder plugin already registered: "
                 f"{plugin.__class__.__name__}"
             )
-        else:
-            logger.warning(
-                f"[TelemetryRecorderPluginManager] Recorder plugin already registered: "
-                f"{plugin.__class__.__name__}"
-            )
+
+        self._recorder_plugins.append(plugin)
+        logger.debug(
+            f"[RecorderPluginManager] Recorder plugin registered: "
+            f"{plugin.__class__.__name__}"
+        )
 
     def register_plugin_clis(self, group: Any) -> None:
         """
@@ -160,7 +164,7 @@ class TelemetryRecorderPluginManager:
         )
 
         logger.info(
-            "[TelemetryRecorderPluginManager] Following recorders are enabled",
+            "[RecorderPluginManager] Following recorders are enabled",
             extra={"recorders": enabled_plugins},
         )
 
@@ -171,13 +175,10 @@ class TelemetryRecorderPluginManager:
             try:
                 plugin.load(environment=environment, **kwargs)
                 logger.info(
-                    f"[TelemetryRecorderPluginManager] Recorder plugin loaded "
+                    f"[RecorderPluginManager] Recorder plugin loaded "
                     f"successfully: {plugin.__class__.__name__}"
                 )
-            except Exception:
-                logger.exception(
-                    f"[TelemetryRecorderPluginManager] Failed to load recorder plugin: "
-                    f"{plugin.__class__.__name__} "
-                    f"in {environment.runner.__class__.__name__}. "
-                    f"Enabled recorder plugins: {enabled_plugins}"
-                )
+            except Exception as e:
+                raise RecorderPluginLoadError(
+                    f"Failed to load recorder plugin: {plugin.__class__.__name__}"
+                ) from e
