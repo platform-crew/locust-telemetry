@@ -19,7 +19,7 @@
           "uid": "P8E80F9AEF21F6940"
         },
         "enable": true,
-        "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.locust.event.test.start\"}",
+        "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.event.test.start\"}",
         "hide": true,
         "iconColor": "dark-blue",
         "name": "Test Start",
@@ -34,7 +34,7 @@
           "uid": "P8E80F9AEF21F6940"
         },
         "enable": true,
-        "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.locust.event.test.stop\"}",
+        "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.event.test.stop\"}",
         "hide": true,
         "iconColor": "dark-blue",
         "name": "Test Stop",
@@ -49,7 +49,7 @@
           "uid": "P8E80F9AEF21F6940"
         },
         "enable": true,
-        "expr": "{container=\"locust-master\", telemetry_name=\"event.spawn.complete\"}",
+        "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.event.spawn.complete\"}",
         "hide": true,
         "iconColor": "semi-dark-orange",
         "name": "Ramp Up Completed",
@@ -2271,5 +2271,5 @@
   "timezone": "browser",
   "title": "Locust Requests Dashboard (stats-json plugin)",
   "uid": "4a54c6e2-1519-4332-9bb5-fa79c0989ec8",
-  "version": 4
+  "version": 7
 }

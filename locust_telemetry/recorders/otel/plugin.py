@@ -115,7 +115,7 @@ class LocustOtelRecorderPlugin(BaseRecorderPlugin):
             system_handler_cls=OtelSystemMetricsHandler,
             requests_handler_cls=OtelRequestHandler,
         )
-        logger.debug("[otel] Master OTel recorder initialized.")
+        logger.info("[otel] Master OTel recorder initialized.")
 
     def load_worker_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """
@@ -135,7 +135,7 @@ class LocustOtelRecorderPlugin(BaseRecorderPlugin):
             system_handler_cls=OtelSystemMetricsHandler,
             requests_handler_cls=OtelRequestHandler,
         )
-        logger.debug("[otel] Worker OTel recorder initialized.")
+        logger.info("[otel] Worker OTel recorder initialized.")
 
     def load(self, environment: Environment, **kwargs: Any) -> None:
         """

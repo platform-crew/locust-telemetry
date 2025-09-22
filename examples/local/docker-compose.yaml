@@ -29,7 +29,7 @@ services:
       - LOCUST_SPAWN_RATE=2
       - LOCUST_RUN_TIME=20s
       - LOCUST_TESTPLAN_NAME=myappn
-      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-otel
+      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-json
       - LOCUST_OTEL_EXPORTER_OTLP_INSECURE=true
       - LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
   locust_worker1:
@@ -54,7 +54,7 @@ services:
       - LOCUST_SPAWN_RATE=2
       - LOCUST_RUN_TIME=20s
       - LOCUST_TESTPLAN_NAME=myapp
-      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-otel
+      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-json
       - LOCUST_OTEL_EXPORTER_OTLP_INSECURE=true
       - LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
   locust_worker2:
@@ -79,7 +79,7 @@ services:
       - LOCUST_SPAWN_RATE=2
       - LOCUST_RUN_TIME=20s
       - LOCUST_TESTPLAN_NAME=myapp
-      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-otel
+      - LOCUST_ENABLE_TELEMETRY_RECORDER=stats-json
       - LOCUST_OTEL_EXPORTER_OTLP_INSECURE=true
       - LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
   loki:

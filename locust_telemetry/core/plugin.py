@@ -110,6 +110,6 @@ class BaseRecorderPlugin(ABC):
             )
 
         if isinstance(environment.runner, MasterRunner):
-            self.load_master_telemetry_recorders(environment, **kwargs)
+            self.load_master_recorders(environment, **kwargs)
         elif isinstance(environment.runner, WorkerRunner):
-            self.load_worker_telemetry_recorders(environment, **kwargs)
+            self.load_worker_recorders(environment, **kwargs)
