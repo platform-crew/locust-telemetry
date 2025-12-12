@@ -6,7 +6,7 @@ def test_static_metadata(mock_env):
     metadata = {"test_name": "load_test", "version": "1.0"}
     set_test_metadata(mock_env, metadata)
 
-    assert hasattr(mock_env, "telemetry_meta")
+    assert hasattr(mock_env, "telemetry_meta") is True
     assert mock_env.telemetry_meta.test_name == "load_test"
     assert mock_env.telemetry_meta.version == "1.0"
 

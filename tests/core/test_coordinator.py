@@ -9,12 +9,12 @@ from locust.argument_parser import LocustArgumentParser
 from locust.runners import MasterRunner, WorkerRunner
 
 from locust_telemetry.core.coordinator import TelemetryCoordinator
-from locust_telemetry.core.manager import TelemetryRecorderPluginManager
+from locust_telemetry.core.manager import RecorderPluginManager
 
 
 def test_singleton_behavior():
     """Ensure TelemetryCoordinator enforces the singleton pattern."""
-    mgr = TelemetryRecorderPluginManager()
+    mgr = RecorderPluginManager()
     coo1 = TelemetryCoordinator(mgr)
     coo2 = TelemetryCoordinator(mgr)
     assert coo1 is coo2
@@ -22,7 +22,7 @@ def test_singleton_behavior():
 
 def test_initialize_registers_hooks(mock_env):
     """Verify that initialize registers all lifecycle hooks exactly once."""
-    mgr = TelemetryRecorderPluginManager()
+    mgr = RecorderPluginManager()
     coo = TelemetryCoordinator(mgr)
 
     called_hooks = {"init_parser": [], "init": [], "test_start": []}
@@ -52,20 +52,20 @@ def test_initialize_registers_hooks(mock_env):
     assert len(called_hooks["test_start"]) == 1
 
 
-def test_configure_logging_calls_login_setup():
+def test_configure_logging_calls_loggin_setup(mock_env):
     """Verify coordinator setups logging calls actual logging configuration func"""
-    mgr = TelemetryRecorderPluginManager()
+    mgr = RecorderPluginManager()
     coo = TelemetryCoordinator(mgr)
     with patch(
         "locust_telemetry.core.coordinator.configure_logging"
     ) as mock_configure_logging:
-        coo._configure_logging()
+        coo._configure_logging(mock_env)
         mock_configure_logging.assert_called_once()
 
 
 def test_add_cli_arguments_calls_plugins():
     """Ensure _add_cli_arguments calls add_cli_arguments for each registered plugin."""
-    mgr = TelemetryRecorderPluginManager()
+    mgr = RecorderPluginManager()
     mock_plugin = MagicMock()
     mock_plugin.add_cli_arguments = MagicMock()
     mgr.register_recorder_plugin(mock_plugin)
@@ -101,7 +101,7 @@ def test_setup_metadata_for_master_sends_message(mock_env):
     Verify on master node, coordinator initiates the metadata setup and
     sends message to worker
     """
-    mgr = MagicMock(spec=TelemetryRecorderPluginManager)
+    mgr = MagicMock(spec=RecorderPluginManager)
     mgr.register_plugin_metadata.return_value = {"foo": "bar"}
 
     coord = TelemetryCoordinator(mgr)
@@ -118,7 +118,7 @@ def test_setup_metadata_does_nothing_for_worker(mock_env):
     Verify on worker node, make sure coordinator doesn't initiates metadata
     collector and does not send any message.
     """
-    mgr = MagicMock(spec=TelemetryRecorderPluginManager)
+    mgr = MagicMock(spec=RecorderPluginManager)
     coord = TelemetryCoordinator(mgr)
 
     mock_env.runner.__class__ = WorkerRunner
