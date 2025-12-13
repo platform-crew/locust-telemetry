@@ -26,7 +26,7 @@ Metrics Recorders
 =======================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    recorders
 
@@ -44,7 +44,7 @@ Examples
 =======================================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    examples
 
