@@ -1,116 +1,66 @@
 # Locust Telemetry
 
-
 ![Tests](https://github.com/platform-crew/locust-telemetry/actions/workflows/tests.yaml/badge.svg)
-[![Release](https://img.shields.io/github/v/release/platform-crew/locust-telemetry?color=blue&style=flat-square)](https://github.com/platform-crew/locust-telemetry/releases)
-[![Contributors](https://img.shields.io/github/contributors/platform-crew/locust-telemetry?color=brightgreen&style=flat-square)](https://github.com/platform-crew/locust-telemetry/graphs/contributors)
+[![Release](https://img.shields.io/github/v/release/platform-crew/locust-telemetry)](https://github.com/platform-crew/locust-telemetry/releases)
 [![codecov](https://codecov.io/gh/platform-crew/locust-telemetry/branch/main/graph/badge.svg)](https://codecov.io/gh/platform-crew/locust-telemetry)
-[![License](https://img.shields.io/github/license/platform-crew/locust-telemetry?color=orange&style=flat-square)](https://github.com/platform-crew/locust-telemetry/blob/main/LICENSE)
-[![Documentation Status](https://readthedocs.org/projects/locust-telemetry/badge/?version=latest)](https://locust-telemetry.readthedocs.io/en/latest/?badge=latest)
+[![License](https://img.shields.io/github/license/platform-crew/locust-telemetry)](LICENSE)
+[![Docs](https://readthedocs.org/projects/locust-telemetry/badge/?version=latest)](https://locust-telemetry.readthedocs.io)
 
-Locust Telemetry is a modular observability plugin for the Locust load-testing
-framework. It emits structured telemetry for load and performance tests,
-making it easy to export, analyze, and correlate test results with system
-metrics.
+**Locust Telemetry** is a modular observability plugin for the
+[Locust](https://locust.io) load-testing framework.
 
-The plugin supports multiple telemetry backends to fit different workflows:
+It emits structured telemetry from load tests so you can **correlate
+request behavior with system metrics** using modern observability tools.
 
-- **JSON log-based telemetry**:
-  A lightweight option for capturing structured events and metrics.
+📖 **Full documentation:**
+https://locust-telemetry.readthedocs.io
 
-- **OpenTelemetry metrics**:
-  Native OpenTelemetry integration for exporting load-test metrics to
-  OTLP-compatible backends and correlating them with infrastructure data.
+---
 
-📖 Full documentation is available on [Read the Docs](https://locust-telemetry.readthedocs.io/).
-
-## Motivation
+## Why Locust Telemetry?
 
 Load testing is most effective when request-level metrics can be correlated
-with system signals such as CPU, memory, network usage, latency, and errors.
-However, traditional load-testing tools provide limited observability and
-export options.
+with system signals like CPU, memory, network usage, and errors.
 
-Locust Telemetry addresses this gap by emitting structured telemetry that
-integrates cleanly with modern observability stacks, enabling a unified view
-of system behavior under load.
+Locust Telemetry bridges this gap by exporting structured telemetry that
+integrates cleanly with existing observability stacks.
+
+---
 
 ## Key Features
 
 - **Structured Telemetry**
-  Emits test lifecycle events, request metrics, and system usage in JSON or
-  OpenTelemetry formats.
+  Test lifecycle events, request metrics, and system metrics
 
-- **OpenTelemetry Integration**
-  Exports metrics via OTLP for correlation with existing observability data.
+- **Multiple Backends**
+  JSON logs or OpenTelemetry metrics
+
+- **OpenTelemetry Native**
+  OTLP export to Prometheus, Grafana, Datadog, New Relic, and more
 
 - **Distributed Support**
-  Compatible with Locust’s master–worker architecture.
+  Works with Locust master–worker mode
 
-- **Modular & Extensible**
-  Easily extended with custom recorders.
+- **Extensible Design**
+  Add custom recorders and instruments
 
-- **Traces & Spans (Coming Soon)**
-  Planned OpenTelemetry trace and span support for end-to-end correlation.
-
----
-
-## Installation & Quick Start
-Here is a **clean, concise `## Installation & Quick Start` section in Markdown**, faithfully adapted from your RST and aligned with your new README tone.
-
-You can drop this in directly.
+> Traces and spans are planned but not yet supported.
 
 ---
 
-## Installation & Quick Start
-
-### Requirements
-
-- Python ≥ 3.10
-- locust ≥ 2.37.0
-- python-json-logger ≥ 3.3.0
-
----
-
-### Install
-
-Using **pip**:
+## Installation
 
 ```bash
 pip install locust-telemetry
 ````
 
-Using **uv**:
-
-```bash
-uv install locust-telemetry
-```
-
-Using **poetry**:
-
-```bash
-poetry add locust-telemetry
-```
-
-Verify the installation:
-
-```bash
-pip show locust-telemetry
-```
-
 ---
 
-### Quick Start
+## Quick Start
 
-Locust Telemetry extends Locust with telemetry recording while preserving
-all existing Locust behavior and configuration.
+### 1. Initialize the plugin
 
-For general Locust usage, see the
-[Locust documentation](https://docs.locust.io/en/stable/).
-
-#### 1. Initialize the plugin
-
-In your Locust test file (e.g. `locustfile.py`):
+In your `locustfile.py`:
 
 ```python
 from locust_telemetry import entrypoint
@@ -118,137 +68,71 @@ from locust_telemetry import entrypoint
 entrypoint.initialize()
 ```
 
-#### 2. Run Locust with telemetry enabled
+### 2. Run Locust with telemetry enabled
 
-**JSON telemetry recorder**
-
-```bash
-locust -f locustfile.py \
-  --testplan mytest \
-  --enable-telemetry-recorder json
-```
-
-**OpenTelemetry metrics recorder**
+**JSON telemetry (logs):**
 
 ```bash
-locust -f locustfile.py \
-  --testplan mytest \
-  --enable-telemetry-recorder otel
+locust -f locustfile.py --testplan mytest --enable-telemetry-recorder json
 ```
 
----
+**OpenTelemetry metrics:**
 
-### Notes
+```bash
+locust -f locustfile.py --testplan mytest --enable-telemetry-recorder otel
+```
 
-* CLI options can also be set using environment variables:
-
-  * `LOCUST_TESTPLAN_NAME` → `--testplan`
-  * `LOCUST_ENABLE_TELEMETRY_RECORDER` → `--enable-telemetry-recorder`
-
-* For all available configuration options, see the
-  [Configuration](https://locust-telemetry.readthedocs.io/en/latest/configuration.html)
-  section of the documentation.
-
-* For help getting started with Locust itself, refer to the
-  [Locust Quick Start Guide](https://docs.locust.io/en/stable/quickstart.html).
+➡️ See the **Configuration** section in the docs for all available options.
 
 ---
 
-### Warning
+## Local Demo (Docker)
 
-Locust does not currently support native plugin arguments (`--plugin` or `-p`).
-As a result, telemetry plugins must be initialized explicitly in
-`locustfile.py`.
-
----
-
-## Local Example (Docker)
-
-Locust Telemetry provides a complete local example that runs Locust with a
-full observability stack using Docker. This is the fastest way to see both
-JSON and OpenTelemetry telemetry in action.
-
-**Included services:**
-
-- Locust (master + workers)
-- OpenTelemetry Collector
-- Prometheus
-- Loki & Promtail
-- Grafana (preconfigured dashboards)
-
-### Run the example
+A complete local observability stack is provided to quickly try both
+JSON and OpenTelemetry telemetry:
 
 ```bash
 git clone https://github.com/platform-crew/locust-telemetry.git
 cd locust-telemetry/examples/local
 make build && make up
-````
+```
 
-This starts Locust in distributed mode and launches all required
-observability services.
+* Locust UI: [http://localhost:8089](http://localhost:8089)
+* Grafana: [http://localhost:3000](http://localhost:3000)
 
-### Access the UIs
-
-* **Locust Web UI**: [http://localhost:8089](http://localhost:8089)
-* **Grafana**: [http://localhost:3000](http://localhost:3000) (anonymous access enabled)
-
-Start a test from the Locust UI and wait ~20 seconds for metrics and logs
-to appear in Grafana.
-
-### Supported telemetry
-
-* **JSON telemetry**
-  Structured logs emitted by Locust and stored in Loki.
-  Ideal for event timelines, request metrics, and debugging.
-
-* **OpenTelemetry telemetry**
-  Metrics exported via OTLP, collected by the OpenTelemetry Collector,
-  scraped by Prometheus, and visualized in Grafana.
-
-> Traces and spans are not yet supported. Only metrics and events are emitted.
-
-📘 **Full setup details, configuration files, and dashboards are documented here:**
+📘 Full walkthrough:
 [https://locust-telemetry.readthedocs.io/en/latest/examples.html](https://locust-telemetry.readthedocs.io/en/latest/examples.html)
-
-### Dashboard Preview
-
-**JSON Telemetry (Loki / Grafana Logs)**
-Structured logs showing request metrics, lifecycle events, and system signals.
-
-![JSON Telemetry Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/json-dashboard1.png)
-![JSON Telemetry Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/json-dashboard2.png)
-![JSON Telemetry Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/json-dashboard3.png)
-![JSON Telemetry Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/json-dashboard4.png)
-
-**OpenTelemetry Metrics (Prometheus / Grafana)**
-Request latency histograms, system metrics, and user counts exported via OTLP.
-
-![OpenTelemetry Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/otel-dashboard1.png)
-![OpenTelemetry Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/otel-dashboard2.png)
-![OpenTelemetry Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/otel-dashboard3.png)
-![OpenTelemetry Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/otel-dashboard4.png)
-
-
-## Contributing
-
-First of all, thank you for your interest in contributing! Whether it’s
-fixing bugs, improving documentation, or adding new features,
-your contributions help make Locust Telemetry better for everyone.
-
-Please refer to the [contributing guidelines](https://locust-telemetry.readthedocs.io/en/latest/contributing.html) to get started.
 
 ---
 
-## Authors
+## Dashboard Preview
 
-- Swaroop Shubhakrishna Bhat ([@ss-bhat](https://github.com/ss-bhat))
+**JSON Telemetry (Loki / Grafana Logs)**
+![JSON Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/json-dashboard1.png)
+![JSON Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/json-dashboard4.png)
 
-Thanks to all [contributors](https://github.com/platform-crew/locust-telemetry/graphs/contributors)!
+**OpenTelemetry Metrics (Prometheus / Grafana)**
+![OTel Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/otel-dashboard1.png)
+![OTel Dashboard](https://raw.githubusercontent.com/platform-crew/locust-telemetry/main/docs/_static/otel-dashboard4.png)
+
+---
+
+## Contributing
+
+Contributions are welcome!
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+## Author
+
+**Swaroop Shubhakrishna Bhat** ([@ss-bhat](https://github.com/ss-bhat))
+
+Thanks to all contributors ❤️
 
 ---
 
 ## License
 
-Licensed under the [Apache License 2.0](https://github.com/platform-crew/locust-telemetry/blob/main/LICENSE).
-
----
+Licensed under the Apache License 2.0.
+See [LICENSE](LICENSE) for details.
