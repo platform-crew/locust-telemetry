@@ -25,7 +25,7 @@ def test_add_cli_arguments_registers_all_options():
 
     plugin.add_cli_arguments(group)
 
-    assert group.add_argument.call_count == 3
+    assert group.add_argument.call_count == 2
 
     args = [call.args[0] for call in group.add_argument.call_args_list]
     assert "--lt-otel-exporter-otlp-endpoint" in args

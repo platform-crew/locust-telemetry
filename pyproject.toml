@@ -51,6 +51,7 @@ dependencies = [
 dev = [
     "pytest>=8.4.0",
     "pytest-cov>=6.3.0",
+    "freezegun>=1.5.5"
 ]
 
 [project.urls]
