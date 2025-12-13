@@ -11,9 +11,6 @@ from locust_telemetry.common import helpers as h
 ISO8601_REGEX = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$")
 
 
-# --- warmup_psutil -----------------------------------------------------------
-
-
 def test_warmup_calls_expected_methods():
     """warmup_psutil should call cpu_percent and memory_info exactly once."""
     fake_process = MagicMock(spec=psutil.Process)
@@ -27,9 +24,6 @@ def test_warmup_with_real_process_does_not_raise():
     """warmup_psutil should not raise errors with a real psutil.Process."""
     process = psutil.Process()
     h.warmup_psutil(process)
-
-
-# --- get_utc_time_with_buffer ------------------------------------------------
 
 
 def test_get_utc_time_format_is_iso8601():
@@ -66,9 +60,6 @@ def test_get_utc_time_various_buffers(buffer):
 
     delta = abs((parsed - expected).total_seconds())
     assert delta < 1, f"Drift too large: {delta} seconds"
-
-
-# --- add_percentiles ---------------------------------------------------------
 
 
 def test_add_percentiles_transforms_keys():
@@ -120,9 +111,6 @@ def test_add_percentiles_overwrites_existing_keys():
     assert result["percentile_99"] == 10
 
 
-# --- convert_bytes_to_mib ----------------------------------------------------
-
-
 def test_convert_bytes_zero():
     """Zero bytes should convert to 0 MiB."""
     assert h.convert_bytes_to_mib(0) == 0
@@ -159,9 +147,6 @@ def test_convert_bytes_negative():
     assert h.convert_bytes_to_mib(-1024 * 1024) == -1.0
 
 
-# --- get_source_id -----------------------------------------------------------
-
-
 def test_get_source_id_master(mock_env_master):
     """When role=master, should return 'master'."""
     assert h.get_source_id(mock_env_master) == "master"
@@ -170,9 +155,6 @@ def test_get_source_id_master(mock_env_master):
 def test_get_source_id_worker(mock_env_worker):
     """When role=worker, should return worker-{index} (default index=2)."""
     assert h.get_source_id(mock_env_worker) == "worker-2"
-
-
-# --- create_otel_* wrappers --------------------------------------------------
 
 
 def test_create_otel_histogram_uses_meter():

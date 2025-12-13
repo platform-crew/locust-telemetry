@@ -1,7 +1,3 @@
-"""
-Tests for TelemetryCoordinator with updated CLI hook handling.
-"""
-
 from unittest.mock import MagicMock, patch
 
 from locust import events

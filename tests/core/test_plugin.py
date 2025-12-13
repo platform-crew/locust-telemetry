@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock
 
 import pytest
-from locust.runners import MasterRunner, WorkerRunner
 
 from locust_telemetry.core.exceptions import RecorderPluginError
 from locust_telemetry.core.plugin import BaseRecorderPlugin
@@ -31,24 +30,22 @@ def test_load_raises_error_if_missing_plugin_id(mock_env):
         plugin.load(mock_env)
 
 
-def test_load_calls_master_loader(mock_env, mock_plugin):
+def test_load_calls_master_loader(mock_env_master, mock_plugin):
     """
     load() must call load_master_recorders when the environment runner
     is a MasterRunner.
     """
-    mock_env.runner = MagicMock(spec=MasterRunner)
-    mock_plugin.load(mock_env)
+    mock_plugin.load(mock_env_master)
     assert mock_plugin.called_master is True
     assert mock_plugin.called_worker is False
 
 
-def test_load_calls_worker_loader(mock_env, mock_plugin):
+def test_load_calls_worker_loader(mock_env_worker, mock_plugin):
     """
     load() must call load_worker_recorders when the environment runner
      is a WorkerRunner.
     """
-    mock_env.runner = MagicMock(spec=WorkerRunner)
-    mock_plugin.load(mock_env)
+    mock_plugin.load(mock_env_worker)
     assert mock_plugin.called_worker is True
     assert mock_plugin.called_master is False
 

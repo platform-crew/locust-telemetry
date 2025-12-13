@@ -16,6 +16,9 @@ from locust_telemetry.core.handlers import (
 )
 from locust_telemetry.core.manager import RecorderPluginManager
 from locust_telemetry.core.plugin import BaseRecorderPlugin
+from locust_telemetry.recorders.json.handlers import JsonTelemetryOutputHandler
+from locust_telemetry.recorders.otel.handlers import OtelOutputHandler
+from locust_telemetry.recorders.otel.otel import InstrumentRegistry
 
 
 class DummyOutputHandler(BaseOutputHandler):
@@ -170,6 +173,20 @@ def mock_env_worker():
 
 
 @pytest.fixture
+def mock_otel_env(mock_env):
+    """
+    Mock Locust environment with a real InstrumentRegistry
+    backed by a mocked OTEL meter.
+    """
+    # Mock OTEL meter
+    meter = MagicMock()
+    registry = InstrumentRegistry(meter=meter)
+    mock_env.otel_registry = registry
+    mock_env.runner.user_count = 10
+    return mock_env
+
+
+@pytest.fixture
 def parser() -> LocustArgumentParser:
     """Return a fresh Locust argument parser for testing CLI integration."""
     return LocustArgumentParser()
@@ -215,3 +232,21 @@ def mock_recorder_plugin():
     plugin.add_test_metadata = MagicMock(return_value={"extra": "value"})
     plugin.load = MagicMock()
     return plugin
+
+
+@pytest.fixture
+def json_output_handler(mock_env):
+    """Create a JsonTelemetryOutputHandler with mocked context."""
+    h = JsonTelemetryOutputHandler(env=mock_env)
+    h.get_context = MagicMock(return_value={"context": 1})
+    return h
+
+
+@pytest.fixture
+def otel_output_handler(mock_env):
+    """
+    OtelOutputHandler with patched get_context().
+    """
+    handler = OtelOutputHandler(mock_env)
+    handler.get_context = MagicMock(return_value={"ctx": "test"})
+    return handler

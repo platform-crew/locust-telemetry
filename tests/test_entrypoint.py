@@ -1,7 +1,3 @@
-"""
-Tests for Locust Telemetry Entrypoint
-"""
-
 from unittest.mock import MagicMock
 
 from locust_telemetry import entrypoint
