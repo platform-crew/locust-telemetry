@@ -1,113 +1,65 @@
+from unittest.mock import MagicMock
+
 import pytest
-from locust.argument_parser import LocustArgumentParser
-from locust.env import Environment
-from locust.runners import MasterRunner, WorkerRunner
 
-from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
+from locust_telemetry.core.exceptions import RecorderPluginError
+from locust_telemetry.core.plugin import BaseRecorderPlugin
 
 
-def test_add_arguments_default_noop(dummy_recorder_plugin: TelemetryRecorderPluginBase):
-    """Verify that the default add_arguments does nothing (no error raised)."""
-    parser = LocustArgumentParser()
-    dummy_recorder_plugin.add_cli_arguments(parser)
-    assert dummy_recorder_plugin.added_cli_args is True
+def test_load_raises_error_if_missing_plugin_id(mock_env):
+    """load() must raise RecorderPluginError if RECORDER_PLUGIN_ID is not defined."""
+
+    class NoIdPlugin(BaseRecorderPlugin):
+        """Plugin missing RECORDER_PLUGIN_ID used to test error handling."""
+
+        def add_test_metadata(self):
+            return {}
+
+        def add_cli_arguments(self, g):
+            pass
+
+        def load_master_recorders(self, env, **kw):
+            pass
+
+        def load_worker_recorders(self, env, **kw):
+            pass
+
+    plugin = NoIdPlugin()
+
+    with pytest.raises(RecorderPluginError):
+        plugin.load(mock_env)
 
 
-def test_register_master_telemetry_recorder_called_on_master_load(
-    mock_env: Environment, dummy_recorder_plugin: TelemetryRecorderPluginBase
-):
-    """Ensure load() calls master recorder when runner is MasterRunner."""
-    mock_env.runner.__class__ = MasterRunner
-    dummy_recorder_plugin.load(mock_env)
-    assert getattr(dummy_recorder_plugin, "master_loaded", False)
-    assert not getattr(dummy_recorder_plugin, "worker_loaded", False)
-
-
-def test_register_worker_telemetry_recorder_called_on_worker_load(
-    mock_env: Environment, dummy_recorder_plugin: TelemetryRecorderPluginBase
-):
-    """Ensure load() calls worker recorder when runner is WorkerRunner."""
-    mock_env.runner.__class__ = WorkerRunner
-    dummy_recorder_plugin.load(mock_env)
-    assert getattr(dummy_recorder_plugin, "worker_loaded", False)
-    assert not getattr(dummy_recorder_plugin, "master_loaded", False)
-
-
-def test_load_calls_correct_recorder_multiple_times(
-    mock_env: Environment, dummy_recorder_plugin: TelemetryRecorderPluginBase
-):
-    """Verify load dispatches correctly depending on runner type."""
-    # Master
-    mock_env.runner.__class__ = MasterRunner
-    dummy_recorder_plugin.master_loaded = False
-    dummy_recorder_plugin.worker_loaded = False
-    dummy_recorder_plugin.load(mock_env)
-    assert dummy_recorder_plugin.master_loaded
-    assert not dummy_recorder_plugin.worker_loaded
-
-    # Worker
-    mock_env.runner.__class__ = WorkerRunner
-    dummy_recorder_plugin.master_loaded = False
-    dummy_recorder_plugin.worker_loaded = False
-    dummy_recorder_plugin.load(mock_env)
-    assert dummy_recorder_plugin.worker_loaded
-    assert not dummy_recorder_plugin.master_loaded
-
-
-def test_load_calls_nothing_if_runner_is_unknown(mock_env, dummy_recorder_plugin):
+def test_load_calls_master_loader(mock_env_master, mock_plugin):
     """
-    Ensure load() does nothing when runner is neither MasterRunner nor WorkerRunner.
+    load() must call load_master_recorders when the environment runner
+    is a MasterRunner.
     """
-
-    class FakeRunner:
-        pass
-
-    mock_env.runner = FakeRunner()
-    dummy_recorder_plugin.master_loaded = False
-    dummy_recorder_plugin.worker_loaded = False
-    dummy_recorder_plugin.load(mock_env)
-    assert not dummy_recorder_plugin.master_loaded
-    assert not dummy_recorder_plugin.worker_loaded
+    mock_plugin.load(mock_env_master)
+    assert mock_plugin.called_master is True
+    assert mock_plugin.called_worker is False
 
 
-def test_abstract_methods_raise_typeerror():
+def test_load_calls_worker_loader(mock_env_worker, mock_plugin):
     """
-    Ensure instantiating TelemetryRecorderPluginBase without implementing
-    abstract methods fails
+    load() must call load_worker_recorders when the environment runner
+     is a WorkerRunner.
     """
-    with pytest.raises(TypeError):
-        TelemetryRecorderPluginBase()
+    mock_plugin.load(mock_env_worker)
+    assert mock_plugin.called_worker is True
+    assert mock_plugin.called_master is False
 
 
-def test_load_without_plugin_id(mock_env, dummy_recorder_plugin):
+def test_add_test_metadata_is_returned(mock_plugin):
+    """add_test_metadata() should return the plugin-provided metadata dictionary."""
+    meta = mock_plugin.add_test_metadata()
+    assert meta == {"dummy": True}
+
+
+def test_add_cli_arguments_called(mock_plugin):
     """
-    Verify that loading the plugin without plugin id causes RunTimeError
+    add_cli_arguments() should register CLI arguments on the provided group object.
     """
-    dummy_recorder_plugin.RECORDER_PLUGIN_ID = None
-    with pytest.raises(RuntimeError):
-        dummy_recorder_plugin.load(mock_env)
-
-
-def test_add_test_metadata_contract(dummy_recorder_plugin):
-    """
-    Ensure add_test_metadata returns a dict and can be merged into environment metadata.
-    """
-    metadata = dummy_recorder_plugin.add_test_metadata()
-    assert isinstance(metadata, dict)
-    assert "dummy_key" in metadata
-
-
-def test_load_logs_when_invalid_runner(mock_env, dummy_recorder_plugin, caplog):
-    """
-    Ensure load() logs at debug level when runner type is unsupported.
-    """
-
-    class StrangeRunner:
-        pass
-
-    mock_env.runner = StrangeRunner()
-    with caplog.at_level("DEBUG"):
-        dummy_recorder_plugin.load(mock_env)
-
-    # should not crash, should log nothing critical
-    assert all("Failed" not in m for m in caplog.messages)
+    group = MagicMock()
+    mock_plugin.add_cli_arguments(group)
+    group.add_argument.assert_called_with("--dummy")

@@ -1,48 +1,149 @@
-from unittest.mock import patch
+from conftest import (
+    DummyLifecycleHandler,
+    DummyOutputHandler,
+    DummyRequestHandler,
+    DummySystemHandler,
+)
 
-from locust_telemetry.common.telemetry import TelemetryData
-from locust_telemetry.core.recorder import TelemetryBaseRecorder
+from locust_telemetry.core.recorder import (
+    BaseRecorder,
+    MasterNodeRecorder,
+    WorkerNodeRecorder,
+)
 
 
-def test_initialization_sets_env_and_metadata(recorder, mock_env):
+def test_base_recorder_initializes_handlers(mock_env):
+    """BaseRecorder should initialize all handler classes correctly."""
+    recorder = BaseRecorder(
+        env=mock_env,
+        output_handler_cls=DummyOutputHandler,
+        lifecycle_handler_cls=DummyLifecycleHandler,
+        system_handler_cls=DummySystemHandler,
+        requests_handler_cls=DummyRequestHandler,
+    )
+
+    assert isinstance(recorder.output, DummyOutputHandler)
+    assert isinstance(recorder.lifecycle, DummyLifecycleHandler)
+    assert isinstance(recorder.system, DummySystemHandler)
+    assert isinstance(recorder.requests, DummyRequestHandler)
+
+
+def test_base_recorder_cpu_warning_forwards_to_lifecycle(mock_env):
+    """on_cpu_warning should forward CPU usage to the lifecycle handler."""
+    recorder = BaseRecorder(
+        env=mock_env,
+        output_handler_cls=DummyOutputHandler,
+        lifecycle_handler_cls=DummyLifecycleHandler,
+        system_handler_cls=DummySystemHandler,
+        requests_handler_cls=DummyRequestHandler,
+    )
+
+    recorder.on_cpu_warning(cpu_usage=87)
+
+    assert recorder.lifecycle.called == [("cpu", {"value": 87, "unit": "percent"})]
+
+
+def test_master_recorder_registers_events(mock_env):
+    """MasterNodeRecorder should register master-specific event listeners."""
+    MasterNodeRecorder(
+        mock_env,
+        DummyOutputHandler,
+        DummyLifecycleHandler,
+        DummySystemHandler,
+        DummyRequestHandler,
+    )
+
+    mock_env.events.test_start.add_listener.assert_called()
+    mock_env.events.test_stop.add_listener.assert_called()
+    mock_env.events.spawning_complete.add_listener.assert_called()
+
+
+def test_master_on_test_start(mock_env):
     """
-    Ensure TelemetryRecorderBase initializes environment, username, hostname, and pid.
+    MasterNodeRecorder.on_test_start should start all handlers and register lifecycle.
     """
-    assert recorder.env is mock_env
-    assert hasattr(recorder, "_username")
-    assert hasattr(recorder, "_hostname")
-    assert hasattr(recorder, "_pid")
+    recorder = MasterNodeRecorder(
+        mock_env,
+        DummyOutputHandler,
+        DummyLifecycleHandler,
+        DummySystemHandler,
+        DummyRequestHandler,
+    )
+
+    recorder.on_test_start()
+
+    assert recorder.lifecycle.called == ["test_start"]
+    assert recorder.system.started is True
+    assert recorder.requests.started is True
 
 
-def test_log_telemetry_calls_logger_info(recorder, mock_env):
+def test_master_on_test_stop(mock_env):
+    """MasterNodeRecorder.on_test_stop should stop all handlers and record lifecycle."""
+    recorder = MasterNodeRecorder(
+        mock_env,
+        DummyOutputHandler,
+        DummyLifecycleHandler,
+        DummySystemHandler,
+        DummyRequestHandler,
+    )
+
+    recorder.on_test_stop()
+
+    assert recorder.lifecycle.called == ["test_stop"]
+    assert recorder.system.stopped is True
+    assert recorder.requests.stopped is True
+
+
+def test_master_on_spawning_complete(mock_env):
     """
-    Verify log_telemetry calls logger.info with expected structure.
+    MasterNodeRecorder.on_spawning_complete should forward user count to lifecycle.
     """
-    telemetry = TelemetryData(name="event1", type="metric")
-    extra_kwargs = {"custom_field": 42}
+    recorder = MasterNodeRecorder(
+        mock_env,
+        DummyOutputHandler,
+        DummyLifecycleHandler,
+        DummySystemHandler,
+        DummyRequestHandler,
+    )
 
-    with patch("locust_telemetry.core.recorder.logger.info") as mock_info:
-        recorder.log_telemetry(telemetry, **extra_kwargs)
+    recorder.on_spawning_complete(user_count=50)
 
-    # Check logger.info was called
-    mock_info.assert_called_once()
-    args, kwargs = mock_info.call_args
-
-    # First argument is the log message
-    assert args[0] == f"Recording telemetry: {telemetry.name}"
-
-    # 'extra' contains structured telemetry
-    extra = kwargs.get("extra", {})
-    telemetry_dict = extra.get("telemetry", {})
-    assert telemetry_dict["run_id"] == mock_env.run_id
-    assert telemetry_dict["testplan"] == mock_env.parsed_options.testplan
-    assert telemetry_dict["telemetry_name"] == telemetry.name
-    assert telemetry_dict["telemetry_type"] == telemetry.type
-    assert telemetry_dict["recorder"] == recorder.name
-    # Custom kwargs should be merged
-    assert telemetry_dict["custom_field"] == 42
+    assert recorder.lifecycle.called == [("spawn", {"user_count": 50})]
 
 
-def test_default_name_classvar():
-    """Ensure the default recorder name is 'base'."""
-    assert TelemetryBaseRecorder.name == "base"
+def test_worker_on_test_start(mock_env):
+    """
+    WorkerNodeRecorder.on_test_start should start system and requests but not lifecycle.
+    """
+    recorder = WorkerNodeRecorder(
+        mock_env,
+        DummyOutputHandler,
+        DummyLifecycleHandler,
+        DummySystemHandler,
+        DummyRequestHandler,
+    )
+
+    recorder.on_test_start()
+
+    assert recorder.system.started is True
+    assert recorder.requests.started is True
+    assert recorder.lifecycle.called == []
+
+
+def test_worker_on_test_stop(mock_env):
+    """
+    WorkerNodeRecorder.on_test_stop should stop system and requests but not lifecycle.
+    """
+    recorder = WorkerNodeRecorder(
+        mock_env,
+        DummyOutputHandler,
+        DummyLifecycleHandler,
+        DummySystemHandler,
+        DummyRequestHandler,
+    )
+
+    recorder.on_test_stop()
+
+    assert recorder.system.stopped is True
+    assert recorder.requests.stopped is True
+    assert recorder.lifecycle.called == []

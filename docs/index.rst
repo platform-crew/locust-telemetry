@@ -20,22 +20,19 @@ Configuration
    :maxdepth: 2
 
    configuration
-   telemetry
 
 =======================================
-Extending Guide
+Metrics Recorders
 =======================================
 
 .. toctree::
    :maxdepth: 2
 
-   extending
+   recorders
 
 =======================================
 Contributing Guide
 =======================================
-
-Contributing guide
 
 .. toctree::
    :maxdepth: 4
@@ -55,12 +52,10 @@ Examples
 API Reference
 =======================================
 
-The API reference is automatically generated from docstrings.
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   api/index
+   api
 
 =======================================
 Help Needed

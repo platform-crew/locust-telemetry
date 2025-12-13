@@ -41,6 +41,9 @@ classifiers = [
 dependencies = [
     "locust>=2.37.0",
     "python-json-logger>=3.3.0",
+    "opentelemetry-api>=1.37.0",
+    "opentelemetry-sdk>=1.37.0",
+    "opentelemetry-exporter-otlp>=1.37.0"
 ]
 
 

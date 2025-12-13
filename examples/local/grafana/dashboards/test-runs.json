@@ -1,0 +1,234 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Load Test Runs for 'json' plugin",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 8,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
+      "description": "All Load Test Runs",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": true
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Run Id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "Locust Dashboard",
+                    "url": "/d/4a54c6e2-1519-4332-9bb5-fa79c0989ec8/locust-requests-dashboard?var-run_id=${__data.fields[\"Run Id\"]:percentencode}&var-testplan=${__data.fields[\"Testplan\"]}&from=${__data.fields[\"Start Time\"]}&to=${__data.fields[\"End Time\"]}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": true,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true
+      },
+      "pluginVersion": "12.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.event.test.start\"}\n| json",
+          "queryType": "range",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "{container=\"locust-master\", telemetry_name=\"locust.tl.event.test.stop\"}\n| json",
+          "hide": false,
+          "queryType": "range",
+          "refId": "B"
+        }
+      ],
+      "title": "All Load Test Runs",
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "delimiter": ",",
+            "format": "json",
+            "jsonPaths": [
+              {
+                "alias": "Run Id",
+                "path": "telemetry.run_id"
+              },
+              {
+                "alias": "Testplan",
+                "path": "telemetry.testplan"
+              },
+              {
+                "alias": "Endtime",
+                "path": "telemetry.end_time"
+              },
+              {
+                "alias": "Starttime",
+                "path": "time"
+              }
+            ],
+            "keepTime": true,
+            "replace": true,
+            "source": "Line"
+          }
+        },
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "Run Id",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Duration",
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "Time 1",
+                "Time 2"
+              ],
+              "reducer": "diff"
+            },
+            "replaceFields": false
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Endtime 1": true,
+              "Endtime 2": false,
+              "Starttime 2": true,
+              "Testplan 2": true,
+              "Time 1": true,
+              "Time 2": true,
+              "UTCTime 2": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Duration": 7,
+              "Endtime 1": 8,
+              "Endtime 2": 6,
+              "Run Id": 0,
+              "Starttime 1": 5,
+              "Starttime 2": 9,
+              "Testplan 1": 1,
+              "Testplan 2": 4,
+              "Time 1": 2,
+              "Time 2": 3
+            },
+            "renameByName": {
+              "Duration": "Duration",
+              "End Time": "End Time",
+              "Endtime 2": "End Time",
+              "Run Id": "Run Id",
+              "Starttime 1": "Start Time",
+              "Testplan 1": "Testplan",
+              "Time 1": "",
+              "Time 2": "",
+              "UTCTime 1": "Start Time",
+              "UTCTime 2": "End Time"
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Load Test Runs (json plugin)",
+  "uid": "2a1a2a1b-5407-44dd-860f-1c9361750049",
+  "version": 4
+}

@@ -1,0 +1,143 @@
+version: '3.9'
+
+volumes:
+  postgres_data:
+  grafana_data:
+  loki_data:
+  prometheus_data:
+
+services:
+  locust_master:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 50m
+    container_name: locust-master
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    ports:
+      - 8089:8089
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - LOCUST_MODE_MASTER=true
+      - LOCUST_HOST=https://httpbin.org
+      - LOCUST_LOCUSTFILE=locustapp/locustfile.py
+      - LOCUST_USERS=5
+      - LOCUST_SPAWN_RATE=2
+      - LOCUST_RUN_TIME=20s
+      - LOCUST_TESTPLAN_NAME=myappn
+      - LOCUST_ENABLE_TELEMETRY_RECORDER=otel
+      - LOCUST_OTEL_EXPORTER_OTLP_INSECURE=true
+      - LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+  locust_worker1:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 50m
+    container_name: locust-worker1
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    depends_on:
+      - locust_master
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - LOCUST_MASTER_NODE_HOST=locust-master
+      - LOCUST_MODE_WORKER=true
+      - LOCUST_LOCUSTFILE=locustapp/locustfile.py
+      - LOCUST_USERS=5
+      - LOCUST_SPAWN_RATE=2
+      - LOCUST_RUN_TIME=20s
+      - LOCUST_TESTPLAN_NAME=myapp
+      - LOCUST_ENABLE_TELEMETRY_RECORDER=otel
+      - LOCUST_OTEL_EXPORTER_OTLP_INSECURE=true
+      - LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+  locust_worker2:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 50m
+    container_name: locust-worker2
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    depends_on:
+      - locust_master
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - LOCUST_MASTER_NODE_HOST=locust-master
+      - LOCUST_MODE_WORKER=true
+      - LOCUST_LOCUSTFILE=locustapp/locustfile.py
+      - LOCUST_USERS=5
+      - LOCUST_SPAWN_RATE=2
+      - LOCUST_RUN_TIME=20s
+      - LOCUST_TESTPLAN_NAME=myapp
+      - LOCUST_ENABLE_TELEMETRY_RECORDER=otel
+      - LOCUST_OTEL_EXPORTER_OTLP_INSECURE=true
+      - LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+  loki:
+    image: grafana/loki:3.5
+    container_name: loki
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./loki:/etc/loki
+      - loki_data:/loki
+
+  promtail:
+    image: grafana/promtail:3.5
+    container_name: promtail
+    command: -config.file=/etc/promtail/config.yaml
+    volumes:
+      - ./promtail:/etc/promtail
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+
+  otel_collector:
+    image: otel/opentelemetry-collector-contrib:0.135.0
+    container_name: otel-collector
+    ports:
+      - "4317:4317"    # OTLP gRPC
+      - "55681:55681"  # OTLP HTTP
+      - "8889:8889"    # Prometheus scrape endpoint
+    volumes:
+      - ./otel_collector/config.yaml:/etc/config.yaml
+    command: [ "--config", "/etc/config.yaml" ]
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    command: --config.file=/etc/prometheus/config.yaml
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/config.yaml:/etc/prometheus/config.yaml
+      - prometheus_data:/prometheus
+    depends_on:
+      - otel_collector
+
+  grafana:
+    image: grafana/grafana:12.0.0
+    container_name: grafana
+    ports:
+      - 3000:3000
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
+    depends_on:
+      - loki
+      - otel_collector

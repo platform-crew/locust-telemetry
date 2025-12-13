@@ -1,13 +1,4 @@
-"""
-Base interface for Telemetry Recorder plugins in Locust.
-
-Responsibilities
-----------------
-- Provide a consistent lifecycle for recorder plugins across master and worker nodes.
-- Allow recorder plugins to define their own CLI arguments and environment variables.
-- Automatically dispatch recorder setup depending on runner type (master vs worker).
-- Support multiple recorder plugins within a single Locust session.
-"""
+"""Base interface for Telemetry Recorder plugins in Locust."""
 
 from __future__ import annotations
 
@@ -18,10 +9,12 @@ from typing import Any, Dict
 from locust.env import Environment
 from locust.runners import MasterRunner, WorkerRunner
 
+from locust_telemetry.core.exceptions import RecorderPluginError
+
 logger = logging.getLogger(__name__)
 
 
-class TelemetryRecorderPluginBase(ABC):
+class BaseRecorderPlugin(ABC):
     """
     Abstract base class for all telemetry recorder plugins.
 
@@ -58,9 +51,7 @@ class TelemetryRecorderPluginBase(ABC):
         """
 
     @abstractmethod
-    def load_master_telemetry_recorders(
-        self, environment: Environment, **kwargs: Any
-    ) -> None:
+    def load_master_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """
         Register telemetry recorders that should run on the master process.
 
@@ -75,9 +66,7 @@ class TelemetryRecorderPluginBase(ABC):
         """
 
     @abstractmethod
-    def load_worker_telemetry_recorders(
-        self, environment: Environment, **kwargs: Any
-    ) -> None:
+    def load_worker_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """
         Register telemetry recorders that should run on each worker process.
 
@@ -95,7 +84,7 @@ class TelemetryRecorderPluginBase(ABC):
         """
         Entry point for recorder plugin initialization.
 
-        Automatically invoked by ``TelemetryRecorderPluginManager`` during
+        Automatically invoked by ``RecorderPluginManager`` during
         Locust's init phase. Dispatches to the correct recorder registration
         method depending on runner type.
 
@@ -107,9 +96,11 @@ class TelemetryRecorderPluginBase(ABC):
             Additional context passed by the coordinator or event system.
         """
         if self.RECORDER_PLUGIN_ID is None:
-            raise RuntimeError("Recorder plugin not configured appropriately.")
+            raise RecorderPluginError(
+                "Recorder plugin should have RECORDER_PLUGIN_ID attribute."
+            )
 
         if isinstance(environment.runner, MasterRunner):
-            self.load_master_telemetry_recorders(environment, **kwargs)
+            self.load_master_recorders(environment, **kwargs)
         elif isinstance(environment.runner, WorkerRunner):
-            self.load_worker_telemetry_recorders(environment, **kwargs)
+            self.load_worker_recorders(environment, **kwargs)

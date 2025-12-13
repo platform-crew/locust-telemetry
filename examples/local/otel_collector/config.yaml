@@ -1,0 +1,41 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 400
+    spike_limit_mib: 100
+  resourcedetection:
+    detectors: [env, system]
+    override: false
+
+exporters:
+  debug:
+    verbosity: detailed  # Use 'detailed' instead of loglevel
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    metric_expiration: 10s
+
+service:
+  telemetry:
+    logs:
+      level: "info"
+
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resourcedetection]
+      exporters: [prometheus, debug]  # Add debug to metrics too for visibility
+
+    traces:
+      receivers: [otlp]
+      processors: [batch, resourcedetection]
+      exporters: [debug]  # Replaced logging with debug

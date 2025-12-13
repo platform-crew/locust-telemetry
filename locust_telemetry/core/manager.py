@@ -1,13 +1,4 @@
-"""
-Recorder manager for Locust Telemetry.
-
-Responsibilities
-----------------
-- Maintain a registry of telemetry recorder plugins.
-- Provide a singleton manager (one per process).
-- Allow safe recorder plugin registration (avoiding duplicates).
-- Load and activate recorder plugins according to user configuration.
-"""
+"""Recorder manager for Locust Telemetry."""
 
 from __future__ import annotations
 
@@ -17,13 +8,17 @@ from typing import Any, Dict, List
 from locust.env import Environment
 
 from locust_telemetry import config
-from locust_telemetry.core.plugin import TelemetryRecorderPluginBase
+from locust_telemetry.core.exceptions import (
+    RecorderPluginAlreadyRegistered,
+    RecorderPluginLoadError,
+)
+from locust_telemetry.core.plugin import BaseRecorderPlugin
 from locust_telemetry.metadata import set_test_metadata
 
 logger = logging.getLogger(__name__)
 
 
-class TelemetryRecorderPluginManager:
+class RecorderPluginManager:
     """
     Singleton class that manages telemetry recorder plugin registration and loading.
 
@@ -34,13 +29,13 @@ class TelemetryRecorderPluginManager:
     - Safely load recorder plugins when requested by the orchestrator.
     """
 
-    _instance: TelemetryRecorderPluginManager | None = None
+    _instance: RecorderPluginManager | None = None
     _initialized: bool = False
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            logger.debug("[TelemetryRecorderPluginManager] Creating singleton instance")
+            logger.debug("[RecorderPluginManager] Creating singleton instance")
         return cls._instance
 
     def __init__(self):
@@ -52,22 +47,22 @@ class TelemetryRecorderPluginManager:
         """
         if self._initialized:
             return
-        self._recorder_plugins: List[TelemetryRecorderPluginBase] = []
+        self._recorder_plugins: List[BaseRecorderPlugin] = []
         self._initialized = True
 
     @property
-    def recorder_plugins(self) -> List[TelemetryRecorderPluginBase]:
+    def recorder_plugins(self) -> List[BaseRecorderPlugin]:
         """
         Get the list of registered recorder plugins.
 
         Returns
         -------
-        List[TelemetryRecorderPluginBase]
+        List[BaseRecorderPlugin]
             The currently registered recorder plugin instances.
         """
         return self._recorder_plugins
 
-    def register_recorder_plugin(self, plugin: TelemetryRecorderPluginBase) -> None:
+    def register_recorder_plugin(self, plugin: BaseRecorderPlugin) -> None:
         """
         Register a telemetry recorder plugin for later loading.
 
@@ -75,20 +70,20 @@ class TelemetryRecorderPluginManager:
 
         Parameters
         ----------
-        plugin : TelemetryRecorderPluginBase
+        plugin : BaseRecorderPlugin
             The recorder plugin instance to register.
         """
-        if plugin not in self._recorder_plugins:
-            self._recorder_plugins.append(plugin)
-            logger.debug(
-                f"[TelemetryRecorderPluginManager] Recorder plugin registered: "
+        if plugin in self._recorder_plugins:
+            raise RecorderPluginAlreadyRegistered(
+                f"[RecorderPluginManager] Recorder plugin already registered: "
                 f"{plugin.__class__.__name__}"
             )
-        else:
-            logger.warning(
-                f"[TelemetryRecorderPluginManager] Recorder plugin already registered: "
-                f"{plugin.__class__.__name__}"
-            )
+
+        self._recorder_plugins.append(plugin)
+        logger.debug(
+            f"[RecorderPluginManager] Recorder plugin registered: "
+            f"{plugin.__class__.__name__}"
+        )
 
     def register_plugin_clis(self, group: Any) -> None:
         """
@@ -129,9 +124,11 @@ class TelemetryRecorderPluginManager:
         for plugin in self._recorder_plugins:
             metadata.update(plugin.add_test_metadata())
 
-        set_test_metadata(environment, metadata)
-
-        return metadata
+        cleaned_metadata = {
+            k: val() if callable(val) else val for k, val in metadata.items()
+        }
+        set_test_metadata(environment, cleaned_metadata)
+        return cleaned_metadata
 
     def load_recorder_plugins(self, environment: Environment, **kwargs: Any) -> None:
         """
@@ -158,7 +155,7 @@ class TelemetryRecorderPluginManager:
         )
 
         logger.info(
-            "[TelemetryRecorderPluginManager] Following recorders are enabled",
+            "[RecorderPluginManager] Following recorders are enabled",
             extra={"recorders": enabled_plugins},
         )
 
@@ -169,13 +166,10 @@ class TelemetryRecorderPluginManager:
             try:
                 plugin.load(environment=environment, **kwargs)
                 logger.info(
-                    f"[TelemetryRecorderPluginManager] Recorder plugin loaded "
+                    f"[RecorderPluginManager] Recorder plugin loaded "
                     f"successfully: {plugin.__class__.__name__}"
                 )
-            except Exception:
-                logger.exception(
-                    f"[TelemetryRecorderPluginManager] Failed to load recorder plugin: "
-                    f"{plugin.__class__.__name__} "
-                    f"in {environment.runner.__class__.__name__}. "
-                    f"Enabled recorder plugins: {enabled_plugins}"
-                )
+            except Exception as e:
+                raise RecorderPluginLoadError(
+                    f"Failed to load recorder plugin: {plugin.__class__.__name__}"
+                ) from e

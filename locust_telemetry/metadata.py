@@ -2,13 +2,6 @@
 This module provides helper functions for managing test metadata
 in a Locust Telemetry setup. Metadata is generated on the master node,
 propagated to worker nodes, and attached to the Locust environment.
-
-Responsibilities
-----------------
-- Attach metadata to the master and worker environment
-- TelemetryRecorderPluginManager collects and manages metadata from all the plugins
-  set those on both worker and master envs.
-
 """
 
 import logging
@@ -31,6 +24,9 @@ def set_test_metadata(environment: Environment, metadata: Dict) -> None:
     """
     telemetry_meta = type("", (object,), {})
     for key, val in metadata.items():
-        setattr(telemetry_meta, key, val() if callable(val) else val)
+        setattr(telemetry_meta, key, val)
 
+    logger.info(
+        f"Setting metadata for {environment.runner.__class__.__name__}", extra=metadata
+    )
     environment.telemetry_meta = telemetry_meta

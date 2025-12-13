@@ -115,7 +115,7 @@ entrypoint.initialize()
 Run with telemetry enabled. Specify the test plan and the recorder plugin:
 
 ```bash
-$ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder stats-json
+$ locust -f locustfile.py --testplan mytest --enable-telemetry-recorder json
 ```
 
 ##### Note

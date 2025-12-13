@@ -2,7 +2,9 @@ import json
 import logging
 from datetime import datetime, timezone
 
-from locust_telemetry.logger import LOGGING_CONFIG, RFC3339JsonFormatter
+import pytest
+
+from locust_telemetry.logger import RFC3339JsonFormatter, configure_logging
 
 
 def test_rfc3339_json_formatter_outputs_rfc3339_timestamp():
@@ -53,15 +55,36 @@ def test_formatter_outputs_json_with_required_fields():
     assert data["message"] == "hello json"
 
 
-def test_logging_config_root_and_locust_logger_levels():
-    """
-    Ensure LOGGING_CONFIG has root disabled and locust_telemetry configured properly.
-    """
-    root_cfg = LOGGING_CONFIG["root"]
-    locust_cfg = LOGGING_CONFIG["loggers"]["locust_telemetry"]
+def test_default_logging_configuration():
+    configure_logging()
+    logger = logging.getLogger("locust_telemetry")
 
-    assert root_cfg["handlers"] == ["null"]
-    assert root_cfg["level"] == "WARNING"
+    # Logger level
+    assert logger.level == logging.INFO
 
-    assert locust_cfg["handlers"] == ["console"]
-    assert locust_cfg["propagate"] is False
+    # Logger handlers
+    handler_types = [type(h) for h in logger.handlers]
+    assert logging.StreamHandler in handler_types
+
+    # Logger propagation
+    assert logger.propagate is False
+
+
+@pytest.mark.parametrize(
+    "level,expected",
+    [
+        ("DEBUG", logging.DEBUG),
+        ("WARNING", logging.WARNING),
+        ("ERROR", logging.ERROR),
+    ],
+)
+def test_custom_logging_levels(level, expected):
+    configure_logging(level=level)
+    logger = logging.getLogger("locust_telemetry")
+
+    # Logger level
+    assert logger.level == expected
+
+    # Handler levels
+    for h in logger.handlers:
+        assert h.level == expected

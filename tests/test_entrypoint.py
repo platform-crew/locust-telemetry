@@ -1,7 +1,3 @@
-"""
-Tests for Locust Telemetry Entrypoint
-"""
-
 from unittest.mock import MagicMock
 
 from locust_telemetry import entrypoint
@@ -18,7 +14,7 @@ def test_initialize_calls(monkeypatch):
     # Patch TelemetryRecorderPluginManager
     plugin_manager_mock = MagicMock()
     monkeypatch.setattr(
-        entrypoint, "TelemetryRecorderPluginManager", lambda: plugin_manager_mock
+        entrypoint, "RecorderPluginManager", lambda: plugin_manager_mock
     )
 
     # Patch CONFIGURED_RECORDER_PLUGINS to use a fake plugin class
