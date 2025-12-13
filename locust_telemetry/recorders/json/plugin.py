@@ -1,17 +1,8 @@
 """
-Locust Telemetry Recorder Plugin
---------------------------------
-
 This module defines the `LocustJsonRecorderPlugin`, which integrates
 telemetry recording into Locust runs. It initializes master and
 worker telemetry recorders to capture lifecycle events, request
 statistics, and worker system metrics.
-
-Responsibilities
-----------------
-- Register CLI arguments for telemetry configuration.
-- Register master and worker telemetry recorders.
-- Initialize telemetry via RecorderPluginManager.
 """
 
 import logging
@@ -46,7 +37,7 @@ class LocustJsonRecorderPlugin(BaseRecorderPlugin):
     - Load worker-side telemetry recorders.
     """
 
-    RECORDER_PLUGIN_ID = config.TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID
+    RECORDER_PLUGIN_ID = config.TELEMETRY_JSON_RECORDER_PLUGIN_ID
 
     def add_test_metadata(self) -> Dict:
         """

@@ -2,22 +2,10 @@
 This module provides structured JSON logging for Locust Telemetry.
 
 Features
---------
 - Outputs logs in JSON format compatible with RFC3339 timestamps.
 - Custom formatter for millisecond-precision timestamps in UTC.
 - Configures loggers specifically for the `locust_telemetry` namespace.
 - Provides a convenience function to apply the logging configuration.
-
-Classes
--------
-RFC3339JsonFormatter
-    Custom JSON formatter that outputs timestamps in RFC3339 format with
-    millisecond precision.
-
-Functions
----------
-configure_logging()
-    Apply the logging configuration to the Python logging system.
 """
 
 import logging

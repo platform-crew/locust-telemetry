@@ -5,21 +5,6 @@ This module provides handler implementations for lifecycle events, system
 metrics, request metrics, and output in the context of OpenTelemetry.
 These handlers are used by OTEL recorders for both master and worker
 nodes to collect and export telemetry data to an OTLP endpoint.
-
-Classes
--------
-OtelLifecycleHandler
-    Registers and records lifecycle event metrics (e.g., test start/stop,
-    user counts).
-OtelOutputHandler
-    Central registry for OTEL instruments; manages recording of events
-    and request metrics.
-OtelRequestHandler
-    Registers request-related metrics (success/error histograms) and
-    records request durations.
-OtelSystemMetricsHandler
-    Registers and reports system-level metrics (CPU, memory, network I/O)
-    via observable callbacks.
 """
 
 import logging

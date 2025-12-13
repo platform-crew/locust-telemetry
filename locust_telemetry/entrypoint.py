@@ -1,9 +1,4 @@
-"""
-Locust Telemetry Entrypoint
---------------------------
-
-Entry point for initializing telemetry in a Locust test run.
-"""
+"""Entry point for initializing telemetry in a Locust test run."""
 
 import logging
 

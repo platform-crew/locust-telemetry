@@ -1,21 +1,8 @@
 """
 JSON telemetry handlers for Locust.
-
 This module provides handler implementations for lifecycle events, system
 metrics, request metrics, and structured JSON output. These handlers are
 used by the JSON telemetry recorders for both master and worker nodes.
-
-
-Classes
--------
-JsonTelemetryLifecycleHandler
-    Handles Locust test lifecycle events for json recorder.
-JsonTelemetryOutputHandler
-    Handles structured telemetry output and logs them as json.
-JsonTelemetryRequestHandler
-    Collects and exports request metrics for requests.
-JsonTelemetrySystemMetricsHandler
-    Collects and exports system-level metrics (CPU, memory).
 """
 
 import logging
@@ -35,6 +22,7 @@ from locust_telemetry.core.handlers import (
 )
 from locust_telemetry.recorders.json.constants import (
     REQUEST_STATS_TYPE_CURRENT,
+    REQUEST_STATS_TYPE_ENDPOINT,
     REQUEST_STATS_TYPE_FINAL,
     REQUEST_STATUS_ERROR,
     REQUEST_STATUS_SUCCESS,
@@ -124,8 +112,8 @@ class JsonTelemetryLifecycleHandler(BaseLifecycleHandler):
     are forwarded to the output handler for structured logging.
 
     Custom behavior:
-    - On test stop, adjusts the stop timestamp to account for a
-      buffer used in JSON graphs, and emits a `SPAWNING_COMPLETE` event.
+    On test stop, adjusts the stop timestamp to account for a
+    buffer used in JSON graphs, and emits a `SPAWNING_COMPLETE` event.
 
     Attributes
     ----------
@@ -320,6 +308,7 @@ class JsonTelemetryRequestHandler(BaseRequestHandler):
             for _, stat in stats.items():
                 self.output.record_metrics(
                     TelemetryMetricsEnum.REQUEST_STATS,
+                    stats_type=REQUEST_STATS_TYPE_ENDPOINT,
                     status=status,
                     **h.add_percentiles(stat.to_dict()),
                 )

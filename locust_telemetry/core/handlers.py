@@ -6,19 +6,11 @@ handling Locust events and recording telemetry. These abstractions separate
 event handling (e.g., test lifecycle, requests, system metrics) from the
 concrete output mechanism (e.g., JSON logs, OpenTelemetry exporters).
 
-Responsibilities
-----------------
-- Provide a consistent interface for telemetry event and metric recording.
-- Enable flexible output strategies via the `OutputHandlerBase`.
-- Minimize recorder boilerplate by delegating event handling to specialized
-  handler classes.
-
 Design Notes
-------------
 - These base classes should live under ``locust_telemetry/core`` as they
-  define the foundational contracts of the telemetry framework.
+define the foundational contracts of the telemetry framework.
 - Shared helpers (e.g., metric collectors, enums) belong in
-  ``locust_telemetry/common``.
+``locust_telemetry/common``.
 """
 
 from abc import ABC, abstractmethod
@@ -55,7 +47,7 @@ class BaseOutputHandler(ABC):
         """
         Retrieve common run-level context for telemetry records.
 
-         Parameters
+        Parameters
         ----------
         active : bool
             If active, it returns run_id and testplan in the context
@@ -66,6 +58,7 @@ class BaseOutputHandler(ABC):
             Dictionary with runners context
             and runner identity (master or worker).
         """
+
         context = {
             "source": self.env.runner.__class__.__name__,
             "source_id": h.get_source_id(self.env),

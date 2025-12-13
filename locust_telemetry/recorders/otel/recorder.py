@@ -6,13 +6,6 @@ the Locust telemetry system using OpenTelemetry (OTEL). These recorders
 configure an OTLP exporter, register metric readers, and use OTEL-specific
 handlers to capture and export lifecycle events, system metrics, request
 metrics, and output.
-
-Classes
--------
-LocustOtelMasterNodeRecorder
-    Recorder for the Locust master node with OTEL metrics export.
-LocustOtelWorkerNodeRecorder
-    Recorder for Locust worker nodes with OTEL metrics export.
 """
 
 import logging
@@ -51,16 +44,6 @@ class LocustOtelWorkerNodeRecorder(WorkerNodeRecorder):
     handlers for system metrics, request metrics, lifecycle events,
     and output handling. Additionally, it initializes the OTLP exporter
     and meter provider via :func:`configure_otel`.
-
-    Attributes
-    ----------
-    env : locust.env.Environment
-        The Locust environment instance, including references to events.
-
-    Methods
-    -------
-    on_request(*args, **kwargs)
-        Event listener that records requests as histogram observations.
     """
 
     def __init__(self, *args, **kwargs):

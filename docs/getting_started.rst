@@ -1,57 +1,51 @@
 What is Locust Telemetry?
-==========================
+=============================
 
-Locust Telemetry is a modular plugin for Locust that provides structured
-observability for load and performance tests. It captures telemetry data in a
-flexible, structured format, enabling integration with existing observability
-tools and delivering detailed insights into system performance.
+Locust Telemetry is a modular observability plugin for the Locust load-testing
+framework. It emits structured telemetry for load and performance tests,
+making it easy to export, analyze, and correlate test results with system
+metrics.
 
-Load testing often requires correlating metrics with infrastructure data—CPU,
-memory, latency, errors—but traditional tools provide limited ways to export
-this information. Locust Telemetry addresses this by using log-based pipelines
-to efficiently handle high-volume, distributed metrics. Both master and worker
-nodes emit telemetry data, which can be buffered and batched by observability
-agents to avoid central bottlenecks.
+The plugin supports multiple telemetry backends to fit different workflows:
 
-Currently, telemetry is logged as structured JSON, making it easy to ingest
-into modern observability systems. In the future, we are also planning to
-support the OpenTelemetry standard for broader observability integration.
+- **JSON log-based telemetry**:
+  A lightweight option for capturing structured events and metrics.
 
-By using Locust Telemetry, you can:
+- **OpenTelemetry metrics**:
+  Native OpenTelemetry integration for exporting load-test metrics to
+  OTLP-compatible backends and correlating them with infrastructure data.
 
-- View load testing metrics in your preferred observability tool
-- Correlate them with application and infrastructure metrics
-- Standardize monitoring across systems without introducing extra dependencies
 
-The plugin is highly extensible—custom metrics and recorders can be added to
-monitor scalability and infrastructure behavior under load. We welcome
-contributions to expand this project with additional telemetry recorders!
+Motivation
+------------
+Load testing is most effective when request-level metrics can be correlated
+with system signals such as CPU, memory, network usage, latency, and errors.
+However, traditional load-testing tools provide limited observability and
+export options.
+
+Locust Telemetry addresses this gap by emitting structured telemetry that
+integrates cleanly with modern observability stacks, enabling a unified view
+of system behavior under load.
 
 
 Features
---------
+----------
 
 - **Structured Telemetry**
-  Captures key events—test lifecycle, request stats, errors, and resource
-  warnings—in a structured format suitable for observability pipelines.
+  Emits test lifecycle events, request metrics, and system usage in JSON or
+  OpenTelemetry formats.
 
-- **Master & Worker Metrics**
-  Master nodes aggregate overall stats and errors; worker nodes report
-  node-specific metrics, including CPU usage.
-
-- **Modular & Extensible**
-  Easily add custom recorders (e.g., Kubernetes metrics) and support multiple
-  recorders in a single Locust run.
-
-- **Observability Integration**
-  Compatible with any log-based or structured telemetry tool, enabling
-  flexible dashboards and analysis.
+- **OpenTelemetry Integration**
+  Exports metrics via OTLP for correlation with existing observability data.
 
 - **Distributed Support**
-  Fully compatible with Locust’s master–worker architecture.
+  Compatible with Locust’s master–worker architecture.
 
-- **Flexible Configuration**
-  Configurable via CLI arguments or environment variables for easy setup.
+- **Modular & Extensible**
+  Easily extended with custom recorders.
+
+- **Traces & Spans (Coming Soon)**
+  Planned OpenTelemetry trace and span support for end-to-end correlation.
 
 
 Authors

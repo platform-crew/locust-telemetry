@@ -1,13 +1,4 @@
-"""
-Base interface for Telemetry Recorder plugins in Locust.
-
-Responsibilities
-----------------
-- Provide a consistent lifecycle for recorder plugins across master and worker nodes.
-- Allow recorder plugins to define their own CLI arguments and environment variables.
-- Automatically dispatch recorder setup depending on runner type (master vs worker).
-- Support multiple recorder plugins within a single Locust session.
-"""
+"""Base interface for Telemetry Recorder plugins in Locust."""
 
 from __future__ import annotations
 

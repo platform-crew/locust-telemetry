@@ -100,20 +100,14 @@ def configure_otel(environment: Environment) -> None:
     Parameters
     ----------
     environment : Any
-        Locust environment object containing parsed options for OTEL configuration.
-        Expected attributes:
-            - lt_otel_exporter_otlp_endpoint : str
-                Endpoint of the OTLP gRPC exporter.
-            - lt_otel_exporter_otlp_insecure : bool
-                Whether to connect without TLS.
-            - lt_stats_recorder_interval : int
-                Export interval in seconds.
+    Locust environment object containing parsed options for OTEL configuration.
 
     Returns
     -------
     Any
         The modified environment object with `otel_registry` attached.
     """
+
     # Define resource metadata for the service
     resource = Resource.create(
         {

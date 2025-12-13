@@ -1,13 +1,4 @@
-"""
-Recorder manager for Locust Telemetry.
-
-Responsibilities
-----------------
-- Maintain a registry of telemetry recorder plugins.
-- Provide a singleton manager (one per process).
-- Allow safe recorder plugin registration (avoiding duplicates).
-- Load and activate recorder plugins according to user configuration.
-"""
+"""Recorder manager for Locust Telemetry."""
 
 from __future__ import annotations
 

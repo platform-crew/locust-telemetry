@@ -2,13 +2,6 @@
 This module provides helper functions for managing test metadata
 in a Locust Telemetry setup. Metadata is generated on the master node,
 propagated to worker nodes, and attached to the Locust environment.
-
-Responsibilities
-----------------
-- Attach metadata to the master and worker environment
-- RecorderPluginManager collects and manages metadata from all the plugins
-  set those on both worker and master envs.
-
 """
 
 import logging

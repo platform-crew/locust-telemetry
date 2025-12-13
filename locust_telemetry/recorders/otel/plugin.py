@@ -85,17 +85,6 @@ class LocustOtelRecorderPlugin(BaseRecorderPlugin):
             env_var="LOCUST_OTEL_EXPORTER_OTLP_INSECURE",
             default=False,
         )
-        group.add_argument(
-            "--lt-otel-trace-injection-by-header",
-            type=bool,
-            help=(
-                "Enable trace propagation via HTTP headers. "
-                "Use when no OTLP exporter is available, so trace context is "
-                "still injected into Locust requests for correlation."
-            ),
-            env_var="LOCUST_OTEL_TRACE_INJECTION_BY_HEADER",
-            default=True,
-        )
 
     def load_master_recorders(self, environment: Environment, **kwargs: Any) -> None:
         """

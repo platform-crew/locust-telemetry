@@ -29,19 +29,6 @@ InstrumentType = Union[
 class InstrumentSpec:
     """
     Specification for creating an OpenTelemetry metric instrument.
-
-    Attributes
-    ----------
-    metric : TelemetryEventsEnum | TelemetryMetricsEnum
-        The metric identifier, typically an enum representing a telemetry
-        event or metric.
-    unit : str
-        The unit of measurement (e.g., "ms", "bytes", "1").
-    factory : Callable
-        A factory function responsible for creating the instrument.
-        Expected signature matches OpenTelemetry meter instrument constructors.
-    callbacks : Optional[List[Callable]]
-        Optional list of callback functions for observable instruments.
     """
 
     metric: "TelemetryEventsEnum | TelemetryMetricsEnum"  # noqa: F821

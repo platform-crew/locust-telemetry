@@ -78,6 +78,3 @@ todo_include_todos = False
 
 html_title = "Locust Telemetry Documentation"
 html_short_title = "Locust Telemetry Plugin"
-html_theme_options = {
-    "description": "Logs Locust stats to JSON for easy monitoring and dashboards."
-}

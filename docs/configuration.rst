@@ -1,6 +1,7 @@
 .. _configuration:
+
 Configuration
-=======================
+===============
 
 The core configuration of Locust remains unchanged. However, this plugin
 introduces a few additional environment variables.
@@ -19,48 +20,52 @@ or use below command
    output. Support for plugin options is planned for a future release. For now please refer below table.
 
 
-
 .. list-table::
    :header-rows: 1
-   :widths: 25 25 8 12 10 35
+   :widths: 18 26 10 10 10 26
 
-   * - **Command Line**
+   * - **CLI**
      - **Environment Variable**
-     - **Type**
      - **Default**
      - **Required**
+     - **Plugin**
      - **Description**
    * - ``--testplan``
      - ``LOCUST_TESTPLAN_NAME``
-     - ``str``
      - *N/A*
      - Yes
-     - Unique identifier for the test run or the service
-       under test. This value is mandatory and must be
-       provided for every execution.
+     - json / otel
+     - Unique identifier for the test run
    * - ``--enable-telemetry-recorder``
      - ``LOCUST_ENABLE_TELEMETRY_RECORDER``
-     - ``str``
-     - ``stats-json``
+     - ``json``
      - No
-     - Since this telemetry supports multiple recorders, this is needed. For now it supports only jjson telemetry - ``stats-json``
+     - json / otel
+     - Telemetry recorder to use: ``json`` or ``otel``
    * - ``--lt-stats-recorder-interval``
      - ``LOCUST_TELEMETRY_STATS_RECORDER_INTERVAL``
-     - ``int``
      - ``2``
      - No
-     - Interval (in seconds) for telemetry stats recorder
-       updates. If not specified, the default interval
-       of ``2`` seconds will be applied.
+     - json / otel
+     - Interval (in seconds) for exporting telemetry metrics
    * - ``--lt-system-usage-recorder-interval``
      - ``LOCUST_TELEMETRY_SYSTEM_USAGE_RECORDER_INTERVAL``
-     - ``int``
      - ``2``
      - No
-     - Interval (seconds) for system usage monitoring.
-       If not specified, the default interval
-       of ``2`` seconds will be applied.
-
+     - json / otel
+     - Interval (in seconds) for system usage monitoring
+   * - ``--lt-otel-exporter-otlp-endpoint``
+     - ``LOCUST_OTEL_EXPORTER_OTLP_ENDPOINT``
+     - *N/A*
+     - No
+     - otel
+     - OTLP gRPC endpoint for exporting OpenTelemetry metrics
+   * - ``--lt-otel-exporter-otlp-insecure``
+     - ``LOCUST_OTEL_EXPORTER_OTLP_INSECURE``
+     - ``False``
+     - No
+     - otel
+     - Use insecure (non-TLS) connection for the OTLP exporter
 
 
 The package also provides an entry point that can be used for auto

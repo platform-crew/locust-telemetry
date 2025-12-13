@@ -30,7 +30,6 @@ def test_add_cli_arguments_registers_all_options():
     args = [call.args[0] for call in group.add_argument.call_args_list]
     assert "--lt-otel-exporter-otlp-endpoint" in args
     assert "--lt-otel-exporter-otlp-insecure" in args
-    assert "--lt-otel-trace-injection-by-header" in args
 
 
 @patch("locust_telemetry.recorders.otel.plugin.LocustOtelMasterNodeRecorder")

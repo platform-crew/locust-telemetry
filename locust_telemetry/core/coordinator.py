@@ -1,12 +1,5 @@
 """
 Singleton coordinator responsible for coordinating telemetry lifecycle with Locust.
-
-Responsibilities
-----------------
-- Setup and propagate test metadata between master and workers.
-- Register worker message handlers to receive metadata from master.
-- Load telemetry recorders via ``RecorderPluginManager``.
-- Ensure singleton initialization (one Coordinator per process).
 """
 
 from __future__ import annotations

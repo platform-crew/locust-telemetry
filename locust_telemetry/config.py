@@ -8,8 +8,8 @@ DEFAULT_STATS_RECORDER_INTERVAL : int
     seconds but may be overridden by configuration or environment variables.
 
 DEFAULT_TELEMETRY_LOG_LEVEL: str
-    Log level for locus_telemetry, please note for stats-json to work, log level
-    should be minimum info, because stats-json uses logs to parse statistics.
+    Log level for locus_telemetry, please note for json to work, log level
+    should be minimum info, because json uses logs to parse statistics.
 
 DEFAULT_ENVIRONMENT_METADATA : dict[str, Callable]
     Dictionary of environment metadata providers. Each key is a metadata field name,
@@ -19,7 +19,7 @@ DEFAULT_ENVIRONMENT_METADATA : dict[str, Callable]
 TELEMETRY_CLI_GROUP_NAME : str
     Name of the CLI argument group for telemetry-related options.
 
-TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID : str
+TELEMETRY_JSON_RECORDER_PLUGIN_ID : str
     Plugin identifier for the JSON stats recorder.
 
 TELEMETRY_OTEL_RECORDER_PLUGIN_ID : str
@@ -41,8 +41,8 @@ from typing import Callable, Dict
 #: Default interval (in seconds) for telemetry stats recording.
 DEFAULT_STATS_RECORDER_INTERVAL: int = 3
 
-# Log level for locus_telemetry, please note for stats-json to work
-# log level should be minimum info, because stats-json uses logs to parse statistics.
+# Log level for locus_telemetry, please note for json to work
+# log level should be minimum info, because json uses logs to parse statistics.
 DEFAULT_TELEMETRY_LOG_LEVEL: str = "info"
 
 #: Environment metadata providers, accessed as `environment.<metadata>`.
@@ -54,10 +54,10 @@ DEFAULT_ENVIRONMENT_METADATA: Dict[str, Callable[[], str]] = {
 TELEMETRY_CLI_GROUP_NAME: str = "locust-telemetry"
 
 #: Plugin identifier for the JSON stats recorder.
-TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID: str = "stats-json"
+TELEMETRY_JSON_RECORDER_PLUGIN_ID: str = "json"
 
 #: Plugin identifier for the OpenTelemetry stats recorder.
-TELEMETRY_OTEL_RECORDER_PLUGIN_ID: str = "stats-otel"
+TELEMETRY_OTEL_RECORDER_PLUGIN_ID: str = "otel"
 
 #: Default OpenTelemetry metrics meter name.
 TELEMETRY_OTEL_METRICS_METER: str = "locust_telemetry"

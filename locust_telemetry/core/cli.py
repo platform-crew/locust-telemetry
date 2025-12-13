@@ -1,12 +1,4 @@
-"""
-Telemetry CLI integration for Locust.
-
-Responsibilities
-----------------
-- Provide a dedicated argument group for telemetry configuration.
-- Register core telemetry CLI arguments (e.g., ``--testplan``).
-- Ensure safe repeated registration without duplicating groups.
-"""
+"""Telemetry CLI integration for Locust."""
 
 from locust.argument_parser import LocustArgumentParser
 
@@ -14,7 +6,7 @@ from locust_telemetry.config import (
     DEFAULT_STATS_RECORDER_INTERVAL,
     DEFAULT_TELEMETRY_LOG_LEVEL,
     TELEMETRY_CLI_GROUP_NAME,
-    TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID,
+    TELEMETRY_JSON_RECORDER_PLUGIN_ID,
     TELEMETRY_OTEL_RECORDER_PLUGIN_ID,
 )
 
@@ -56,7 +48,7 @@ def register_telemetry_cli_args(parser: LocustArgumentParser):
     group.add_argument(
         "--enable-telemetry-recorder",
         choices=[
-            TELEMETRY_JSON_STATS_RECORDER_PLUGIN_ID,
+            TELEMETRY_JSON_RECORDER_PLUGIN_ID,
             TELEMETRY_OTEL_RECORDER_PLUGIN_ID,
         ],
         help=(
@@ -79,8 +71,8 @@ def register_telemetry_cli_args(parser: LocustArgumentParser):
     group.add_argument(
         "--lt-log-level",
         type=str,
-        help="Log level for locus_telemetry, please note for stats-json to work, "
-        "log level should be minimum info, because stats-json uses logs to "
+        help="Log level for locus_telemetry, please note for json to work, "
+        "log level should be minimum info, because json uses logs to "
         "parse statistics.",
         env_var="LOCUST_TELEMETRY_LOG_LEVEL",
         default=DEFAULT_TELEMETRY_LOG_LEVEL,

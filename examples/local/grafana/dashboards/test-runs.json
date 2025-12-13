@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "Load Test Runs for 'stats-json' plugin",
+  "description": "Load Test Runs for 'json' plugin",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -228,7 +228,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Load Test Runs (stats-json plugin)",
+  "title": "Load Test Runs (json plugin)",
   "uid": "2a1a2a1b-5407-44dd-860f-1c9361750049",
   "version": 4
 }

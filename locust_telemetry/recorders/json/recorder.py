@@ -4,13 +4,6 @@ JSON telemetry recorders for Locust.
 This module defines master and worker recorder classes that integrate with
 the Locust telemetry system and use JSON-specific handlers to capture and
 log lifecycle events, system metrics, request metrics, and output.
-
-Classes
--------
-LocustJsonMasterNodeRecorder
-    Recorder for the Locust master node with metrics as json logs.
-LocustJsonWorkerNodeRecorder
-    Recorder for Locust worker nodes with metrics as json logs.
 """
 
 import logging

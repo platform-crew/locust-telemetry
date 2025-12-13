@@ -21,7 +21,7 @@
       }
     ]
   },
-  "description": "Locust Requests Dashboard (stats-otel plugin)",
+  "description": "Locust Requests Dashboard (otel plugin)",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -2636,7 +2636,7 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Locust Requests Dashboard (stats-otel plugin)",
+  "title": "Locust Requests Dashboard (otel plugin)",
   "uid": "d89a9144-92a1-4a5c-a96f-65b31b6a1c09",
   "version": 188
 }
