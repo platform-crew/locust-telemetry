@@ -5,11 +5,6 @@ API Reference
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: locust_telemetry
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 .. automodule:: locust_telemetry.entrypoint
    :members:
    :undoc-members:
