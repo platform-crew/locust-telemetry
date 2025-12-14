@@ -3,8 +3,8 @@
 Metrics Recorders
 ==================
 
-Json Telemetry
-------------------
+Json Telemetry Recorder
+--------------------------
 
 The JSON recorder plugin emits structured telemetry logs that can be easily
 ingested into log-based observability tools such as Elasticsearch, Loki,
@@ -100,15 +100,15 @@ Request metrics are emitted as aggregated statistics in JSON format.
      - Aggregated request statistics, including per-endpoint metrics and error
        counts
 
-OpenTelemetry Telemetry
---------------------------
+OpenTelemetry Metrics Recorder
+----------------------------------
 
 The OpenTelemetry recorder plugin exports Locust telemetry using the
 OpenTelemetry (OTel) metrics API. This enables seamless integration with
 existing observability backends such as Prometheus, Grafana, Datadog,
 New Relic, or any OTLP-compatible collector.
 
-Unlike the JSON recorder, the OpenTelemetry plugin focuses on
+Unlike the JSON recorder, the OpenTelemetry recorder plugin focuses on
 **metrics-based observability** rather than structured logs.
 
 It supports both **master** and **worker** nodes and exports metrics via

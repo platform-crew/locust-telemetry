@@ -3,7 +3,7 @@
 Quick Start
 ===========
 
-This extension enhances Locust with telemetry recording while preserving all existing Locust usage patterns and configuration options.
+This plugin enhances Locust with telemetry recording while preserving all existing Locust usage patterns and configuration options.
 For details on Locust itself, refer to the official `Locust documentation <https://docs.locust.io/en/stable/index.html>`_.
 
 1. **Initialize the telemetry plugin** in your Locust test script (e.g., `locustfile.py`):
