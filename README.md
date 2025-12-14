@@ -4,7 +4,7 @@
 [![Release](https://img.shields.io/github/v/release/platform-crew/locust-telemetry)](https://github.com/platform-crew/locust-telemetry/releases)
 [![codecov](https://codecov.io/gh/platform-crew/locust-telemetry/branch/main/graph/badge.svg)](https://codecov.io/gh/platform-crew/locust-telemetry)
 [![License](https://img.shields.io/github/license/platform-crew/locust-telemetry)](LICENSE)
-[![Docs](https://readthedocs.org/projects/locust-telemetry/badge/?version=latest)](https://locust-telemetry.readthedocs.io/en/latest/)
+[![Docs](https://readthedocs.org/projects/locust-telemetry/badge/?version=latest)](https://locust-telemetry.readthedocs.io/en/stable/)
 
 **Locust Telemetry** is a modular observability plugin for the
 [Locust](https://locust.io) load-testing framework.
@@ -13,7 +13,7 @@ It emits structured telemetry from load tests so you can **correlate
 request behavior with system metrics** using modern observability tools.
 
 📖 **Full documentation:**
-https://locust-telemetry.readthedocs.io/en/latest/index.html
+https://locust-telemetry.readthedocs.io/en/stable/index.html
 
 ---
 
@@ -101,7 +101,7 @@ make build && make up
 * Grafana: [http://localhost:3000](http://localhost:3000)
 
 📘 Full walkthrough:
-[https://locust-telemetry.readthedocs.io/en/latest/examples.html](https://locust-telemetry.readthedocs.io/en/latest/examples.html)
+[https://locust-telemetry.readthedocs.io/en/stable/examples.html](https://locust-telemetry.readthedocs.io/en/latest/examples.html)
 
 ---
 
@@ -120,7 +120,7 @@ make build && make up
 ## Contributing
 
 Contributions are welcome!
-Please see [contributing](https://locust-telemetry.readthedocs.io/en/latest/contributing.html) for guidelines.
+Please see [contributing](https://locust-telemetry.readthedocs.io/en/stable/contributing.html) for guidelines.
 
 ---
 

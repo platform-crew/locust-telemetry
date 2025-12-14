@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "locust-telemetry"
 version = "0.0.0" # Taken care by CICD, automatically bumps version based on the tag
-description = "A Locust plugin to log load test metrics to observability tools (DB-free)."
+description = "A Locust plugin for emitting structured telemetry and metrics to JSON or OpenTelemetry backends."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -18,14 +18,15 @@ keywords = [
     "plugin",
     "telemetry",
     "observability",
-    "json",
-    "logging",
     "metrics",
-    "stats",
+    "opentelemetry",
+    "otel",
     "load testing",
-    "locust telemetry",
-    "locust plugin",
-    "locust metrics recorder"
+    "performance testing",
+    "dashboard",
+    "prometheus",
+    "grafana",
+    "loki"
 ]
 
 classifiers = [
@@ -58,7 +59,6 @@ dev = [
 Homepage = "https://locust-telemetry.readthedocs.io/en/latest/index.html"
 Documentation = "https://locust-telemetry.readthedocs.io/en/latest/index.html"
 Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
-Repository = "https://github.com/platform-crew/locust-telemetry"
 
 [project.entry-points."locust_plugins"]
 telemetry_locust = "locust_telemetry.entrypoint"
