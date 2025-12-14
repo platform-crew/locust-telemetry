@@ -5,7 +5,7 @@ v2.1.1 (2025-12-14)
 -------------------
 
 - Update package description
--
+- Update documentation
 
 v2.1.0 (2025-12-14)
 -------------------
