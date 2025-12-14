@@ -55,9 +55,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/platform-crew/locust-observability#readme"
-Documentation = "https://github.com/platform-crew/locust-observability#readme"
+Homepage = "https://locust-telemetry.readthedocs.io/en/latest/index.html"
+Documentation = "https://locust-telemetry.readthedocs.io/en/latest/index.html"
 Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
+Repository = "https://github.com/platform-crew/locust-telemetry"
 
 [project.entry-points."locust_plugins"]
 telemetry_locust = "locust_telemetry.entrypoint"
