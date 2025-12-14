@@ -31,7 +31,7 @@ Metrics Recorders
    recorders
 
 =======================================
-Contributing Guide
+Contributing
 =======================================
 
 .. toctree::

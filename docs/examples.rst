@@ -5,8 +5,8 @@ Examples
 
 Locust Telemetry supports two telemetry recorders:
 
-- **JSON Telemetry** — structured logs (Loki / Grafana Logs)
-- **OpenTelemetry Telemetry** — metrics via OTLP (Prometheus / Grafana)
+- **JSON Telemetry Recorder** — structured logs (Loki / Grafana Logs)
+- **OpenTelemetry Metrics Recorder** — metrics via OTLP (Prometheus / Grafana)
 
 The recorder is selected using configuration or environment variables.
 
@@ -52,7 +52,7 @@ Run a Load Test
 2. Click **Start** (values are preconfigured)
 3. Wait ~20 seconds for metrics and logs to appear
 
-JSON Telemetry
+JSON Telemetry Recorder
 ---------------------------------------
 
 The JSON recorder emits structured telemetry logs from Locust master
@@ -146,7 +146,7 @@ Sample Dashboards (JSON)
    :align: center
 
 
-OpenTelemetry Telemetry
+OpenTelemetry Metrics Recorder
 ---------------------------------------
 
 The OpenTelemetry recorder exports Locust telemetry using the

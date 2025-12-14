@@ -1,7 +1,7 @@
 .. _contributing:
 
-Contributing Guide
-=======================================
+Contributing
+=============
 
 🎉 **Welcome!**
 
