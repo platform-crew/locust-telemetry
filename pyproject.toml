@@ -1,10 +1,14 @@
 [build-system]
-requires = ["setuptools>=80.9.0", "wheel"]
+requires = [
+    "setuptools>=80.9.0",
+    "wheel",
+    "setuptools_scm>=9.2.2"
+]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "locust-telemetry"
-version = "0.0.0" # Taken care by CICD, automatically bumps version based on the tag
+dynamic = ["version"]
 description = "A Locust plugin for emitting structured telemetry and metrics to JSON or OpenTelemetry backends."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -56,12 +60,16 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://locust-telemetry.readthedocs.io/en/latest/index.html"
+Homepage = "https://locust-telemetry.readthedocs.io/en/stable/index.html"
 Documentation = "https://locust-telemetry.readthedocs.io/en/latest/index.html"
 Bug-Tracker = "https://github.com/platform-crew/locust-observability/issues"
 
 [project.entry-points."locust_plugins"]
 telemetry_locust = "locust_telemetry.entrypoint"
+
+[tool.setuptools_scm]
+version_scheme = "release-branch-semver"
+local_scheme = "no-local-version"
 
 # --------------------------
 # Code formatting tools

@@ -78,3 +78,17 @@ todo_include_todos = False
 
 html_title = "Locust Telemetry Documentation"
 html_short_title = "Locust Telemetry Plugin"
+html_meta = {
+    "description": (
+        "Locust Telemetry is a plugin for the Locust load-testing framework that "
+        "emits structured metrics and telemetry to observability tools like "
+        "Prometheus, Grafana, Loki, and Datadog."
+    ),
+    "keywords": (
+        "locust, locust telemetry, load testing, metrics, observability, "
+        "json telemetry, opentelemetry, otel, prometheus, grafana, loki, datadog"
+    ),
+    "viewport": "width=device-width, initial-scale=1",
+    "language": "en",
+    "robots": "index, follow",
+}

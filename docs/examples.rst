@@ -145,6 +145,7 @@ Sample Dashboards (JSON)
    :width: 100%
    :align: center
 
+All the code examples are given in the GitHub Repository.
 
 OpenTelemetry Metrics Recorder
 ---------------------------------------

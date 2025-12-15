@@ -30,21 +30,11 @@ jobs:
           pip install build twine
           pip install ".[dev]"  # pytest, coverage, etc.
 
-      # 4. Extract tag and update pyproject.toml version
-      - name: Update pyproject.toml version
-        run: |
-          echo "Release tag: ${{ github.event.release.tag_name }}"
-          TAG_VERSION=${{ github.event.release.tag_name }}
-          # Remove leading 'v' if your tags are like 'v0.2.0'
-          TAG_VERSION="${TAG_VERSION#v}"
-          echo "Updating pyproject.toml to version $TAG_VERSION"
-          sed -i "s/^version = \".*\"/version = \"$TAG_VERSION\"/" pyproject.toml
-
-      # 5. Run tests with coverage
+      # 4. Run tests with coverage
       - name: Run tests with coverage
         run: pytest tests --maxfail=1 --cov=locust_telemetry --cov-report=term
 
-      # 6. Build source and wheel distributions
+      # 5. Build source and wheel distributions
       - name: Build distributions
         run: python -m build
 
