@@ -40,8 +40,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          if [ "${{ matrix.locust-version }}" != "latest" ]; then
+            pip install "locust==${{ matrix.locust-version }}"
+          fi
           pip install -e ".[dev]"
-          pip install "locust==${{ matrix.locust-version }}"
 
       - name: Show Locust version
         run: locust --version
